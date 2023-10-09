@@ -2,3 +2,4 @@
 // Make a project
 // Make embeddings
 //  Train
+export function train();

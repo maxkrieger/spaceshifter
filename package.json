@@ -10,17 +10,30 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tensorflow/tfjs": "^4.11.0",
+    "dexie": "^3.2.4",
+    "dexie-react-hooks": "^1.1.6",
     "jotai": "^2.4.3",
+    "lodash": "^4.17.21",
+    "loglevel": "^1.8.1",
+    "plotly.js": "^2.26.2",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-plotly.js": "^2.6.0"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.199",
+    "@types/node": "^20.8.3",
+    "@types/plotly.js": "^2.12.27",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
+    "@types/react-plotly.js": "^2.6.1",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react-swc": "^3.3.2",
     "autoprefixer": "^10.4.16",
+    "bun": "^1.0.4",
+    "bun-types": "1.0.5-canary.20231008T140131",
     "eslint": "^8.45.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",

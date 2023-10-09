@@ -1,18 +1,46 @@
 import { useAtom } from "jotai";
 import { apiKeyAtom } from "../lib/atoms";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export default function ApiKey() {
   const [apiKey, setApiKey] = useAtom(apiKeyAtom);
-  const [expanded, setExpanded] = useState(apiKey === null);
+  const [draftApiKey, setDraftApiKey] = useState<string>("");
+  const [expanded, setExpanded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const pasteFromClipboard = useCallback(() => {
     navigator.clipboard.readText().then((text) => {
-      setApiKey(text);
+      setDraftApiKey(text);
     });
-  }, [setApiKey]);
+  }, [setDraftApiKey]);
+  useEffect(() => {
+    if (apiKey !== null) {
+      setDraftApiKey(apiKey);
+    }
+  }, [setDraftApiKey, apiKey]);
+  const onSubmit = useCallback(() => {
+    (async () => {
+      try {
+        const res = await fetch("https://api.openai.com/v1/models", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${draftApiKey}`,
+          },
+        });
+        if (res.status === 200) {
+          setError(null);
+          setApiKey(draftApiKey);
+          setExpanded(false);
+        } else {
+          setError(`API Key is invalid: ${res.status}`);
+        }
+      } catch (e) {
+        setError((e as Error).toString());
+      }
+    })();
+  }, [setApiKey, draftApiKey]);
   return (
     <div className="shadow-md p-3 rounded-md inline-block">
-      {expanded ? (
+      {apiKey === null || expanded ? (
         <div>
           <p>
             Get a secret key from{" "}
@@ -21,7 +49,7 @@ export default function ApiKey() {
               href="https://platform.openai.com/account/api-keys"
               target="_blank"
             >
-              this OpenAI page
+              the OpenAI API Keys page
             </a>{" "}
             and paste it here (stored locally):
           </p>
@@ -31,13 +59,13 @@ export default function ApiKey() {
                 id="api-key"
                 className="h-8 px-2 border rounded"
                 type="text"
-                value={apiKey ?? ""}
+                value={draftApiKey}
                 placeholder="API Key"
-                onChange={(e) => setApiKey(e.target.value)}
+                onChange={(e) => setDraftApiKey(e.target.value)}
               />
               <button
                 className="button bg-slate-500 text-white rounded-md px-2 py-1 m-2"
-                onClick={() => setExpanded(false)}
+                onClick={onSubmit}
               >
                 Done
               </button>
@@ -49,6 +77,7 @@ export default function ApiKey() {
               >
                 paste from clipboard
               </button>
+              {error && <p className="text-red-500">{error}</p>}
             </div>
           </div>
         </div>
