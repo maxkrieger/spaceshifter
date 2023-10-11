@@ -19,7 +19,6 @@ export default function Trainer() {
       if (isValidJSON(pairings)) {
         const { train, test } = trainTestSplit(pairings, 0.5);
         const augmentedTrain = augmentNegatives(train, 1);
-        // How many are in each????
         const augmentedTest = augmentNegatives(test, 1);
         console.log(
           augmentedTest.filter((p) => p.label === 1).length,
@@ -32,11 +31,9 @@ export default function Trainer() {
         console.log(accuracyAndSE(cosP));
         for await (const mat of trainMatrix(augmentedTrain)) {
           const cosPT = await computeCosinePairings(augmentedTest, 1536, mat);
-          console.log("test", cosPT[0].label, cosPT[0].similarity);
           setCosinePairings(cosPT);
           console.log("test", accuracyAndSE(cosPT));
           const cosss = await computeCosinePairings(augmentedTrain, 1536, mat);
-          console.log("train", cosss[0].label, cosss[0].similarity);
           console.log("train", accuracyAndSE(cosss));
         }
       } else {

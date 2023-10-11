@@ -29,6 +29,12 @@ class EmbeddingCache {
       return null;
     }
   }
+  getEmbeddingFast(text: string): number[] {
+    if (!(text in this.cache)) {
+      throw new Error(`Text not cached in embedding ${text}}`);
+    }
+    return this.cache[text];
+  }
   async bulkEmbed(pairs: Pairings): Promise<void> {
     log.info("Bulk embedding...");
     const toFetch = new Set<string>();
