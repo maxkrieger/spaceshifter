@@ -34,6 +34,8 @@ class EmbeddingCache {
   async bulkEmbed(pairs: Pairings): Promise<void> {
     log.info("Bulk embedding...");
     const toFetch = new Set<string>();
+    // TODO: bulkGet, check for undeefs
+    // https://dexie.org/docs/Table/Table.bulkGet()
     await Promise.all(
       pairs.map(async ({ text_1, text_2 }) => {
         if (!toFetch.has(text_1)) {
@@ -53,10 +55,8 @@ class EmbeddingCache {
     if (toFetch.size > 0) {
       const toFetchAsArray = [...toFetch];
       log.info(`Fetching ${toFetchAsArray.length} embeddings`);
-      const chunked = chunk(toFetchAsArray, 2);
+      const chunked = chunk(toFetchAsArray, 150);
       //   TODO: backoff
-      //   await Promise.all(
-      // chunked.map(async (chunk) => {
       for await (const chunk of chunked) {
         log.info(`Fetching ${chunk.length} embeddings chunk`);
         const res = await fetch("https://api.openai.com/v1/embeddings", {
@@ -79,8 +79,6 @@ class EmbeddingCache {
           await db.embedding.put({ text, embedding });
         }
       }
-      // })
-      //   );
       log.info(`Done fetching`);
     } else {
       log.info("No embeddings to fetch");

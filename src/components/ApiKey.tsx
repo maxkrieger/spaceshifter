@@ -62,6 +62,7 @@ export default function ApiKey() {
                 value={draftApiKey}
                 placeholder="API Key"
                 onChange={(e) => setDraftApiKey(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && onSubmit()}
               />
               <button
                 className="button bg-slate-500 text-white rounded-md px-2 py-1 m-2"
