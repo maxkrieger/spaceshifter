@@ -18,7 +18,8 @@ function model(
   //   TODO: right order of ops?
   const e1m = e1d.matMul(matrix);
   const e2m = e2d.matMul(matrix);
-  const sim = tf.losses.cosineDistance(e1m, e2m, 0);
+  //   const sim = tf.losses.cosineDistance(e1m, e2m, 0);
+  const sim = tf.metrics.cosineProximity(e1m, e2m).mul(-1);
   return sim as tf.Tensor1D;
 }
 
@@ -42,20 +43,43 @@ async function embeddingTensorsFromPairings(
   return dataset;
 }
 
+async function foofoooo(
+  pairings: Pairings
+): Promise<{ e1: tf.Tensor2D; e2: tf.Tensor2D; label: tf.Tensor1D }> {
+  const e1s = [];
+  const e2s = [];
+  const s = [];
+  for (const { text_1, text_2, label } of pairings) {
+    const e1 = (await embeddingCache.getEmbeddingLocally(text_1))!;
+    const e2 = (await embeddingCache.getEmbeddingLocally(text_2))!;
+    e1s.push(e1);
+    e2s.push(e2);
+    s.push(label);
+  }
+  return {
+    e1: tf.tensor2d(e1s),
+    e2: tf.tensor2d(e2s),
+    label: tf.tensor1d(s),
+  };
+}
+
 function mse_loss(preds: tf.Tensor, targets: tf.Tensor): tf.Scalar {
   return preds.sub(targets).square().mean();
 }
 
 export async function* trainMatrix(
   train: Pairings,
-  learningRate: number = 0.01,
+  test: Pairings,
+  learningRate: number = 1,
   epochs: number = 100,
   dropoutFraction: number = 0.2,
   batchSize = 100,
   embeddingSize = 1536
 ): AsyncGenerator<tf.Tensor2D> {
+  console.log(test);
   const trainSet = (await embeddingTensorsFromPairings(train)).batch(batchSize);
-  const optimizer = tf.train.sgd(learningRate);
+  const testSet = await foofoooo(test);
+  const optimizer = tf.train.adamax(learningRate);
   const matrix = tf.randomNormal([embeddingSize, embeddingSize]).variable();
   for (let epoch = 0; epoch < epochs; epoch++) {
     // batch it in a loop here, don't use e1train directly
@@ -70,7 +94,22 @@ export async function* trainMatrix(
         false,
         [matrix]
       );
+      //   console.log(
+      //     "train",
+      //     mse_loss(
+      //       model(e1, e2, matrix as tf.Tensor2D, dropoutFraction),
+      //       label
+      //     ).arraySync()
+      //   );
+      //   console.log(
+      //     "teset",
+      //     mse_loss(
+      //       model(testSet.e1, testSet.e2, matrix as tf.Tensor2D, 0),
+      //       testSet.label
+      //     ).arraySync()
+      //   );
     });
+
     yield matrix as tf.Tensor2D;
   }
 }

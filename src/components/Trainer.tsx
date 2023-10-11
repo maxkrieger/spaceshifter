@@ -25,10 +25,14 @@ export default function Trainer() {
         const cosP = await computeCosinePairings(augmentedTest, 1536);
         setCosinePairings(cosP);
         console.log(accuracyAndSE(cosP));
-        for await (const mat of trainMatrix(augmentedTrain)) {
+        for await (const mat of trainMatrix(augmentedTrain, augmentedTest)) {
           const cosPT = await computeCosinePairings(augmentedTest, 1536, mat);
+          console.log("test", cosPT[0].label, cosPT[0].similarity);
           setCosinePairings(cosPT);
-          console.log(accuracyAndSE(cosPT));
+          console.log("test", accuracyAndSE(cosPT));
+          const cosss = await computeCosinePairings(augmentedTrain, 1536, mat);
+          console.log("train", cosss[0].label, cosss[0].similarity);
+          console.log("train", accuracyAndSE(cosss));
         }
       } else {
         console.error("Invalid JSON");

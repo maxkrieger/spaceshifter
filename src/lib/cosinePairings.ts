@@ -9,7 +9,6 @@ export default async function computeCosinePairings(
   embeddingSize: number,
   matMul?: Tensor2D
 ): Promise<CosineSimilarPairings> {
-  log.info("Computing cosine pairings...");
   const packedA = tensor2d(
     await Promise.all(
       pairings.map(
@@ -29,6 +28,5 @@ export default async function computeCosinePairings(
     .mul(-1);
   const arr = proximities.arraySync() as number[];
 
-  log.info("Done computing cosine pairings");
   return pairings.map((pairing, i) => ({ ...pairing, similarity: arr[i] }));
 }
