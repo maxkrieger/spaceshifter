@@ -2,10 +2,9 @@ import { db } from "./db";
 import log from "loglevel";
 import { Pairings } from "./types";
 import { chunk } from "lodash";
-import { Tensor1D, tensor1d } from "@tensorflow/tfjs";
 
 class EmbeddingCache {
-  cache: { [key: string]: Tensor1D } = {};
+  cache: { [key: string]: number[] } = {};
   apiKey = null;
   constructor() {}
   private getApiKey() {
@@ -18,15 +17,14 @@ class EmbeddingCache {
       }
     }
   }
-  async getEmbeddingLocally(text: string): Promise<Tensor1D | null> {
+  async getEmbeddingLocally(text: string): Promise<number[] | null> {
     if (text in this.cache) {
       return this.cache[text];
     } else {
       const dbRes = await db.embedding.where("text").equals(text).first();
       if (dbRes) {
-        const tens = tensor1d(dbRes.embedding);
-        this.cache[text] = tens;
-        return tens;
+        this.cache[text] = dbRes.embedding;
+        return dbRes.embedding;
       }
       return null;
     }
@@ -74,8 +72,7 @@ class EmbeddingCache {
         for (const embeddingRes of json.data) {
           const text = chunk[embeddingRes.index];
           const embedding = embeddingRes.embedding;
-          const tens = tensor1d(embedding);
-          this.cache[text] = tens;
+          this.cache[text] = embedding;
           await db.embedding.put({ text, embedding });
         }
       }

@@ -22,10 +22,14 @@ export default function Trainer() {
         const augmentedTest = augmentNegatives(test, 1);
         await embeddingCache.bulkEmbed(train);
         await embeddingCache.bulkEmbed(test);
-        const cosP = await computeCosinePairings(augmentedTrain);
+        const cosP = await computeCosinePairings(augmentedTest, 1536);
         setCosinePairings(cosP);
         console.log(accuracyAndSE(cosP));
-        await trainMatrix(augmentedTrain, augmentedTest);
+        for await (const mat of trainMatrix(augmentedTrain)) {
+          const cosPT = await computeCosinePairings(augmentedTest, 1536, mat);
+          setCosinePairings(cosPT);
+          console.log(accuracyAndSE(cosPT));
+        }
       } else {
         console.error("Invalid JSON");
       }

@@ -15,6 +15,7 @@ function model(
 ): tf.Tensor1D {
   const e1d = tf.dropout(e1, dropout_fraction);
   const e2d = tf.dropout(e2, dropout_fraction);
+  //   TODO: right order of ops?
   const e1m = e1d.matMul(matrix);
   const e2m = e2d.matMul(matrix);
   const sim = tf.losses.cosineDistance(e1m, e2m, 0);
@@ -22,8 +23,7 @@ function model(
 }
 
 async function embeddingTensorsFromPairings(
-  pairings: Pairings,
-  batchSize: number
+  pairings: Pairings
 ): Promise<tf.data.Dataset<tf.TensorContainer>> {
   const e1s = [];
   const e2s = [];
@@ -38,7 +38,7 @@ async function embeddingTensorsFromPairings(
   const e1D = tf.data.array(e1s);
   const e2D = tf.data.array(e2s);
   const sD = tf.data.array(s);
-  const dataset = tf.data.zip({ e1: e1D, e2: e2D, label: sD }).batch(batchSize);
+  const dataset = tf.data.zip({ e1: e1D, e2: e2D, label: sD });
   return dataset;
 }
 
@@ -46,29 +46,21 @@ function mse_loss(preds: tf.Tensor, targets: tf.Tensor): tf.Scalar {
   return preds.sub(targets).square().mean();
 }
 
-export async function trainMatrix(
+export async function* trainMatrix(
   train: Pairings,
-  test: Pairings,
   learningRate: number = 0.01,
   epochs: number = 100,
   dropoutFraction: number = 0.2,
   batchSize = 100,
   embeddingSize = 1536
-): Promise<void> {
-  const trainSet = await embeddingTensorsFromPairings(train, batchSize);
+): AsyncGenerator<tf.Tensor2D> {
+  const trainSet = (await embeddingTensorsFromPairings(train)).batch(batchSize);
   const optimizer = tf.train.sgd(learningRate);
-  /*const {
-    e1: e1Test,
-    e2: e2Test,
-    s: sTest,
-  } = await embeddingTensorsFromPairings(test);*/
   const matrix = tf.randomNormal([embeddingSize, embeddingSize]).variable();
   for (let epoch = 0; epoch < epochs; epoch++) {
     // batch it in a loop here, don't use e1train directly
     await trainSet.forEachAsync((batch) => {
       const { e1, e2, label } = batch as EmbeddedPairing;
-      const preds = model(e1, e2, matrix as tf.Tensor2D, dropoutFraction);
-      console.log(`Epoch ${epoch} loss ${mse_loss(preds, label).dataSync()}`);
       optimizer.minimize(
         () =>
           mse_loss(
@@ -79,5 +71,6 @@ export async function trainMatrix(
         [matrix]
       );
     });
+    yield matrix as tf.Tensor2D;
   }
 }
