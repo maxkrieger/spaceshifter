@@ -69,11 +69,12 @@ function gradientDescentOptimize(
   return trainSet.forEachAsync((batch) => {
     tf.tidy(() => {
       const { e1, e2, label } = batch as EmbeddedPairing;
-      const gradientFunction = tf.grad(
+      const gradientFunction = tf.valueAndGrad(
         makeWrappedLoss(dropoutFraction, e1, e2, label)
       );
-      const grads = gradientFunction(matrix);
-      matrix.assign(matrix.sub(grads.mul(learningRate)));
+      const { grad, value } = gradientFunction(matrix);
+
+      matrix.assign(matrix.sub(grad.mul(learningRate)));
     });
   });
 }
@@ -107,6 +108,7 @@ export async function* trainMatrix(
 
   // Optimizing this!
   const matrix = tf.randomNormal([embeddingSize, embeddingSize]).variable();
+  // TODO: include epochs and matrix in matrix opt
   for (let epoch = 0; epoch < epochs; epoch++) {
     /*await gradientDescentOptimize(
       dropoutFraction,

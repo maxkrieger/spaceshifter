@@ -37,29 +37,24 @@ class EmbeddingCache {
   }
   async bulkEmbed(pairs: Pairings): Promise<void> {
     log.info("Bulk embedding...");
-    const toFetch = new Set<string>();
-    // TODO: bulkGet, check for undeefs
-    // https://dexie.org/docs/Table/Table.bulkGet()
-    await Promise.all(
-      pairs.map(async ({ text_1, text_2 }) => {
-        if (!toFetch.has(text_1)) {
-          if ((await this.getEmbeddingLocally(text_1)) === null) {
-            toFetch.add(text_1);
-          }
-        }
-        if (!toFetch.has(text_2)) {
-          if ((await this.getEmbeddingLocally(text_2)) === null) {
-            toFetch.add(text_2);
-          }
-        }
-      })
-    );
+    const flattenedPairs = [
+      ...new Set(pairs.flatMap((p) => [p.text_1, p.text_2])),
+    ];
+    const results = await db.embedding.bulkGet(flattenedPairs);
+    const missing = [];
+    for (let i = 0; i < results.length; i++) {
+      const res = results[i];
+      if (res) {
+        this.cache[res.text] = res.embedding;
+      } else {
+        missing.push(flattenedPairs[i]);
+      }
+    }
 
     this.getApiKey();
-    if (toFetch.size > 0) {
-      const toFetchAsArray = [...toFetch];
-      log.info(`Fetching ${toFetchAsArray.length} embeddings`);
-      const chunked = chunk(toFetchAsArray, 150);
+    if (missing.length > 0) {
+      log.info(`Fetching ${missing.length} embeddings`);
+      const chunked = chunk(missing, 150);
       //   TODO: backoff
       for await (const chunk of chunked) {
         log.info(`Fetching ${chunk.length} embeddings chunk`);
