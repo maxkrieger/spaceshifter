@@ -20,10 +20,6 @@ export default function Trainer() {
         const { train, test } = trainTestSplit(pairings, 0.5);
         const augmentedTrain = augmentNegatives(train, 1);
         const augmentedTest = augmentNegatives(test, 1);
-        console.log(
-          augmentedTest.filter((p) => p.label === 1).length,
-          augmentedTest.filter((p) => p.label === -1).length
-        );
         await embeddingCache.bulkEmbed(train);
         await embeddingCache.bulkEmbed(test);
         const cosP = await computeCosinePairings(augmentedTest, 1536);

@@ -60,12 +60,47 @@ const makeWrappedLoss = (
     });
   };
 
+function gradientDescentOptimize(
+  dropoutFraction: number,
+  trainSet: tf.data.Dataset<tf.TensorContainer>,
+  learningRate: number,
+  matrix: tf.Variable
+) {
+  return trainSet.forEachAsync((batch) => {
+    tf.tidy(() => {
+      const { e1, e2, label } = batch as EmbeddedPairing;
+      const gradientFunction = tf.grad(
+        makeWrappedLoss(dropoutFraction, e1, e2, label)
+      );
+      const grads = gradientFunction(matrix);
+      matrix.assign(matrix.sub(grads.mul(learningRate)));
+    });
+  });
+}
+
+function tfOptimize(
+  dropoutFraction: number,
+  trainSet: tf.data.Dataset<tf.TensorContainer>,
+  optimizer: tf.Optimizer,
+  matrix: tf.Variable
+) {
+  return trainSet.forEachAsync((batch) => {
+    const { e1, e2, label } = batch as EmbeddedPairing;
+    optimizer.minimize(
+      () =>
+        mse_loss(model(e1, e2, matrix as tf.Tensor2D, dropoutFraction), label),
+      false,
+      [matrix]
+    );
+  });
+}
+
 export async function* trainMatrix(
   train: Pairings,
-  learningRate: number = 100,
+  learningRate: number = 0.01,
   epochs: number = 100,
   dropoutFraction: number = 0.2,
-  batchSize = 10,
+  batchSize = 100,
   embeddingSize = 1536
 ): AsyncGenerator<tf.Tensor2D> {
   const trainSet = (await embeddingTensorsFromPairings(train)).batch(batchSize);
@@ -73,14 +108,14 @@ export async function* trainMatrix(
   // Optimizing this!
   const matrix = tf.randomNormal([embeddingSize, embeddingSize]).variable();
   for (let epoch = 0; epoch < epochs; epoch++) {
-    await trainSet.forEachAsync((batch) => {
-      tf.tidy(() => {
-        const { e1, e2, label } = batch as EmbeddedPairing;
-        const gradf = tf.grad(makeWrappedLoss(dropoutFraction, e1, e2, label));
-        const grads = gradf(matrix);
-        matrix.assign(matrix.sub(grads.mul(learningRate)));
-      });
-    });
+    /*await gradientDescentOptimize(
+      dropoutFraction,
+      trainSet,
+      learningRate,
+      matrix
+    );*/
+    const optimizer = tf.train.adamax(learningRate);
+    await tfOptimize(dropoutFraction, trainSet, optimizer, matrix);
 
     yield matrix as tf.Tensor2D;
   }
