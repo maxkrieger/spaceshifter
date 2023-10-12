@@ -6,15 +6,17 @@ export default class TrainingWorkerClient {
   sendMessage(message: TrainerMessage) {
     this.worker.postMessage(message);
   }
-  constructor(apiKey: string, onMessage: (m: OutboundMessage) => void) {
-    this.worker = new TrainingWorker();
-    this.sendMessage({ type: "setApiKey", apiKey });
+  addListener(listener: (message: OutboundMessage) => void) {
     this.worker.addEventListener(
       "message",
       (e: MessageEvent<OutboundMessage>) => {
-        onMessage(e.data);
+        listener(e.data);
       }
     );
+  }
+  constructor(apiKey: string) {
+    this.worker = new TrainingWorker();
+    this.sendMessage({ type: "setApiKey", apiKey });
   }
   terminate() {
     log.info("Terminating worker");

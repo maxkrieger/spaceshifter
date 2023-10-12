@@ -42,7 +42,8 @@ export function parseCSV(csvFile: File): Promise<Pairings | null> {
 
 export async function parseJSON(jsonFile: File): Promise<Pairings | null> {
   try {
-    const parsed = await jsonFile.json();
+    const text = await jsonFile.text();
+    const parsed = JSON.parse(text);
     if (isValidJSON(parsed)) {
       return parsed;
     } else {
@@ -57,7 +58,6 @@ export async function parseJSON(jsonFile: File): Promise<Pairings | null> {
 export async function parseJSONL(jsonLFile: File): Promise<Pairings | null> {
   try {
     const text = await jsonLFile.text();
-    console.log(text);
     const parsed = text
       // To prevent from parsing newlines in strings
       .replaceAll("\\n", "{{NEWLINE_REPLACEME}}")

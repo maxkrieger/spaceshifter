@@ -1,7 +1,7 @@
 import Dexie, { Table } from "dexie";
 import { OptimizationParameters, Pairing } from "./types";
 
-export interface Project {
+export interface Dataset {
   id?: number;
   name: string;
   dateCreated: Date;
@@ -15,24 +15,32 @@ export interface Embedding {
   dateCreated: Date;
 }
 
+export interface SavedMatrix {
+  id?: number;
+  dataset: number;
+  matrix: number[][];
+  dateCreated: Date;
+}
+
 export type Pair = {
   id?: number;
-  project: number;
+  dataset: number;
   dateCreated: Date;
-  forTraining?: boolean;
 } & Pairing;
 
 export class SpaceshifterDB extends Dexie {
   embedding!: Table<Embedding>;
-  project!: Table<Project>;
+  dataset!: Table<Dataset>;
   pair!: Table<Pair>;
+  savedMatrices!: Table<SavedMatrix>;
 
   constructor() {
     super("spaceshifter");
     this.version(1).stores({
       embedding: "text, embedding, dateCreated",
-      project: "++id, name, dateCreated, trainingParams",
-      pair: "++id, project, dateCreated, text_1, text_2, label, forTraining",
+      dataset: "++id, name, dateCreated, trainingParams",
+      pair: "++id, dataset, dateCreated, text_1, text_2, label",
+      matrix: "++id, dataset, matrix, dateCreated",
     });
   }
 }

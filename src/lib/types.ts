@@ -31,6 +31,8 @@ export interface OptimizationParameters {
   batchSize: number;
   targetEmbeddingSize: number;
   optimizer: "gradient" | "adamax";
+  generateSyntheticNegatives: boolean;
+  testSplitFraction: number;
 }
 
 export const defaultOptimizationParameters: OptimizationParameters = {
@@ -40,6 +42,8 @@ export const defaultOptimizationParameters: OptimizationParameters = {
   batchSize: 10,
   targetEmbeddingSize: 2048,
   optimizer: "gradient",
+  generateSyntheticNegatives: true,
+  testSplitFraction: 0.5,
 };
 
 export type AccuracyAndSE = {
@@ -74,9 +78,6 @@ export type TrainerMessage =
 
 export type OutboundMessage =
   | {
-      type: "doneEmbedding";
-    }
-  | {
       type: "embeddingProgress";
       progress: number;
       total: number;
@@ -96,6 +97,13 @@ export type OutboundMessage =
     }
   | { type: "error"; message: string };
 
-export type ProjectLocator =
+export type DatasetLocator =
   | { type: "local"; id: number }
   | { type: "example"; route: string; name: string };
+
+export enum ProjectPhase {
+  NoData = 0,
+  DataPresent = 1,
+  Embedded = 2,
+  Trained = 3,
+}

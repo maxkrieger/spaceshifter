@@ -4,6 +4,7 @@ export default function Histogram({ pairings }: { pairings: CosinePairings }) {
   return (
     <div>
       <Plot
+        // grid
         layout={{ barmode: "overlay", width: 500 }}
         data={[
           {

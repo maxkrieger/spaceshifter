@@ -3,7 +3,6 @@ import log from "loglevel";
 import { Pairings } from "./types";
 import { chunk } from "lodash";
 import { backOff } from "exponential-backoff";
-import { sendMessageToHost } from "./trainingWorker";
 
 export default class EmbeddingCache {
   cache: { [key: string]: number[] } = {};
@@ -78,7 +77,7 @@ export default class EmbeddingCache {
           this.cache[res.text] = res.embedding;
         });
 
-        sendMessageToHost({
+        postMessage({
           type: "embeddingProgress",
           progress: i / chunked.length,
           total: missing.length,

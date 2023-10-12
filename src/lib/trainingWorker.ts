@@ -106,7 +106,6 @@ addEventListener("message", async (e: MessageEvent<TrainerMessage>) => {
           e.data.trainingOrig,
           e.data.testOrig
         );
-        sendMessageToHost({ type: "doneEmbedding" });
         break;
       case "train":
         await trainer.train(e.data.parameters);

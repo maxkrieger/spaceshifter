@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { currentProjectAtom } from "./lib/atoms";
+import { currentDatasetAtom } from "./lib/atoms";
 import logotype from "./assets/logotype.svg";
 import logo from "./assets/logo.svg";
 import Hero from "./components/Hero";
@@ -8,7 +8,7 @@ import Project from "./components/Project";
 import { Toaster } from "./components/ui/toaster";
 
 function App() {
-  const [currentProject, setCurrentProject] = useAtom(currentProjectAtom);
+  const [currentProject, setCurrentProject] = useAtom(currentDatasetAtom);
 
   return (
     <div className="p-5 text-white">
