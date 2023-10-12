@@ -19,6 +19,9 @@ import { Input } from "./ui/input";
 import { useCallback, useState } from "react";
 import { Label } from "./ui/label";
 import { Switch } from "./ui/switch";
+import { useSetAtom } from "jotai";
+import { projectPhaseAtom } from "@/lib/atoms";
+import { ProjectPhase } from "@/lib/types";
 export default function CellDropdown({ row }: { row: Row<Pair> }) {
   const r = row.original;
   const [editing, setEditing] = useState<boolean>(false);
@@ -27,6 +30,7 @@ export default function CellDropdown({ row }: { row: Row<Pair> }) {
   const [text1, setText1] = useState<string>(r.text_1);
   const [text2, setText2] = useState<string>(r.text_2);
   const [label, setLabel] = useState<number>(r.label);
+  const setProjectPhase = useSetAtom(projectPhaseAtom);
   const submit = useCallback(() => {
     (async () => {
       await db.pair.update(r.id!, {
@@ -36,8 +40,9 @@ export default function CellDropdown({ row }: { row: Row<Pair> }) {
       });
       setEditing(false);
       setMenuOpen(false);
+      setProjectPhase(ProjectPhase.DataPresent);
     })();
-  }, [text1, text2, label, r]);
+  }, [text1, text2, label, r, setProjectPhase]);
   const deleteRow = useCallback(() => {
     (async () => {
       await db.pair.delete(r.id!);
@@ -59,7 +64,7 @@ export default function CellDropdown({ row }: { row: Row<Pair> }) {
               Edit
             </DropdownMenuItem>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-[425px]">
             <DialogHeader className="text-white">Edit Row</DialogHeader>
             <div className="text-white">
               <div className="my-4">
@@ -104,7 +109,7 @@ export default function CellDropdown({ row }: { row: Row<Pair> }) {
               Delete
             </DropdownMenuItem>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-[425px]">
             <DialogHeader className="text-white">
               Delete "{r.text_1.substring(0, 20)}"?
             </DialogHeader>

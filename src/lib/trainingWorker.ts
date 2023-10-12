@@ -12,13 +12,13 @@ import {
   TensorDataset,
   TrainerMessage,
 } from "./types";
+import augmentNegatives from "./augmentNegatives";
+import trainTestSplit from "./trainTestSplit";
 
-export function sendMessageToHost(message: OutboundMessage) {
+function sendMessageToHost(message: OutboundMessage) {
   postMessage(message);
 }
 class Trainer {
-  trainingPairings?: Pairings;
-  testPairings?: Pairings;
   trainDataset?: TensorDataset;
   testDataset?: TensorDataset;
   embeddingCache?: EmbeddingCache;
@@ -41,24 +41,14 @@ class Trainer {
       trainAccuracyAndSE,
     };
   }
-  async setPairings(
-    trainingAugmented: Pairings,
-    testAugmented: Pairings,
-    trainingOrig: Pairings,
-    testOrig: Pairings
-  ) {
-    this.trainingPairings = trainingAugmented;
-    this.testPairings = testAugmented;
-    await this.embeddingCache!.bulkEmbed(testOrig);
-    await this.embeddingCache!.bulkEmbed(trainingOrig);
-    this.trainDataset = pairingToDataset(
-      this.trainingPairings,
-      this.embeddingCache!
-    );
-    this.testDataset = pairingToDataset(
-      this.testPairings,
-      this.embeddingCache!
-    );
+  async setPairings(pairs: Pairings, params: OptimizationParameters) {
+    await this.embeddingCache!.bulkEmbed(pairs);
+    const { train, test } = trainTestSplit(pairs, params.testSplitFraction);
+    const shouldAugment = params.generateSyntheticNegatives;
+    const testAugmented = shouldAugment ? augmentNegatives(test, 1) : test;
+    const trainAugmented = shouldAugment ? augmentNegatives(train, 1) : train;
+    this.trainDataset = pairingToDataset(trainAugmented, this.embeddingCache!);
+    this.testDataset = pairingToDataset(testAugmented, this.embeddingCache!);
 
     sendMessageToHost({
       type: "initialPerformance",
@@ -100,12 +90,7 @@ addEventListener("message", async (e: MessageEvent<TrainerMessage>) => {
         trainer.embeddingCache = new EmbeddingCache(e.data.apiKey);
         break;
       case "setPairings":
-        await trainer.setPairings(
-          e.data.trainingAugmented,
-          e.data.testAugmented,
-          e.data.trainingOrig,
-          e.data.testOrig
-        );
+        await trainer.setPairings(e.data.allPairings, e.data.parameters);
         break;
       case "train":
         await trainer.train(e.data.parameters);

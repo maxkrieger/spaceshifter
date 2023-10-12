@@ -66,10 +66,8 @@ export type TrainerMessage =
     }
   | {
       type: "setPairings";
-      trainingAugmented: Pairings;
-      testAugmented: Pairings;
-      trainingOrig: Pairings;
-      testOrig: Pairings;
+      allPairings: Pairings;
+      parameters: OptimizationParameters;
     }
   | {
       type: "train";

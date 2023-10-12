@@ -7,11 +7,8 @@ import Histogram from "./Histogram";
 
 export default function Pretraining() {
   const currentPhase = useAtomValue(projectPhaseAtom);
-  const [initialPerformance, setInitialPerformance] = useState<{
-    perf: PerformanceGroup;
-    testSize: number;
-    trainSize: number;
-  } | null>();
+  const [initialPerformance, setInitialPerformance] =
+    useState<PerformanceGroup | null>();
   if (currentPhase < ProjectPhase.DataPresent) {
     return (
       <div className="border bg-slate-900 border-slate-500 rounded-md p-4 my-5 opacity-50">
@@ -29,16 +26,32 @@ export default function Pretraining() {
   return (
     <div className="border bg-slate-900 border-slate-500 rounded-md p-4 my-5">
       <h1 className="text-2xl">Pretraining</h1>
-      <p>
-        The test set has {initialPerformance.testSize} pairs and the train set
-        has {initialPerformance.trainSize} pairs.
+      <p className="text-slate-300 text-l">
+        The test set has{" "}
+        <span className="text-white">
+          {initialPerformance.testCosinePairings.length}
+        </span>{" "}
+        pairs and the train set has{" "}
+        <span className="text-white">
+          {initialPerformance.trainCosinePairings.length}
+        </span>{" "}
+        pairs.
       </p>
-      <p>
-        The test set performance is{" "}
-        {initialPerformance.perf.testAccuracyAndSE.message}
+      <p className="text-slate-300 text-l">
+        Before training, the test set performance is{" "}
+        <span className="text-white">
+          {initialPerformance.testAccuracyAndSE.message}
+        </span>{" "}
+        and the train set performance is{" "}
+        <span className="text-white">
+          {initialPerformance.trainAccuracyAndSE.message}
+        </span>
+        .
       </p>
-      <Histogram pairings={initialPerformance.perf.trainCosinePairings} />
-      <Histogram pairings={initialPerformance.perf.testCosinePairings} />
+      <Histogram
+        trainPairings={initialPerformance.trainCosinePairings}
+        testPairings={initialPerformance.testCosinePairings}
+      />
     </div>
   );
 }

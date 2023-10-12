@@ -14,19 +14,13 @@ import useDataset from "@/lib/useDataset";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import TrainingWorkerClient from "@/lib/TrainingWorkerClient";
-import trainTestSplit from "@/lib/trainTestSplit";
-import augmentNegatives from "@/lib/augmentNegatives";
 import { PerformanceGroup, ProjectPhase } from "@/lib/types";
 import { Progress } from "./ui/progress";
 
 export default function PretrainingSetup({
   setPerformance,
 }: {
-  setPerformance: (performance: {
-    perf: PerformanceGroup;
-    testSize: number;
-    trainSize: number;
-  }) => void;
+  setPerformance: (performance: PerformanceGroup) => void;
 }) {
   const currentDataset = useAtomValue(currentDatasetAtom);
   const setWorkerClient = useSetAtom(trainingWorkerAtom);
@@ -62,35 +56,19 @@ export default function PretrainingSetup({
     if (datasetValue && pairs) {
       const workerClient = new TrainingWorkerClient(apiKey!);
       setWorkerClient(workerClient);
-      const { train, test } = trainTestSplit(
-        pairs,
-        datasetValue.trainingParams.testSplitFraction
-      );
-      const shouldAugment =
-        datasetValue.trainingParams.generateSyntheticNegatives;
-      const testAugmented = shouldAugment ? augmentNegatives(test, 1) : test;
-      const trainingAugmented = shouldAugment
-        ? augmentNegatives(train, 1)
-        : train;
       workerClient.addListener((message) => {
         if (message.type === "embeddingProgress") {
           setEmbeddingProgress(message.progress);
         } else if (message.type === "initialPerformance") {
-          setPerformance({
-            perf: message.performance,
-            testSize: testAugmented.length,
-            trainSize: trainingAugmented.length,
-          });
+          setPerformance(message.performance);
           setPhase(ProjectPhase.Embedded);
         }
       });
       setEmbeddingProgress(0);
       workerClient.sendMessage({
         type: "setPairings",
-        testOrig: test,
-        trainingOrig: train,
-        trainingAugmented,
-        testAugmented,
+        allPairings: pairs,
+        parameters: datasetValue.trainingParams,
       });
     }
   }, [datasetValue, setWorkerClient, apiKey, pairs, setPerformance, setPhase]);
@@ -115,11 +93,12 @@ export default function PretrainingSetup({
   return (
     <div className="border bg-slate-900 border-slate-500 rounded-md p-4 my-5">
       <h1 className="text-2xl">Pretraining</h1>
-      <p className="text-slate-400 text-l my-2">
-        In this step, we prepare the data for training by splitting it into a
-        training and test set.
+      <p className="text-slate-300 text-l my-2">
+        In this step, we prepare the data for training by embedding it and
+        splitting it into a training and test set. Embeddings are retrieved from
+        your browser cache first.
       </p>
-      <p className="text-slate-400 text-l my-2">
+      <p className="text-slate-300 text-l my-2">
         There <span className="text-white">{positiveExamples}</span> positive
         examples and{" "}
         <span className="text-white">{pairs.length - positiveExamples}</span>{" "}
@@ -156,7 +135,7 @@ export default function PretrainingSetup({
       </div>
       <div>
         <Button className="w-full" onClick={embedAndSplit}>
-          Embed and split!
+          Prepare Data
         </Button>
       </div>
     </div>
