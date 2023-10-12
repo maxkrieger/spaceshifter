@@ -4,7 +4,7 @@ export default function Hero() {
       <h1 className="text-5xl font-bold from-purple-100 bg-gradient-to-b to-purple-400 text-transparent bg-clip-text inline-block p-3">
         Finetune your embeddings
       </h1>
-      <p className="text-xl text-slate-200 mt-2">
+      <p className="text-2xl text-slate-200 mt-2">
         Boost your OpenAI embeddings with a{" "}
         <span className="font-medium text-slate-100">simple matmul</span>
         {" trained "}
@@ -48,6 +48,9 @@ export default function Hero() {
       </div>
       <div>
         <p className="text-slate-400 text-sm mt-1">(illustration only)</p>
+        <p className="text-xl text-slate-300 mt-2">
+          Improve RAG by 10-50% without leaving this page.
+        </p>
       </div>
     </div>
   );

@@ -11,11 +11,13 @@ import {
 } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
+import { useToast } from "./ui/use-toast";
 
 export default function ApiKey() {
   const [apiKey, setApiKey] = useAtom(apiKeyAtom);
   const [draftApiKey, setDraftApiKey] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
   const pasteFromClipboard = useCallback(() => {
     navigator.clipboard.readText().then((text) => {
       setDraftApiKey(text);
@@ -38,14 +40,20 @@ export default function ApiKey() {
         if (res.status === 200) {
           setError(null);
           setApiKey(draftApiKey);
+          toast({ title: "API Key has been set" });
         } else {
           setError(`API Key is invalid: ${res.status}`);
+          toast({
+            title: "Could not use API key",
+            description: `Error code ${res.status}`,
+            variant: "destructive",
+          });
         }
       } catch (e) {
         setError((e as Error).toString());
       }
     })();
-  }, [setApiKey, draftApiKey]);
+  }, [setApiKey, draftApiKey, toast]);
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -63,7 +71,10 @@ export default function ApiKey() {
             >
               the OpenAI API Keys page
             </a>{" "}
-            and paste it here (stored locally):
+            and paste it here.{" "}
+            <span className="text-slate-300">
+              It is stored locally and never shared with us.
+            </span>
           </DialogDescription>
         </DialogHeader>
 

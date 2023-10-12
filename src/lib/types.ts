@@ -33,6 +33,15 @@ export interface OptimizationParameters {
   optimizer: "gradient" | "adamax";
 }
 
+export const defaultOptimizationParameters: OptimizationParameters = {
+  dropoutFraction: 0.2,
+  learningRate: 10,
+  epochs: 100,
+  batchSize: 10,
+  targetEmbeddingSize: 2048,
+  optimizer: "gradient",
+};
+
 export type AccuracyAndSE = {
   accuracy: number;
   se: number;
@@ -79,11 +88,13 @@ export type OutboundMessage =
   | {
       type: "updatedPerformance";
       performance: PerformanceGroup;
+      epoch: number;
     }
   | {
       type: "doneTraining";
       matrix: number[][];
-    };
+    }
+  | { type: "error"; message: string };
 
 export type ProjectLocator =
   | { type: "local"; id: number }

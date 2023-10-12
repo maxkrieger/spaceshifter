@@ -39,14 +39,13 @@ async function* gradientDescentOptimize(
   dataset: TensorDataset,
   parameters: OptimizationParameters,
   matrix: tf.Variable
-): AsyncGenerator {
+): AsyncGenerator<number> {
   const shuffledBatchDataset = dataset.tfDataset
     .shuffle(dataset.tfDataset.size)
     .batch(parameters.batchSize);
   let bestLoss = Infinity;
   const draftMatrix = matrix.clone().variable();
   for (let epoch = 0; epoch < parameters.epochs; epoch++) {
-    console.log("Epoch", epoch);
     await shuffledBatchDataset.forEachAsync((batch) => {
       tf.tidy(() => {
         const { e1, e2, labels } = batch as DatasetSlice;
@@ -70,8 +69,8 @@ async function* gradientDescentOptimize(
     if (loss < bestLoss) {
       bestLoss = loss;
       matrix.assign(draftMatrix);
-      yield;
     }
+    yield epoch;
   }
   draftMatrix.dispose();
 }
@@ -81,7 +80,7 @@ async function* tfOptimize(
   parameters: OptimizationParameters,
   matrix: tf.Variable,
   optimizerType: "adamax"
-): AsyncGenerator {
+): AsyncGenerator<number> {
   const shuffledBatchDataset = dataset.tfDataset
     .shuffle(dataset.tfDataset.size)
     .batch(parameters.batchSize);
@@ -89,7 +88,7 @@ async function* tfOptimize(
     optimizerType === "adamax"
       ? tf.train.adamax(parameters.learningRate)
       : tf.train.adam(parameters.learningRate);
-  for (let i = 0; i < parameters.epochs; i++) {
+  for (let epoch = 0; epoch < parameters.epochs; epoch++) {
     await shuffledBatchDataset.forEachAsync((batch) => {
       const { e1, e2, labels } = batch as DatasetSlice;
       optimizer.minimize(
@@ -102,7 +101,7 @@ async function* tfOptimize(
         [matrix]
       );
     });
-    yield;
+    yield epoch;
   }
 }
 
@@ -110,12 +109,12 @@ export function makeMatrix(embeddingSize: number, targetEmbeddingSize: number) {
   return tf.randomNormal([embeddingSize, targetEmbeddingSize]).variable();
 }
 
-// We return a generator so that we can update as the matrix gets updated
+// We return a generator of epochs so that we can update as the matrix gets updated
 export function trainMatrix(
   dataset: TensorDataset,
   parameters: OptimizationParameters,
   matrix: tf.Variable
-): AsyncGenerator {
+): AsyncGenerator<number> {
   switch (parameters.optimizer) {
     case "gradient":
       return gradientDescentOptimize(dataset, parameters, matrix);

@@ -72,9 +72,17 @@ class Trainer {
       parameters.targetEmbeddingSize
     );
 
-    for await (const _ of trainMatrix(this.trainDataset!, parameters, matrix)) {
+    for await (const epoch of trainMatrix(
+      this.trainDataset!,
+      parameters,
+      matrix
+    )) {
       const perf = await this.getPerformance(matrix as Tensor2D);
-      sendMessageToHost({ type: "updatedPerformance", performance: perf });
+      sendMessageToHost({
+        type: "updatedPerformance",
+        performance: perf,
+        epoch,
+      });
     }
     const arr = await matrix.array();
     sendMessageToHost({ type: "doneTraining", matrix: arr as number[][] });
@@ -86,24 +94,28 @@ class Trainer {
 const trainer = new Trainer();
 
 addEventListener("message", async (e: MessageEvent<TrainerMessage>) => {
-  switch (e.data.type) {
-    case "setApiKey":
-      trainer.embeddingCache = new EmbeddingCache(e.data.apiKey);
-      break;
-    case "setPairings":
-      await trainer.setPairings(
-        e.data.trainingAugmented,
-        e.data.testAugmented,
-        e.data.trainingOrig,
-        e.data.testOrig
-      );
-      sendMessageToHost({ type: "doneEmbedding" });
-      break;
-    case "train":
-      await trainer.train(e.data.parameters);
-      break;
-    default:
-      console.error("Unknown message type", e.data);
-      break;
+  try {
+    switch (e.data.type) {
+      case "setApiKey":
+        trainer.embeddingCache = new EmbeddingCache(e.data.apiKey);
+        break;
+      case "setPairings":
+        await trainer.setPairings(
+          e.data.trainingAugmented,
+          e.data.testAugmented,
+          e.data.trainingOrig,
+          e.data.testOrig
+        );
+        sendMessageToHost({ type: "doneEmbedding" });
+        break;
+      case "train":
+        await trainer.train(e.data.parameters);
+        break;
+      default:
+        console.error("Unknown message type", e.data);
+        break;
+    }
+  } catch (e: unknown) {
+    sendMessageToHost({ type: "error", message: (e as Error).toString() });
   }
 });

@@ -66,12 +66,18 @@ export default class EmbeddingCache {
           })
         );
         const json = await res.json();
-        for (const embeddingRes of json.data) {
-          const text = chunk[embeddingRes.index];
-          const embedding = embeddingRes.embedding;
-          this.cache[text] = embedding;
-          await db.embedding.put({ text, embedding });
-        }
+        const toAdd = json.data.map(
+          (res: { index: number; embedding: number[] }) => ({
+            embedding: res.embedding,
+            text: chunk[res.index],
+            dateCreated: new Date(),
+          })
+        );
+        await db.embedding.bulkPut(toAdd);
+        toAdd.forEach((res: { text: number; embedding: number[] }) => {
+          this.cache[res.text] = res.embedding;
+        });
+
         sendMessageToHost({
           type: "embeddingProgress",
           progress: i / chunked.length,
