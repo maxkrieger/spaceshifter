@@ -22,7 +22,11 @@ import { Progress } from "./ui/progress";
 export default function PretrainingSetup({
   setPerformance,
 }: {
-  setPerformance: (perf: PerformanceGroup) => void;
+  setPerformance: (performance: {
+    perf: PerformanceGroup;
+    testSize: number;
+    trainSize: number;
+  }) => void;
 }) {
   const currentDataset = useAtomValue(currentDatasetAtom);
   const setWorkerClient = useSetAtom(trainingWorkerAtom);
@@ -64,11 +68,19 @@ export default function PretrainingSetup({
       );
       const shouldAugment =
         datasetValue.trainingParams.generateSyntheticNegatives;
+      const testAugmented = shouldAugment ? augmentNegatives(test, 1) : test;
+      const trainingAugmented = shouldAugment
+        ? augmentNegatives(train, 1)
+        : train;
       workerClient.addListener((message) => {
         if (message.type === "embeddingProgress") {
           setEmbeddingProgress(message.progress);
         } else if (message.type === "initialPerformance") {
-          setPerformance(message.performance);
+          setPerformance({
+            perf: message.performance,
+            testSize: testAugmented.length,
+            trainSize: trainingAugmented.length,
+          });
           setPhase(ProjectPhase.Embedded);
         }
       });
@@ -77,8 +89,8 @@ export default function PretrainingSetup({
         type: "setPairings",
         testOrig: test,
         trainingOrig: train,
-        testAugmented: shouldAugment ? augmentNegatives(test, 1) : test,
-        trainingAugmented: shouldAugment ? augmentNegatives(train, 1) : train,
+        trainingAugmented,
+        testAugmented,
       });
     }
   }, [datasetValue, setWorkerClient, apiKey, pairs, setPerformance, setPhase]);

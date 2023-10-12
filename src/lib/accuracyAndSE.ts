@@ -24,11 +24,7 @@ export default function accuracyAndSE(pairings: CosinePairings): AccuracyAndSE {
   const a = max(accuracies)!;
   const n = accuracies.length;
   const se = Math.sqrt((a * (1 - a)) / n);
-  const message = `accuracy: ${(a * 100).toFixed(1)}% ± ${(
-    1.96 *
-    se *
-    100
-  ).toFixed(1)}%`;
+  const message = `${(a * 100).toFixed(1)}% ± ${(1.96 * se * 100).toFixed(1)}%`;
 
   return { accuracy: a, se, message };
 }
