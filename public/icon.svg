@@ -1,0 +1,28 @@
+<svg width="150" height="150" viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_1_11)">
+<rect width="150" height="150" rx="50" fill="black"/>
+<circle cx="-12" cy="173.136" r="125" fill="url(#paint0_radial_1_11)" stroke="url(#paint1_radial_1_11)" stroke-width="2"/>
+<circle cx="173" cy="-35" r="125" transform="rotate(-180 173 -35)" fill="url(#paint2_radial_1_11)" stroke="url(#paint3_radial_1_11)" stroke-width="2"/>
+</g>
+<defs>
+<radialGradient id="paint0_radial_1_11" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(79.6364 86.591) rotate(140.723) scale(75.1026)">
+<stop stop-color="#DFD0FF"/>
+<stop offset="1" stop-color="#D9D9D9" stop-opacity="0"/>
+</radialGradient>
+<radialGradient id="paint1_radial_1_11" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(70.5 81.1365) rotate(134.145) scale(88.3017)">
+<stop stop-color="#DFD0FF"/>
+<stop offset="1" stop-opacity="0"/>
+</radialGradient>
+<radialGradient id="paint2_radial_1_11" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(264.636 -121.545) rotate(140.723) scale(75.1026)">
+<stop stop-color="#DFD0FF"/>
+<stop offset="1" stop-color="#D9D9D9" stop-opacity="0"/>
+</radialGradient>
+<radialGradient id="paint3_radial_1_11" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(255.5 -127) rotate(134.145) scale(88.3017)">
+<stop stop-color="#DFD0FF"/>
+<stop offset="1" stop-opacity="0"/>
+</radialGradient>
+<clipPath id="clip0_1_11">
+<rect width="150" height="150" rx="50" fill="white"/>
+</clipPath>
+</defs>
+</svg>

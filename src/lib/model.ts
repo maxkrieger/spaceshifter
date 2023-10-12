@@ -1,31 +1,5 @@
-// Get openai keys for localstorage
-// Make a project
-// Make embeddings
-//  Train
-
-import embeddingCache from "./embeddingCache";
-import { EmbeddedPairing, Pairings } from "./types";
+import { DatasetSlice, OptimizationParameters, TensorDataset } from "./types";
 import * as tf from "@tensorflow/tfjs";
-
-async function embeddingTensorsFromPairings(
-  pairings: Pairings
-): Promise<tf.data.Dataset<tf.TensorContainer>> {
-  const e1s = [];
-  const e2s = [];
-  const s = [];
-  for (const { text_1, text_2, label } of pairings) {
-    const e1 = embeddingCache.getEmbeddingFast(text_1);
-    const e2 = embeddingCache.getEmbeddingFast(text_2);
-    e1s.push(e1);
-    e2s.push(e2);
-    s.push(label);
-  }
-  const e1D = tf.data.array(e1s);
-  const e2D = tf.data.array(e2s);
-  const sD = tf.data.array(s);
-  const dataset = tf.data.zip({ e1: e1D, e2: e2D, label: sD });
-  return dataset;
-}
 
 function model(
   e1: tf.Tensor2D,
@@ -60,65 +34,92 @@ const makeWrappedLoss = (
     });
   };
 
-function gradientDescentOptimize(
-  dropoutFraction: number,
-  trainSet: tf.data.Dataset<tf.TensorContainer>,
-  learningRate: number,
+// Based on the OpenAI Notebook
+async function* gradientDescentOptimize(
+  dataset: TensorDataset,
+  parameters: OptimizationParameters,
   matrix: tf.Variable
-) {
-  return trainSet.forEachAsync((batch) => {
-    tf.tidy(() => {
-      const { e1, e2, label } = batch as EmbeddedPairing;
-      const gradientFunction = tf.valueAndGrad(
-        makeWrappedLoss(dropoutFraction, e1, e2, label)
-      );
-      const { grad, value } = gradientFunction(matrix);
-
-      matrix.assign(matrix.sub(grad.mul(learningRate)));
+): AsyncGenerator {
+  const shuffledBatchDataset = dataset.tfDataset
+    .shuffle(dataset.tfDataset.size)
+    .batch(parameters.batchSize);
+  let bestLoss = Infinity;
+  const draftMatrix = matrix.clone().variable();
+  for (let epoch = 0; epoch < parameters.epochs; epoch++) {
+    console.log("Epoch", epoch);
+    await shuffledBatchDataset.forEachAsync((batch) => {
+      tf.tidy(() => {
+        const { e1, e2, labels } = batch as DatasetSlice;
+        const gradientFunction = tf.grad(
+          makeWrappedLoss(parameters.dropoutFraction, e1, e2, labels)
+        );
+        const grad = gradientFunction(draftMatrix);
+        draftMatrix.assign(draftMatrix.sub(grad.mul(parameters.learningRate)));
+      });
     });
-  });
+    const loss = tf.tidy(() => {
+      const preds = model(
+        dataset.e1,
+        dataset.e2,
+        draftMatrix as tf.Tensor2D,
+        parameters.dropoutFraction
+      );
+      return mse_loss(preds, dataset.labels).dataSync()[0];
+    });
+    // Only modify the matrix if the loss is better
+    if (loss < bestLoss) {
+      bestLoss = loss;
+      matrix.assign(draftMatrix);
+      yield;
+    }
+  }
+  draftMatrix.dispose();
 }
 
-function tfOptimize(
-  dropoutFraction: number,
-  trainSet: tf.data.Dataset<tf.TensorContainer>,
-  optimizer: tf.Optimizer,
+async function* tfOptimize(
+  dataset: TensorDataset,
+  parameters: OptimizationParameters,
+  matrix: tf.Variable,
+  optimizerType: "adamax"
+): AsyncGenerator {
+  const shuffledBatchDataset = dataset.tfDataset
+    .shuffle(dataset.tfDataset.size)
+    .batch(parameters.batchSize);
+  const optimizer =
+    optimizerType === "adamax"
+      ? tf.train.adamax(parameters.learningRate)
+      : tf.train.adam(parameters.learningRate);
+  for (let i = 0; i < parameters.epochs; i++) {
+    await shuffledBatchDataset.forEachAsync((batch) => {
+      const { e1, e2, labels } = batch as DatasetSlice;
+      optimizer.minimize(
+        () =>
+          mse_loss(
+            model(e1, e2, matrix as tf.Tensor2D, parameters.dropoutFraction),
+            labels
+          ),
+        false,
+        [matrix]
+      );
+    });
+    yield;
+  }
+}
+
+export function makeMatrix(embeddingSize: number, targetEmbeddingSize: number) {
+  return tf.randomNormal([embeddingSize, targetEmbeddingSize]).variable();
+}
+
+// We return a generator so that we can update as the matrix gets updated
+export function trainMatrix(
+  dataset: TensorDataset,
+  parameters: OptimizationParameters,
   matrix: tf.Variable
-) {
-  return trainSet.forEachAsync((batch) => {
-    const { e1, e2, label } = batch as EmbeddedPairing;
-    optimizer.minimize(
-      () =>
-        mse_loss(model(e1, e2, matrix as tf.Tensor2D, dropoutFraction), label),
-      false,
-      [matrix]
-    );
-  });
-}
-
-export async function* trainMatrix(
-  train: Pairings,
-  learningRate: number = 0.01,
-  epochs: number = 100,
-  dropoutFraction: number = 0.2,
-  batchSize = 100,
-  embeddingSize = 1536
-): AsyncGenerator<tf.Tensor2D> {
-  const trainSet = (await embeddingTensorsFromPairings(train)).batch(batchSize);
-
-  // Optimizing this!
-  const matrix = tf.randomNormal([embeddingSize, embeddingSize]).variable();
-  // TODO: include epochs and matrix in matrix opt
-  for (let epoch = 0; epoch < epochs; epoch++) {
-    /*await gradientDescentOptimize(
-      dropoutFraction,
-      trainSet,
-      learningRate,
-      matrix
-    );*/
-    const optimizer = tf.train.adamax(learningRate);
-    await tfOptimize(dropoutFraction, trainSet, optimizer, matrix);
-
-    yield matrix as tf.Tensor2D;
+): AsyncGenerator {
+  switch (parameters.optimizer) {
+    case "gradient":
+      return gradientDescentOptimize(dataset, parameters, matrix);
+    case "adamax":
+      return tfOptimize(dataset, parameters, matrix, "adamax");
   }
 }

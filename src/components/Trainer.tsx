@@ -1,37 +1,73 @@
 import { useCallback, useState } from "react";
-import { CosineSimilarPairings, Pairings } from "../lib/types";
+import { CosinePairings, OptimizationParameters, Pairings } from "../lib/types";
 import trainTestSplit from "../lib/trainTestSplit";
 import augmentNegatives from "../lib/augmentNegatives";
-import embeddingCache from "../lib/embeddingCache";
 import Histogram from "./Histogram";
-import computeCosinePairings from "../lib/cosinePairings";
-import accuracyAndSE from "../lib/accuracyAndSE";
 import { isValidJSON } from "../lib/validator";
-import { trainMatrix } from "../lib/model";
 
 export default function Trainer() {
-  const [cosinePairings, setCosinePairings] =
-    useState<CosineSimilarPairings | null>(null);
   const doTrain = useCallback(() => {
     (async () => {
+      if (apiKey === null) {
+        throw new Error("API key is null");
+      }
+      const workerClient = new TrainingWorkerClient(apiKey, (message) => {
+        console.log(message);
+        switch (message.type) {
+          case "doneEmbedding":
+            break;
+
+          default:
+            console.log(message);
+            break;
+        }
+      });
       const res = await fetch("/nmnli.json");
       const pairings = await res.json();
       if (isValidJSON(pairings)) {
         const { train, test } = trainTestSplit(pairings, 0.5);
         const augmentedTrain = augmentNegatives(train, 1);
         const augmentedTest = augmentNegatives(test, 1);
-        await embeddingCache.bulkEmbed(train);
-        await embeddingCache.bulkEmbed(test);
-        const cosP = await computeCosinePairings(augmentedTest, 1536);
-        setCosinePairings(cosP);
-        console.log(accuracyAndSE(cosP));
-        for await (const mat of trainMatrix(augmentedTrain)) {
-          const cosPT = await computeCosinePairings(augmentedTest, 1536, mat);
+        console.log("sending");
+        workerClient.sendMessage({
+          type: "setPairings",
+          testOrig: test,
+          trainingOrig: train,
+          testAugmented: augmentedTest,
+          trainingAugmented: augmentedTrain,
+        });
+
+        const parameters: OptimizationParameters = {
+          dropoutFraction: 0.2,
+          learningRate: 10,
+          epochs: 100,
+          batchSize: 10,
+          targetEmbeddingSize: 2048,
+          optimizer: "gradient",
+        };
+        /*const matrix = makeMatrix(
+          trainDataset.embeddingSize,
+          parameters.targetEmbeddingSize
+        );
+        for await (const loss of gradientDescentOptimize(
+          trainDataset,
+          parameters,
+          matrix
+        )) {
+          console.log(loss);
+          const cosPT = await computeCosinePairings(
+            testDataset,
+            matrix as Tensor2D
+          );
           setCosinePairings(cosPT);
           console.log("test", accuracyAndSE(cosPT));
-          const cosss = await computeCosinePairings(augmentedTrain, 1536, mat);
-          console.log("train", accuracyAndSE(cosss));
-        }
+          console.log(
+            "train",
+            accuracyAndSE(
+              await computeCosinePairings(trainDataset, matrix as Tensor2D)
+            )
+          );
+        }*/
       } else {
         console.error("Invalid JSON");
       }

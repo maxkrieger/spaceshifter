@@ -17,15 +17,16 @@ export type Pair = {
   id?: number;
   project: number;
   dateCreated: Date;
+  forTraining?: boolean;
 } & Pairing;
 
-export class TunekitDB extends Dexie {
+export class SpaceshifterDB extends Dexie {
   embedding!: Table<Embedding>;
   project!: Table<Project>;
   pair!: Table<Pair>;
 
   constructor() {
-    super("tunekit");
+    super("spaceshifter");
     this.version(1).stores({
       embedding: "text, embedding",
       project: "++id, name, dateCreated",
@@ -34,4 +35,4 @@ export class TunekitDB extends Dexie {
   }
 }
 
-export const db = new TunekitDB();
+export const db = new SpaceshifterDB();

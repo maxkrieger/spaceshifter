@@ -1,11 +1,20 @@
 import { useAtom } from "jotai";
 import { apiKeyAtom } from "../lib/atoms";
 import { useCallback, useEffect, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 
 export default function ApiKey() {
   const [apiKey, setApiKey] = useAtom(apiKeyAtom);
   const [draftApiKey, setDraftApiKey] = useState<string>("");
-  const [expanded, setExpanded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const pasteFromClipboard = useCallback(() => {
     navigator.clipboard.readText().then((text) => {
@@ -29,7 +38,6 @@ export default function ApiKey() {
         if (res.status === 200) {
           setError(null);
           setApiKey(draftApiKey);
-          setExpanded(false);
         } else {
           setError(`API Key is invalid: ${res.status}`);
         }
@@ -39,10 +47,14 @@ export default function ApiKey() {
     })();
   }, [setApiKey, draftApiKey]);
   return (
-    <div className="shadow-md p-3 rounded-md inline-block">
-      {apiKey === null || expanded ? (
-        <div>
-          <p>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button>Set API Key</Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle className="text-white">Set API Key</DialogTitle>
+          <DialogDescription>
             Get a secret key from{" "}
             <a
               className="underline"
@@ -52,39 +64,38 @@ export default function ApiKey() {
               the OpenAI API Keys page
             </a>{" "}
             and paste it here (stored locally):
-          </p>
+          </DialogDescription>
+        </DialogHeader>
+
+        <div>
+          <div className="flex items-center">
+            <Input
+              id="api-key"
+              type="text"
+              value={draftApiKey}
+              placeholder="API Key"
+              className="text-white"
+              onChange={(e) => setDraftApiKey(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && onSubmit()}
+            />
+            <Button
+              className="button text-white rounded-md px-2 py-1 m-2"
+              onClick={onSubmit}
+            >
+              Done
+            </Button>
+          </div>
           <div>
-            <div className="flex items-center">
-              <input
-                id="api-key"
-                className="h-8 px-2 border rounded"
-                type="text"
-                value={draftApiKey}
-                placeholder="API Key"
-                onChange={(e) => setDraftApiKey(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && onSubmit()}
-              />
-              <button
-                className="button bg-slate-500 text-white rounded-md px-2 py-1 m-2"
-                onClick={onSubmit}
-              >
-                Done
-              </button>
-            </div>
-            <div>
-              <button
-                className="button underline text-slate-500"
-                onClick={pasteFromClipboard}
-              >
-                paste from clipboard
-              </button>
-              {error && <p className="text-red-500">{error}</p>}
-            </div>
+            <button
+              className="button underline text-slate-500"
+              onClick={pasteFromClipboard}
+            >
+              paste from clipboard
+            </button>
+            {error && <p className="text-red-500">{error}</p>}
           </div>
         </div>
-      ) : (
-        <div onClick={() => setExpanded(true)}>API Key ✅</div>
-      )}
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
