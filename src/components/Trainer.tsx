@@ -7,7 +7,6 @@ import {
   trainingWorkerAtom,
 } from "@/lib/atoms";
 import {
-  AccuracyAndSE,
   OptimizationParameters,
   OptimizerType,
   PerformanceGroup,

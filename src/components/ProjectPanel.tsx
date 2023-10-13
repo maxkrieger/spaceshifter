@@ -189,7 +189,7 @@ export default function ProjectPanel() {
                   <div className="flex flex-row gap-3">
                     <Input
                       type="text"
-                      placeholder="Dataset Title"
+                      placeholder="Dataset Name"
                       value={datasetTitle}
                       onChange={(e) => setDatasetTitle(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && onCreateDataset()}
