@@ -10,12 +10,12 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useState } from "react";
 import { Label } from "./ui/label";
 import { Switch } from "./ui/switch";
-import useDataset from "@/lib/useDataset";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import TrainingWorkerClient from "@/lib/TrainingWorkerClient";
 import { PerformanceGroup, ProjectPhase } from "@/lib/types";
 import { Progress } from "./ui/progress";
+import useParameters from "@/lib/useParameters";
 
 export default function PretrainingSetup({
   setPerformance,
@@ -26,7 +26,7 @@ export default function PretrainingSetup({
   const setWorkerClient = useSetAtom(trainingWorkerAtom);
   const setPhase = useSetAtom(projectPhaseAtom);
   const apiKey = useAtomValue(apiKeyAtom);
-  const datasetValue = useDataset();
+  const [parameters, setParameters] = useParameters();
   const pairs = useLiveQuery(async () => {
     if (currentDataset?.type === "local") {
       const pairs = await db.pair
@@ -39,21 +39,15 @@ export default function PretrainingSetup({
   }, [currentDataset]);
   const setTrainingParam = useCallback(
     (key: string, value: boolean | number) => {
-      if (currentDataset?.type === "local") {
-        (async () => {
-          await db.dataset.update(currentDataset.id, {
-            [`trainingParams.${key}`]: value,
-          });
-        })();
-      }
+      setParameters({ ...parameters, [key]: value });
     },
-    [currentDataset]
+    [parameters, setParameters]
   );
   const [embeddingProgress, setEmbeddingProgress] = useState<number | null>(
     null
   );
   const embedAndSplit = useCallback(() => {
-    if (datasetValue && pairs) {
+    if (pairs) {
       const workerClient = new TrainingWorkerClient(apiKey!);
       setWorkerClient(workerClient);
       workerClient.addListener((message) => {
@@ -68,10 +62,10 @@ export default function PretrainingSetup({
       workerClient.sendMessage({
         type: "setPairings",
         allPairings: pairs,
-        parameters: datasetValue.trainingParams,
+        parameters,
       });
     }
-  }, [datasetValue, setWorkerClient, apiKey, pairs, setPerformance, setPhase]);
+  }, [parameters, setWorkerClient, apiKey, pairs, setPerformance, setPhase]);
 
   if (embeddingProgress !== null) {
     return (
@@ -81,12 +75,12 @@ export default function PretrainingSetup({
           <p className="py-2 text-slate-300">
             embedding & caching ({Math.round(embeddingProgress * 100)}%)...
           </p>
-          <Progress value={embeddingProgress * 100} className="w-[60%]" />
+          <Progress value={embeddingProgress * 100} />
         </div>
       </div>
     );
   }
-  if (!pairs || !datasetValue) {
+  if (!pairs) {
     return <div>loading...</div>;
   }
   const positiveExamples = pairs.filter((pair) => pair.label === 1).length;
@@ -109,7 +103,7 @@ export default function PretrainingSetup({
       <div className="m-3 flex items-center space-x-2">
         <Switch
           id="augment"
-          checked={datasetValue.trainingParams.generateSyntheticNegatives}
+          checked={parameters.generateSyntheticNegatives}
           onCheckedChange={(b) =>
             setTrainingParam("generateSyntheticNegatives", b)
           }
@@ -126,7 +120,7 @@ export default function PretrainingSetup({
           max={0.9}
           min={0.1}
           step={0.1}
-          value={datasetValue.trainingParams.testSplitFraction}
+          value={parameters.testSplitFraction}
           onChange={(e) =>
             setTrainingParam("testSplitFraction", Number(e.target.value))
           }

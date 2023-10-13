@@ -18,7 +18,8 @@ export interface Embedding {
 export interface SavedMatrix {
   id?: number;
   dataset: number;
-  matrix: number[][];
+  matrix: ArrayBuffer;
+  shape: [number, number];
   dateCreated: Date;
 }
 
@@ -40,7 +41,7 @@ export class SpaceshifterDB extends Dexie {
       embedding: "text, embedding, dateCreated",
       dataset: "++id, name, dateCreated, trainingParams",
       pair: "++id, dataset, dateCreated, text_1, text_2, label",
-      matrix: "++id, dataset, matrix, dateCreated",
+      matrix: "++id, dataset, matrix, shape, dateCreated",
     });
   }
 }

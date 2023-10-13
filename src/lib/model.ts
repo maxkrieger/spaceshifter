@@ -28,10 +28,8 @@ const makeWrappedLoss = (
   targets: tf.Tensor1D
 ) =>
   function wrappedLoss(matrix: tf.Tensor) {
-    return tf.tidy(() => {
-      const preds = model(e1, e2, matrix as tf.Tensor2D, dropoutFraction);
-      return mse_loss(preds, targets);
-    });
+    const preds = model(e1, e2, matrix as tf.Tensor2D, dropoutFraction);
+    return mse_loss(preds, targets);
   };
 
 // Based on the OpenAI Notebook

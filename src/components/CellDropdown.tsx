@@ -48,8 +48,9 @@ export default function CellDropdown({ row }: { row: Row<Pair> }) {
       await db.pair.delete(r.id!);
       setDeleting(false);
       setMenuOpen(false);
+      setProjectPhase(ProjectPhase.DataPresent);
     })();
-  }, [r]);
+  }, [r, setProjectPhase]);
   return (
     <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} modal={false}>
       <DropdownMenuTrigger asChild>

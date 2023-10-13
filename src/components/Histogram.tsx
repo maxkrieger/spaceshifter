@@ -50,8 +50,8 @@ export default function Histogram({
             color: "white",
           },
           showlegend: true,
-          height: 600,
-          width: window.innerWidth - 100,
+          height: 300,
+          width: 400,
           legend: {
             // tracegroupgap: 0,
             // x: 0,
@@ -64,7 +64,7 @@ export default function Histogram({
           yaxis2: {
             title: "Train Set",
           },
-          margin: { l: 50, t: 0, r: 0, b: 0 },
+          margin: { l: 50, t: 0, r: 0, b: 50 },
           grid: {
             rows: 2,
             columns: 1,

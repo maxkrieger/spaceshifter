@@ -14,10 +14,14 @@ import {
 } from "./types";
 import augmentNegatives from "./augmentNegatives";
 import trainTestSplit from "./trainTestSplit";
+import { tfToNp } from "./tfToNp";
 
 function sendMessageToHost(message: OutboundMessage) {
   postMessage(message);
 }
+
+// https://github.com/propelml/tfjs-npy/blob/master/npy.ts
+
 class Trainer {
   trainDataset?: TensorDataset;
   testDataset?: TensorDataset;
@@ -74,10 +78,12 @@ class Trainer {
         epoch,
       });
     }
-    const arr = await matrix.array();
-    sendMessageToHost({ type: "doneTraining", matrix: arr as number[][] });
+    const converted = await tfToNp(matrix as Tensor2D);
+    postMessage(
+      { type: "doneTraining", matrixNpy: converted, shape: matrix.shape },
+      [converted]
+    );
     matrix.dispose();
-    return arr;
   }
 }
 

@@ -13,8 +13,8 @@ export default function Hero() {
       <div className="mx-auto py-3 px-4 mt-5 text-left text-sm bg-slate-900 rounded-md border border-slate-500 font-mono inline-block">
         <span className="block">
           <span className="text-yellow-300">M</span> ={" "}
-          <span className="text-blue-300">np.matrix</span>(
-          <span className="text-green-300">spaceshifted_mat</span>)
+          <span className="text-blue-300">np.load</span>(
+          <span className="text-red-300">"spaceshifted.npy"</span>)
         </span>
         <span className="block">
           <span className="text-yellow-300">u</span> ={" "}
@@ -24,7 +24,7 @@ export default function Hero() {
         <span className="block">
           <span className="text-yellow-300">v</span> ={" "}
           <span className="text-blue-300">get_embedding</span>(
-          <span className="text-red-300">"Lima is the capital of Peru."</span>)
+          <span className="text-red-300">"Lima."</span>)
         </span>
         <br />
         <span className="block">(</span>

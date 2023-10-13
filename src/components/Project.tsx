@@ -2,13 +2,14 @@ import { currentDatasetAtom } from "@/lib/atoms";
 import { useSetAtom } from "jotai";
 import DataViewer from "./DataViewer";
 import Trainer from "./Trainer";
-import useProject from "@/lib/useDataset";
 import Pretraining from "./Pretraining";
+import useDataset from "@/lib/useDataset";
+import MatrixViewer from "./MatrixViewer";
 
 export default function Project() {
   const setCurrentProject = useSetAtom(currentDatasetAtom);
-  const projectValue = useProject();
-  if (!projectValue) {
+  const datasetValue = useDataset();
+  if (!datasetValue) {
     return <div>loading...</div>;
   }
   return (
@@ -21,12 +22,13 @@ export default function Project() {
           >
             projects/
           </span>
-          {projectValue.name}
+          {datasetValue.name}
         </h1>
       </div>
       <DataViewer />
       <Pretraining />
       <Trainer />
+      <MatrixViewer />
     </div>
   );
 }

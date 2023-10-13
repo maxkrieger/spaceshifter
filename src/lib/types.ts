@@ -24,23 +24,24 @@ export type DatasetSlice = {
 // [cosine similarity, label]
 export type CosinePairings = [number, number][];
 
+export type OptimizerType = "gradient" | "adamax";
 export interface OptimizationParameters {
   dropoutFraction: number;
   learningRate: number;
   epochs: number;
   batchSize: number;
   targetEmbeddingSize: number;
-  optimizer: "gradient" | "adamax";
+  optimizer: OptimizerType;
   generateSyntheticNegatives: boolean;
   testSplitFraction: number;
 }
 
 export const defaultOptimizationParameters: OptimizationParameters = {
   dropoutFraction: 0.2,
-  learningRate: 10,
+  learningRate: 100,
   epochs: 100,
-  batchSize: 10,
-  targetEmbeddingSize: 2048,
+  batchSize: 100,
+  targetEmbeddingSize: 1536,
   optimizer: "gradient",
   generateSyntheticNegatives: true,
   testSplitFraction: 0.5,
@@ -91,13 +92,19 @@ export type OutboundMessage =
     }
   | {
       type: "doneTraining";
-      matrix: number[][];
+      matrixNpy: ArrayBuffer;
+      shape: [number, number];
     }
   | { type: "error"; message: string };
 
 export type DatasetLocator =
   | { type: "local"; id: number }
   | { type: "example"; route: string; name: string };
+
+export type PerformanceHistory = {
+  test: AccuracyAndSE;
+  train: AccuracyAndSE;
+}[];
 
 export enum ProjectPhase {
   NoData = 0,
