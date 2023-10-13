@@ -113,7 +113,11 @@ export default function PretrainingSetup({
       <p className="text-slate-300 text-l my-2">
         In this step, we prepare the data for training by embedding it and
         splitting it into a training and test set. Embeddings are retrieved from
-        your browser cache first.
+        your browser cache first. If they aren't cached,{" "}
+        <span className="text-white font-bold">
+          this may download 50mb+ of data
+        </span>
+        .
       </p>
       <p className="text-slate-300 text-l my-2">
         There <span className="text-white">{positiveExamples}</span> positive
