@@ -11,7 +11,7 @@ export default function LossCurve({
   return (
     <div>
       <Plot
-        config={{ responsive: true }}
+        config={{ responsive: true, displayModeBar: false, displaylogo: false }}
         data={[
           {
             mode: "lines",

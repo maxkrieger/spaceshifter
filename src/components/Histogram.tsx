@@ -42,7 +42,7 @@ export default function Histogram({
     // <div className="flex justify-center">
     <div className="flex justify-center p-4">
       <Plot
-        config={{ responsive: true }}
+        config={{ responsive: true, displayModeBar: false, displaylogo: false }}
         layout={{
           plot_bgcolor: "rgba(255,255,255,0.25)",
           paper_bgcolor: "transparent",

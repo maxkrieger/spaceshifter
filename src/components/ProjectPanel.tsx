@@ -110,7 +110,7 @@ export default function ProjectPanel() {
               locator={{
                 type: "example",
                 datasetURL:
-                  "https://gist.githubusercontent.com/maxkrieger/33434e8ee941a47e921f6c5b78566d1b/raw/d76524287bcf2446ebd0f290c97090003d184ce8/cities_dataset.json",
+                  "https://gistcdn.githack.com/maxkrieger/33434e8ee941a47e921f6c5b78566d1b/raw/d76524287bcf2446ebd0f290c97090003d184ce8/cities_dataset.json",
                 embeddingsURL:
                   "https://gistcdn.githack.com/maxkrieger/e411a7c77b7af9c81844bb1fbcf9e117/raw/2b897bdc58433d78254de6982140945698eb74bf/cities_embeddings.json",
                 name: "City Facts JSON",
