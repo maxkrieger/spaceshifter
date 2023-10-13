@@ -10,6 +10,7 @@ import { useCallback, useState } from "react";
 import Histogram from "./Histogram";
 import { Button } from "./ui/button";
 import { Download } from "lucide-react";
+import { cardClasses } from "@/lib/const";
 
 export default function Pretraining() {
   const currentPhase = useAtomValue(projectPhaseAtom);
@@ -45,7 +46,7 @@ export default function Pretraining() {
   }, [trainingWorker]);
   if (currentPhase < ProjectPhase.DataPresent) {
     return (
-      <div className="border bg-slate-900 border-slate-500 rounded-md p-4 my-5 opacity-50">
+      <div className={cardClasses + " opacity-50"}>
         <h1 className="text-2xl">Embeddings</h1>
       </div>
     );
@@ -58,9 +59,9 @@ export default function Pretraining() {
   }
 
   return (
-    <div className="border bg-slate-900 border-slate-500 rounded-md p-4 my-5">
+    <div className={cardClasses}>
       <div className="flex flex-row justify-between">
-        <h1 className="text-2xl">Pretraining</h1>
+        <h1 className="text-2xl mb-3">Pretraining</h1>
         <Button
           variant={"ghost"}
           onClick={downloadEmbeddings}

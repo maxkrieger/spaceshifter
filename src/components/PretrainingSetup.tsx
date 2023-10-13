@@ -17,6 +17,7 @@ import TrainingWorkerClient from "@/lib/TrainingWorkerClient";
 import { PerformanceGroup, ProjectPhase } from "@/lib/types";
 import { Progress } from "./ui/progress";
 import useParameters from "@/lib/useParameters";
+import { cardClasses } from "@/lib/const";
 
 export default function PretrainingSetup({
   setPerformance,
@@ -92,7 +93,7 @@ export default function PretrainingSetup({
 
   if (embeddingProgress !== null) {
     return (
-      <div className="border bg-slate-900 border-slate-500 rounded-md p-4 my-5">
+      <div className={cardClasses}>
         <h1 className="text-2xl">Pretraining</h1>
         <div className="p-2">
           <p className="py-2 text-slate-300">
@@ -108,7 +109,7 @@ export default function PretrainingSetup({
   }
   const positiveExamples = pairs.filter((pair) => pair.label === 1).length;
   return (
-    <div className="border bg-slate-900 border-slate-500 rounded-md p-4 my-5">
+    <div className={cardClasses}>
       <h1 className="text-2xl">Pretraining</h1>
       <p className="text-slate-300 text-l my-2">
         In this step, we prepare the data for training by embedding it and

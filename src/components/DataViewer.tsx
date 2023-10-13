@@ -12,6 +12,7 @@ import {
   exampleDatasetAtom,
   projectPhaseAtom,
 } from "@/lib/atoms";
+import { cardClasses } from "@/lib/const";
 
 export default function DataViewer() {
   const currentDataset = useAtomValue(currentDatasetAtom);
@@ -54,7 +55,7 @@ export default function DataViewer() {
   const dropzoneVisible =
     !readonly && (!localPairs || localPairs.length === 0 || showDropzone);
   return (
-    <div className="border bg-slate-900 border-slate-500 rounded-md p-4 my-5">
+    <div className={cardClasses}>
       <h1 className="text-2xl">Dataset</h1>
       <p className="text-slate-300 text-l my-2">
         To train a spaceshifting matrix, provide 100+ text pairs you want to be{" "}

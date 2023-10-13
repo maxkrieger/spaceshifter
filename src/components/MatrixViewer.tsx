@@ -3,6 +3,7 @@ import { ProjectPhase } from "@/lib/types";
 import { useAtomValue } from "jotai";
 import { Button } from "./ui/button";
 import { useCallback } from "react";
+import { cardClasses } from "@/lib/const";
 
 export default function MatrixViewer() {
   const bestMatrix = useAtomValue(bestMatrixAtom);
@@ -21,16 +22,16 @@ export default function MatrixViewer() {
   }, [bestMatrix]);
   if (projectPhase < ProjectPhase.Trained || bestMatrix === null) {
     return (
-      <div className="opacity-50 border bg-slate-900 border-slate-500 rounded-md p-4 my-5">
+      <div className={cardClasses + " opacity-50"}>
         <h1 className="text-2xl">Matrix</h1>
       </div>
     );
   }
   return (
-    <div className="border bg-slate-900 border-slate-500 rounded-md p-4 my-5">
-      <h1 className="text-2xl">Matrix</h1>
-      <div className="flex flex-row items-center justify-center gap-5">
-        <div className="max-w-[400px]">
+    <div className={cardClasses}>
+      <h1 className="text-2xl mb-3">Matrix</h1>
+      <div className="flex flex-row items-center justify-around gap-5 flex-wrap">
+        <div className="max-w-[350px]">
           <p className="text-slate-300">
             We trained a <span className="text-white">bias matrix</span> of size{" "}
             <span className="text-white">
@@ -41,7 +42,7 @@ export default function MatrixViewer() {
             <span className="text-purple-200">Spaceshifted</span> vectors of
             size <span className="text-white">{bestMatrix.shape[1]}</span>.
           </p>
-          <div className="flex flex-row justify-center my-3">
+          <div className="flex flex-row justify-end my-3">
             <Button onClick={downloadNumpy}>
               download matrix{" "}
               <span className="font-mono ml-1">spaceshifted.npy</span>

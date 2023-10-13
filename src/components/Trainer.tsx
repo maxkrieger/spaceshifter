@@ -31,6 +31,7 @@ import { Progress } from "./ui/progress";
 import Histogram from "./Histogram";
 import LossCurve from "./LossCurve";
 import { db } from "@/lib/db";
+import { cardClasses } from "@/lib/const";
 
 export default function Trainer() {
   const { toast } = useToast();
@@ -125,7 +126,7 @@ export default function Trainer() {
 
   if (projectPhase < ProjectPhase.Embedded || !workerClient) {
     return (
-      <div className="opacity-50 border bg-slate-900 border-slate-500 rounded-md p-4 my-5">
+      <div className={cardClasses + " opacity-50"}>
         <h1 className="text-2xl">Training</h1>
       </div>
     );
@@ -143,35 +144,32 @@ export default function Trainer() {
           0 - (pretrainingPerformance?.testAccuracyAndSE?.accuracy ?? 0))
     ) / 100;
   return (
-    <div className="border bg-slate-900 border-slate-500 rounded-md p-4 my-5">
-      <h1 className="text-2xl">Training</h1>
+    <div className={cardClasses}>
+      <h1 className="text-2xl mb-3">Training</h1>
       {currentEpoch === null && (
         <div>
           <p className="text-slate-300">
             Hover on a parameter name to see more info.
           </p>
           <div className="p-3 flex flex-wrap gap-5">
+            <div className="flex gap-3 flex-shrink-0">
+              <TooltipWrapper tooltip="How big should the embedding be after the matmul. Larger is usually better but more expensive to search over.">
+                <Label htmlFor="targetEmbeddingSize" className="flex-shrink-0">
+                  Target Embedding Size
+                </Label>
+              </TooltipWrapper>
+              <Input
+                type="number"
+                min={1}
+                step={1}
+                value={parameters.targetEmbeddingSize}
+                onChange={(e) =>
+                  changeValue(Number(e.target.value), "targetEmbeddingSize")
+                }
+                id="targetEmbeddingSize"
+              />
+            </div>
             <div className="flex flex-row gap-4">
-              <div className="flex gap-3">
-                <TooltipWrapper tooltip="How big should the embedding be after the matmul. Larger is usually better but more expensive to search over.">
-                  <Label
-                    htmlFor="targetEmbeddingSize"
-                    className="flex-shrink-0"
-                  >
-                    Target Embedding Size
-                  </Label>
-                </TooltipWrapper>
-                <Input
-                  type="number"
-                  min={1}
-                  step={1}
-                  value={parameters.targetEmbeddingSize}
-                  onChange={(e) =>
-                    changeValue(Number(e.target.value), "targetEmbeddingSize")
-                  }
-                  id="targetEmbeddingSize"
-                />
-              </div>
               <TooltipWrapper tooltip="The algorithm to optimize the matrix. Simple Gradient Descent usually works best.">
                 <Label htmlFor="optimizer">Optimizer</Label>
               </TooltipWrapper>
