@@ -21,6 +21,7 @@ import { PlusIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTrigger,
 } from "./ui/dialog";
@@ -103,7 +104,11 @@ export function DataTable<TData, TValue>({
                     </Label>
                   </div>
                 </div>
-                <Button onClick={onSubmit}>save</Button>
+                <DialogFooter>
+                  <Button onClick={onSubmit} type="submit">
+                    save
+                  </Button>
+                </DialogFooter>
               </DialogContent>
             </Dialog>
           )}

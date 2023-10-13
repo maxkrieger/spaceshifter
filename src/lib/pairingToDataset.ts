@@ -1,6 +1,6 @@
-import * as tf from "@tensorflow/tfjs";
 import { Pairings, TensorDataset } from "./types";
 import EmbeddingCache from "./EmbeddingCache";
+import { data as tf_data, tensor1d, tensor2d } from "@tensorflow/tfjs";
 
 export default function pairingToDataset(
   pairings: Pairings,
@@ -17,13 +17,13 @@ export default function pairingToDataset(
     labels.push(label);
   }
   // This is redundant, but due to batching allocating more memory anyway, it's fine
-  const e1Tensor = tf.tensor2d(e1s);
-  const e2Tensor = tf.tensor2d(e2s);
-  const labelsTensor = tf.tensor1d(labels);
-  const e1Dataset = tf.data.array(e1s);
-  const e2Dataset = tf.data.array(e2s);
-  const labelsDataset = tf.data.array(labels);
-  const dataset = tf.data.zip({
+  const e1Tensor = tensor2d(e1s);
+  const e2Tensor = tensor2d(e2s);
+  const labelsTensor = tensor1d(labels);
+  const e1Dataset = tf_data.array(e1s);
+  const e2Dataset = tf_data.array(e2s);
+  const labelsDataset = tf_data.array(labels);
+  const dataset = tf_data.zip({
     e1: e1Dataset,
     e2: e2Dataset,
     labels: labelsDataset,

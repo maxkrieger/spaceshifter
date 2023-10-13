@@ -35,6 +35,24 @@ export class SpaceshifterDB extends Dexie {
   pair!: Table<Pair>;
   savedMatrices!: Table<SavedMatrix>;
 
+  async deleteDataset(id: number) {
+    return await this.transaction(
+      "rw",
+      this.embedding,
+      this.pair,
+      this.dataset,
+      async () => {
+        const pairs = await this.pair.where("dataset").equals(id).toArray();
+        for await (const { text_1, text_2 } of pairs) {
+          await this.embedding.where("text").equals(text_1).delete();
+          await this.embedding.where("text").equals(text_2).delete();
+        }
+        await this.pair.where("dataset").equals(id).delete();
+        // delete all embeddings contained in pairs
+        await this.dataset.delete(id);
+      }
+    );
+  }
   constructor() {
     super("spaceshifter");
     this.version(1).stores({

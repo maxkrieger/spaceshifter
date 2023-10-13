@@ -1,4 +1,4 @@
-import { Tensor2D, getBackend, ready, setBackend } from "@tensorflow/tfjs";
+import { Tensor2D, getBackend, ready as tf_ready } from "@tensorflow/tfjs";
 import EmbeddingCache from "./EmbeddingCache";
 import accuracyAndSE from "./accuracyAndSE";
 import computeCosinePairings from "./cosinePairings";
@@ -50,7 +50,7 @@ class Trainer {
     params: OptimizationParameters,
     embedCacheUrl?: string
   ) {
-    await ready();
+    await tf_ready();
     if (!embedCacheUrl) {
       await this.embeddingCache!.bulkEmbed(pairs);
     } else {

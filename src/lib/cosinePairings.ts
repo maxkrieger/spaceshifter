@@ -1,7 +1,6 @@
 import { zip } from "lodash";
 import { CosinePairings, TensorDataset } from "./types";
-import * as tf from "@tensorflow/tfjs";
-import { Tensor2D } from "@tensorflow/tfjs";
+import { metrics, tidy, Tensor2D } from "@tensorflow/tfjs";
 
 function matMul(tensor: Tensor2D, mat?: Tensor2D) {
   return mat ? tensor.matMul(mat) : tensor;
@@ -12,8 +11,8 @@ export default async function computeCosinePairings(
   dataset: TensorDataset,
   mat?: Tensor2D
 ): Promise<CosinePairings> {
-  const res = tf.tidy(() => {
-    const proximities = tf.metrics
+  const res = tidy(() => {
+    const proximities = metrics
       .cosineProximity(matMul(dataset.e1, mat), matMul(dataset.e2, mat))
       .mul(-1);
     return proximities.arraySync() as number[];

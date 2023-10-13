@@ -1,5 +1,5 @@
 import log from "loglevel";
-import TrainingWorker from "./TrainingWorker?worker";
+import TrainingWorker from "@/lib/TrainingWorker?worker";
 import { OutboundMessage, TrainerMessage } from "./types";
 export default class TrainingWorkerClient {
   worker: Worker;

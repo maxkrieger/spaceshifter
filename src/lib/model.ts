@@ -1,34 +1,46 @@
 import { DatasetSlice, OptimizationParameters, TensorDataset } from "./types";
-import * as tf from "@tensorflow/tfjs";
+import {
+  dropout as tf_dropout,
+  tidy as tf_tidy,
+  Tensor2D,
+  Tensor1D,
+  metrics as tf_metrics,
+  Tensor,
+  Scalar,
+  Variable,
+  grad as tf_grad,
+  train as tf_train,
+  randomNormal,
+} from "@tensorflow/tfjs";
 
 function model(
-  e1: tf.Tensor2D,
-  e2: tf.Tensor2D,
-  matrix: tf.Tensor2D,
+  e1: Tensor2D,
+  e2: Tensor2D,
+  matrix: Tensor2D,
   dropout_fraction: number
-): tf.Tensor1D {
-  return tf.tidy(() => {
-    const e1d = tf.dropout(e1, dropout_fraction);
-    const e2d = tf.dropout(e2, dropout_fraction);
+): Tensor1D {
+  return tf_tidy(() => {
+    const e1d = tf_dropout(e1, dropout_fraction);
+    const e2d = tf_dropout(e2, dropout_fraction);
     const e1m = e1d.matMul(matrix);
     const e2m = e2d.matMul(matrix);
-    const sim = tf.metrics.cosineProximity(e1m, e2m).mul(-1);
-    return sim as tf.Tensor1D;
+    const sim = tf_metrics.cosineProximity(e1m, e2m).mul(-1);
+    return sim as Tensor1D;
   });
 }
 
-function mse_loss(preds: tf.Tensor, targets: tf.Tensor): tf.Scalar {
+function mse_loss(preds: Tensor, targets: Tensor): Scalar {
   return preds.sub(targets).square().mean();
 }
 
 const makeWrappedLoss = (
   dropoutFraction: number,
-  e1: tf.Tensor2D,
-  e2: tf.Tensor2D,
-  targets: tf.Tensor1D
+  e1: Tensor2D,
+  e2: Tensor2D,
+  targets: Tensor1D
 ) =>
-  function wrappedLoss(matrix: tf.Tensor) {
-    const preds = model(e1, e2, matrix as tf.Tensor2D, dropoutFraction);
+  function wrappedLoss(matrix: Tensor) {
+    const preds = model(e1, e2, matrix as Tensor2D, dropoutFraction);
     return mse_loss(preds, targets);
   };
 
@@ -36,7 +48,7 @@ const makeWrappedLoss = (
 async function* gradientDescentOptimize(
   dataset: TensorDataset,
   parameters: OptimizationParameters,
-  matrix: tf.Variable
+  matrix: Variable
 ): AsyncGenerator<number> {
   const shuffledBatchDataset = dataset.tfDataset
     .shuffle(dataset.tfDataset.size)
@@ -45,20 +57,20 @@ async function* gradientDescentOptimize(
   const draftMatrix = matrix.clone().variable();
   for (let epoch = 0; epoch < parameters.epochs; epoch++) {
     await shuffledBatchDataset.forEachAsync((batch) => {
-      tf.tidy(() => {
+      tf_tidy(() => {
         const { e1, e2, labels } = batch as DatasetSlice;
-        const gradientFunction = tf.grad(
+        const gradientFunction = tf_grad(
           makeWrappedLoss(parameters.dropoutFraction, e1, e2, labels)
         );
         const grad = gradientFunction(draftMatrix);
         draftMatrix.assign(draftMatrix.sub(grad.mul(parameters.learningRate)));
       });
     });
-    const loss = tf.tidy(() => {
+    const loss = tf_tidy(() => {
       const preds = model(
         dataset.e1,
         dataset.e2,
-        draftMatrix as tf.Tensor2D,
+        draftMatrix as Tensor2D,
         parameters.dropoutFraction
       );
       return mse_loss(preds, dataset.labels).dataSync()[0];
@@ -76,7 +88,7 @@ async function* gradientDescentOptimize(
 async function* tfOptimize(
   dataset: TensorDataset,
   parameters: OptimizationParameters,
-  matrix: tf.Variable,
+  matrix: Variable,
   optimizerType: "adamax"
 ): AsyncGenerator<number> {
   const shuffledBatchDataset = dataset.tfDataset
@@ -84,15 +96,15 @@ async function* tfOptimize(
     .batch(parameters.batchSize);
   const optimizer =
     optimizerType === "adamax"
-      ? tf.train.adamax(parameters.learningRate)
-      : tf.train.adam(parameters.learningRate);
+      ? tf_train.adamax(parameters.learningRate)
+      : tf_train.adam(parameters.learningRate);
   for (let epoch = 0; epoch < parameters.epochs; epoch++) {
     await shuffledBatchDataset.forEachAsync((batch) => {
       const { e1, e2, labels } = batch as DatasetSlice;
       optimizer.minimize(
         () =>
           mse_loss(
-            model(e1, e2, matrix as tf.Tensor2D, parameters.dropoutFraction),
+            model(e1, e2, matrix as Tensor2D, parameters.dropoutFraction),
             labels
           ),
         false,
@@ -104,14 +116,14 @@ async function* tfOptimize(
 }
 
 export function makeMatrix(embeddingSize: number, targetEmbeddingSize: number) {
-  return tf.randomNormal([embeddingSize, targetEmbeddingSize]).variable();
+  return randomNormal([embeddingSize, targetEmbeddingSize]).variable();
 }
 
 // We return a generator of epochs so that we can update as the matrix gets updated
 export function trainMatrix(
   dataset: TensorDataset,
   parameters: OptimizationParameters,
-  matrix: tf.Variable
+  matrix: Variable
 ): AsyncGenerator<number> {
   switch (parameters.optimizer) {
     case "gradient":
