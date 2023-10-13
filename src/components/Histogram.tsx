@@ -64,6 +64,9 @@ export default function Histogram({
           yaxis2: {
             title: "Train Set",
           },
+          xaxis: {
+            title: "Cosine Similarity",
+          },
           margin: { l: 50, t: 0, r: 0, b: 50 },
           grid: {
             rows: 2,
