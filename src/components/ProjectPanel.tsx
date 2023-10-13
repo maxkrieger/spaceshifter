@@ -19,6 +19,7 @@ import {
 import { Settings, ChevronRight } from "lucide-react";
 import {
   DatasetLocator,
+  Pairings,
   ProjectPhase,
   defaultOptimizationParameters,
 } from "@/lib/types";
@@ -32,7 +33,6 @@ import {
 import { Input } from "./ui/input";
 import { useCallback, useState } from "react";
 import { sortBy } from "lodash";
-import { loadExampleDataset } from "@/lib/example-utils";
 import { useToast } from "./ui/use-toast";
 
 const cardStyle =
@@ -53,7 +53,8 @@ function DatasetRow({
     (async () => {
       if (locator.type === "example") {
         const { dismiss } = toast({ title: "Loading example..." });
-        const dataset = await loadExampleDataset(locator.datasetURL);
+        const res = await fetch(locator.datasetURL);
+        const dataset = (await res.json()) as Pairings;
         setExampleDataset(dataset);
         dismiss();
       }

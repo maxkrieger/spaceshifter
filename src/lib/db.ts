@@ -48,7 +48,6 @@ export class SpaceshifterDB extends Dexie {
           await this.embedding.where("text").equals(text_2).delete();
         }
         await this.pair.where("dataset").equals(id).delete();
-        // delete all embeddings contained in pairs
         await this.dataset.delete(id);
       }
     );
