@@ -133,15 +133,15 @@ export default function Trainer() {
   }
   const trainPerfDiff =
     Math.round(
-      1000 *
-        (currentPerformance?.trainAccuracyAndSE.accuracy ??
-          0 - (pretrainingPerformance?.trainAccuracyAndSE?.accuracy ?? 0))
+      10000 *
+        ((currentPerformance?.trainAccuracyAndSE.accuracy ?? 0) -
+          (pretrainingPerformance?.trainAccuracyAndSE?.accuracy ?? 0))
     ) / 100;
   const testPerfDiff =
     Math.round(
-      1000 *
-        (currentPerformance?.testAccuracyAndSE.accuracy ??
-          0 - (pretrainingPerformance?.testAccuracyAndSE?.accuracy ?? 0))
+      10000 *
+        ((currentPerformance?.testAccuracyAndSE.accuracy ?? 0) -
+          (pretrainingPerformance?.testAccuracyAndSE?.accuracy ?? 0))
     ) / 100;
   return (
     <div className={cardClasses}>
