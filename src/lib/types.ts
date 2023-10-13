@@ -39,7 +39,7 @@ export interface OptimizationParameters {
 export const defaultOptimizationParameters: OptimizationParameters = {
   dropoutFraction: 0.2,
   learningRate: 0.01,
-  epochs: 80,
+  epochs: 30,
   batchSize: 10,
   targetEmbeddingSize: 1536,
   optimizer: "adamax",
