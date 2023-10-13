@@ -153,7 +153,7 @@ export default function Trainer() {
           <div className="p-3 flex flex-wrap gap-5">
             <div className="flex flex-row gap-4">
               <div className="flex gap-3">
-                <TooltipWrapper tooltip="How big should the embedding be after the matmul. Results are usually better but more expensive to search over.">
+                <TooltipWrapper tooltip="How big should the embedding be after the matmul. Larger is usually better but more expensive to search over.">
                   <Label
                     htmlFor="targetEmbeddingSize"
                     className="flex-shrink-0"
