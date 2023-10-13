@@ -7,6 +7,7 @@ import {
   OptimizationParameters,
   defaultOptimizationParameters,
   Pairings,
+  PerformanceGroup,
 } from "./types";
 
 export const apiKeyAtom = atomWithStorage<string | null>("api-key", null);
@@ -16,6 +17,8 @@ export const trainingWorkerAtom = atom<TrainingWorkerClient | null>(null);
 export const currentDatasetAtom = atom<DatasetLocator | null>(null);
 
 export const projectPhaseAtom = atom<ProjectPhase>(ProjectPhase.NoData);
+
+export const pretrainingPerformanceAtom = atom<PerformanceGroup | null>(null);
 
 export const bestMatrixAtom = atom<{
   matrixNpy: ArrayBuffer;

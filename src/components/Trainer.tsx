@@ -3,6 +3,7 @@ import { useToast } from "./ui/use-toast";
 import {
   bestMatrixAtom,
   currentDatasetAtom,
+  pretrainingPerformanceAtom,
   projectPhaseAtom,
   trainingWorkerAtom,
 } from "@/lib/atoms";
@@ -42,6 +43,7 @@ export default function Trainer() {
     useState<PerformanceGroup | null>(null);
   const [performanceHistory, setPerformanceHistory] =
     useState<PerformanceHistory>([]);
+  const pretrainingPerformance = useAtomValue(pretrainingPerformanceAtom);
   const setBestMatrix = useSetAtom(bestMatrixAtom);
 
   const changeOptimizer = useCallback(
@@ -128,6 +130,18 @@ export default function Trainer() {
       </div>
     );
   }
+  const trainPerfDiff =
+    Math.round(
+      1000 *
+        (currentPerformance?.trainAccuracyAndSE.accuracy ??
+          0 - (pretrainingPerformance?.trainAccuracyAndSE?.accuracy ?? 0))
+    ) / 100;
+  const testPerfDiff =
+    Math.round(
+      1000 *
+        (currentPerformance?.testAccuracyAndSE.accuracy ??
+          0 - (pretrainingPerformance?.testAccuracyAndSE?.accuracy ?? 0))
+    ) / 100;
   return (
     <div className="border bg-slate-900 border-slate-500 rounded-md p-4 my-5">
       <h1 className="text-2xl">Training</h1>
@@ -262,16 +276,32 @@ export default function Trainer() {
         )}
         {currentPerformance && (
           <div className="flex flex-row justify-around items-center my-4 flex-wrap">
-            <p className="text-slate-300 max-w-[300px]">
+            <p className="text-slate-300 max-w-[400px] mb-4">
               Currently, test accuracy is{" "}
               <span className="text-white">
                 {currentPerformance.testAccuracyAndSE.message}
               </span>{" "}
-              and train accuracy is{" "}
+              (
+              <span
+                className={testPerfDiff > 0 ? "text-green-300" : "text-red-300"}
+              >
+                {testPerfDiff > 0 ? "+" : ""}
+                {testPerfDiff}%
+              </span>
+              ) and train accuracy is{" "}
               <span className="text-white">
                 {currentPerformance.trainAccuracyAndSE.message}
+              </span>{" "}
+              (
+              <span
+                className={
+                  trainPerfDiff > 0 ? "text-green-300" : "text-red-300"
+                }
+              >
+                {trainPerfDiff > 0 ? "+" : ""}
+                {trainPerfDiff}%
               </span>
-              .
+              ).
             </p>
             {performanceHistory.length > 0 && (
               <LossCurve performanceHistory={performanceHistory} />

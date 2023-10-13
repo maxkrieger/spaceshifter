@@ -1,7 +1,11 @@
 import { PerformanceGroup, ProjectPhase } from "@/lib/types";
 import PretrainingSetup from "./PretrainingSetup";
-import { useAtomValue } from "jotai";
-import { projectPhaseAtom, trainingWorkerAtom } from "@/lib/atoms";
+import { useAtom, useAtomValue } from "jotai";
+import {
+  pretrainingPerformanceAtom,
+  projectPhaseAtom,
+  trainingWorkerAtom,
+} from "@/lib/atoms";
 import { useCallback, useState } from "react";
 import Histogram from "./Histogram";
 import { Button } from "./ui/button";
@@ -9,8 +13,9 @@ import { Download } from "lucide-react";
 
 export default function Pretraining() {
   const currentPhase = useAtomValue(projectPhaseAtom);
-  const [initialPerformance, setInitialPerformance] =
-    useState<PerformanceGroup | null>();
+  const [initialPerformance, setInitialPerformance] = useAtom(
+    pretrainingPerformanceAtom
+  );
   const trainingWorker = useAtomValue(trainingWorkerAtom);
   const downloadEmbeddings = useCallback(() => {
     if (trainingWorker) {

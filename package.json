@@ -3,11 +3,14 @@
   "license": "LGPL-3.0-or-later",
   "version": "0.0.0",
   "type": "module",
+  "homepage": "https://a9.io/spaceshifter/",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --debug --logLevel=info",
+    "build": "vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "pnpm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.0.5",
@@ -58,6 +61,7 @@
     "eslint": "^8.45.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
+    "gh-pages": "^6.0.0",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.3",
     "typescript": "^5.0.2",
