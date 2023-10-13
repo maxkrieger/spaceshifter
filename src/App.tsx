@@ -41,9 +41,16 @@ function App() {
             href="https://github.com/openai/openai-cookbook/blob/main/examples/Customizing_embeddings.ipynb"
             target="_blank"
           >
-            "Customizing embeddings"
+            "Customizing embeddings" cookbook
           </a>{" "}
-          cookbook by OpenAI. Fork on GitHub
+          by OpenAI.{" "}
+          <a
+            href="https://github.com/maxkrieger/spaceshifter"
+            target="_blank"
+            className="underline"
+          >
+            View source on GitHub
+          </a>
         </div>
       </div>
     </TooltipProvider>

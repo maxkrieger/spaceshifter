@@ -38,11 +38,11 @@ export interface OptimizationParameters {
 
 export const defaultOptimizationParameters: OptimizationParameters = {
   dropoutFraction: 0.2,
-  learningRate: 100,
-  epochs: 100,
-  batchSize: 100,
+  learningRate: 0.01,
+  epochs: 80,
+  batchSize: 10,
   targetEmbeddingSize: 1536,
-  optimizer: "gradient",
+  optimizer: "adamax",
   generateSyntheticNegatives: true,
   testSplitFraction: 0.5,
 };
@@ -62,10 +62,6 @@ export type PerformanceGroup = {
 
 export type TrainerMessage =
   | {
-      type: "fetchPrecomputedEmbeddings";
-      url: string;
-    }
-  | {
       type: "setApiKey";
       apiKey: string;
     }
@@ -73,6 +69,7 @@ export type TrainerMessage =
       type: "setPairings";
       allPairings: Pairings;
       parameters: OptimizationParameters;
+      cacheUrl?: string;
     }
   | {
       type: "train";
@@ -105,7 +102,12 @@ export type OutboundMessage =
 
 export type DatasetLocator =
   | { type: "local"; id: number }
-  | { type: "example"; route: string; name: string };
+  | {
+      type: "example";
+      embeddingsURL: string;
+      datasetURL: string;
+      name: string;
+    };
 
 export type PerformanceHistory = {
   test: AccuracyAndSE;

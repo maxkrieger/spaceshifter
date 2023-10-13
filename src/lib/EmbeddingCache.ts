@@ -6,10 +6,8 @@ import { backOff } from "exponential-backoff";
 
 export default class EmbeddingCache {
   cache: { [key: string]: number[] } = {};
-  apiKey: string;
-  constructor(apiKey: string) {
-    this.apiKey = apiKey;
-  }
+  apiKey: string = "";
+  constructor() {}
 
   async getEmbeddingLocally(text: string): Promise<number[] | null> {
     if (text in this.cache) {

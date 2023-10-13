@@ -1,6 +1,7 @@
 import {
   apiKeyAtom,
   currentDatasetAtom,
+  exampleDatasetAtom,
   projectPhaseAtom,
   trainingWorkerAtom,
 } from "@/lib/atoms";
@@ -27,6 +28,7 @@ export default function PretrainingSetup({
   const setPhase = useSetAtom(projectPhaseAtom);
   const apiKey = useAtomValue(apiKeyAtom);
   const [parameters, setParameters] = useParameters();
+  const exampleDataset = useAtomValue(exampleDatasetAtom);
   const pairs = useLiveQuery(async () => {
     if (currentDataset?.type === "local") {
       const pairs = await db.pair
@@ -34,9 +36,10 @@ export default function PretrainingSetup({
         .equals(currentDataset.id)
         .toArray();
       return pairs;
+    } else {
+      return exampleDataset;
     }
-    return null;
-  }, [currentDataset]);
+  }, [currentDataset, exampleDataset]);
   const setTrainingParam = useCallback(
     (key: string, value: boolean | number) => {
       setParameters({ ...parameters, [key]: value });
@@ -48,24 +51,44 @@ export default function PretrainingSetup({
   );
   const embedAndSplit = useCallback(() => {
     if (pairs) {
-      const workerClient = new TrainingWorkerClient(apiKey!);
+      const workerClient = new TrainingWorkerClient();
       setWorkerClient(workerClient);
       workerClient.addListener((message) => {
         if (message.type === "embeddingProgress") {
           setEmbeddingProgress(message.progress);
         } else if (message.type === "initialPerformance") {
           setPerformance(message.performance);
+          setEmbeddingProgress(null);
           setPhase(ProjectPhase.Embedded);
         }
       });
       setEmbeddingProgress(0);
-      workerClient.sendMessage({
-        type: "setPairings",
-        allPairings: pairs,
-        parameters,
-      });
+      if (currentDataset?.type === "local") {
+        workerClient.sendMessage({ type: "setApiKey", apiKey: apiKey! });
+        workerClient.sendMessage({
+          type: "setPairings",
+          allPairings: pairs,
+          parameters,
+        });
+      } else {
+        workerClient.sendMessage({
+          type: "setPairings",
+          allPairings: exampleDataset,
+          parameters,
+          cacheUrl: currentDataset?.embeddingsURL,
+        });
+      }
     }
-  }, [parameters, setWorkerClient, apiKey, pairs, setPerformance, setPhase]);
+  }, [
+    parameters,
+    setWorkerClient,
+    apiKey,
+    pairs,
+    setPerformance,
+    setPhase,
+    currentDataset,
+    exampleDataset,
+  ]);
 
   if (embeddingProgress !== null) {
     return (

@@ -1,4 +1,4 @@
-import { Tensor2D } from "@tensorflow/tfjs";
+import { Tensor2D, getBackend, ready, setBackend } from "@tensorflow/tfjs";
 import EmbeddingCache from "./EmbeddingCache";
 import accuracyAndSE from "./accuracyAndSE";
 import computeCosinePairings from "./cosinePairings";
@@ -25,7 +25,7 @@ function sendMessageToHost(message: OutboundMessage) {
 class Trainer {
   trainDataset?: TensorDataset;
   testDataset?: TensorDataset;
-  embeddingCache?: EmbeddingCache;
+  embeddingCache: EmbeddingCache = new EmbeddingCache();
   constructor() {}
   async getPerformance(mat?: Tensor2D): Promise<PerformanceGroup> {
     const testCosinePairings = await computeCosinePairings(
@@ -45,8 +45,17 @@ class Trainer {
       trainAccuracyAndSE,
     };
   }
-  async setPairings(pairs: Pairings, params: OptimizationParameters) {
-    await this.embeddingCache!.bulkEmbed(pairs);
+  async setPairings(
+    pairs: Pairings,
+    params: OptimizationParameters,
+    embedCacheUrl?: string
+  ) {
+    await ready();
+    if (!embedCacheUrl) {
+      await this.embeddingCache!.bulkEmbed(pairs);
+    } else {
+      await this.fetchPrecomputedEmbeddings(embedCacheUrl);
+    }
     const { train, test } = trainTestSplit(pairs, params.testSplitFraction);
     const shouldAugment = params.generateSyntheticNegatives;
     const testAugmented = shouldAugment ? augmentNegatives(test, 1) : test;
@@ -61,8 +70,43 @@ class Trainer {
   }
 
   async fetchPrecomputedEmbeddings(url: string) {
-    const res = await fetch(url);
-    const json = await res.json();
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Transfer-Encoding": "chunked",
+      },
+    });
+    const reader = res.body!.getReader();
+    let receivedLength = 0;
+    let maxchunks = 600;
+    const chunks = [];
+    while (true) {
+      if (chunks.length > maxchunks - 100) {
+        maxchunks *= 2;
+      }
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+      chunks.push(value);
+      receivedLength += value!.length;
+      sendMessageToHost({
+        type: "embeddingProgress",
+        total: maxchunks,
+        progress: chunks.length / maxchunks,
+      });
+    }
+    const allChunks = new Uint8Array(receivedLength);
+    let position = 0;
+    for (const chunk of chunks) {
+      allChunks.set(chunk, position);
+      position += chunk.length;
+    }
+
+    const result = new TextDecoder("utf-8").decode(allChunks);
+
+    const json = JSON.parse(result);
+
     if (this.embeddingCache) {
       this.embeddingCache.cache = { ...this.embeddingCache.cache, ...json };
     } else {
@@ -71,6 +115,13 @@ class Trainer {
   }
 
   async train(parameters: OptimizationParameters) {
+    if (getBackend() !== "webgl") {
+      sendMessageToHost({
+        type: "error",
+        message:
+          "Your browser doesn't support worker WebGL, try Chrome. It will be slow otherwise!",
+      });
+    }
     const matrix = makeMatrix(
       this.trainDataset!.embeddingSize,
       parameters.targetEmbeddingSize
@@ -103,13 +154,14 @@ addEventListener("message", async (e: MessageEvent<TrainerMessage>) => {
   try {
     switch (e.data.type) {
       case "setApiKey":
-        trainer.embeddingCache = new EmbeddingCache(e.data.apiKey);
-        break;
-      case "fetchPrecomputedEmbeddings":
-        trainer.fetchPrecomputedEmbeddings(e.data.url);
+        trainer.embeddingCache.apiKey = e.data.apiKey;
         break;
       case "setPairings":
-        await trainer.setPairings(e.data.allPairings, e.data.parameters);
+        await trainer.setPairings(
+          e.data.allPairings,
+          e.data.parameters,
+          e.data.cacheUrl
+        );
         break;
       case "train":
         await trainer.train(e.data.parameters);

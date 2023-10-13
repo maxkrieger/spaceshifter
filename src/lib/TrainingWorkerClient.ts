@@ -14,9 +14,8 @@ export default class TrainingWorkerClient {
       }
     );
   }
-  constructor(apiKey: string) {
+  constructor() {
     this.worker = new TrainingWorker();
-    this.sendMessage({ type: "setApiKey", apiKey });
   }
   terminate() {
     log.info("Terminating worker");

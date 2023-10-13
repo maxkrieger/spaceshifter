@@ -5,6 +5,8 @@ import Trainer from "./Trainer";
 import Pretraining from "./Pretraining";
 import useDataset from "@/lib/useDataset";
 import MatrixViewer from "./MatrixViewer";
+import { Button } from "./ui/button";
+import { TrashIcon } from "lucide-react";
 
 export default function Project() {
   const [currentDataset, setCurrentDataset] = useAtom(currentDatasetAtom);
@@ -16,7 +18,7 @@ export default function Project() {
   }
   return (
     <div>
-      <div>
+      <div className="flex flex-row justify-between">
         <h1 className="text-3xl">
           <span
             className="text-slate-500 text-2xl button cursor-pointer"
@@ -26,6 +28,13 @@ export default function Project() {
           </span>
           {datasetName}
         </h1>
+        <div>
+          {currentDataset?.type === "local" && (
+            <Button variant="ghost">
+              <TrashIcon size={15} className="opacity-50" />
+            </Button>
+          )}
+        </div>
       </div>
       <DataViewer />
       <Pretraining />

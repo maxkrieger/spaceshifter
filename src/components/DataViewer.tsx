@@ -7,13 +7,18 @@ import { DataTable } from "./DataTable";
 
 import CellDropdown from "./CellDropdown";
 import { useAtom, useAtomValue } from "jotai";
-import { currentDatasetAtom, projectPhaseAtom } from "@/lib/atoms";
+import {
+  currentDatasetAtom,
+  exampleDatasetAtom,
+  projectPhaseAtom,
+} from "@/lib/atoms";
 
 export default function DataViewer() {
   const currentDataset = useAtomValue(currentDatasetAtom);
   const [projectPhase, setProjectPhase] = useAtom(projectPhaseAtom);
   const readonly = currentDataset?.type !== "local";
-  const pairs = useLiveQuery(async () => {
+  const currentExampleDataset = useAtomValue(exampleDatasetAtom);
+  const localPairs = useLiveQuery(async () => {
     if (currentDataset?.type === "local") {
       const pairs = await db.pair
         .where("dataset")
@@ -27,7 +32,6 @@ export default function DataViewer() {
     }
     return null;
   }, [currentDataset, setProjectPhase, projectPhase]);
-
   const addRows = useCallback(
     (rows: Pairings) => {
       (async () => {
@@ -47,7 +51,8 @@ export default function DataViewer() {
     [currentDataset, setProjectPhase]
   );
   const [showDropzone, setShowDropzone] = useState<boolean>(false);
-  const dropzoneVisible = !pairs || pairs.length === 0 || showDropzone;
+  const dropzoneVisible =
+    !readonly && (!localPairs || localPairs.length === 0 || showDropzone);
   return (
     <div className="border bg-slate-900 border-slate-500 rounded-md p-4 my-5">
       <h1 className="text-2xl">Dataset</h1>
@@ -76,7 +81,11 @@ export default function DataViewer() {
                   ]
                 : []),
             ]}
-            data={pairs}
+            data={
+              currentDataset?.type === "local"
+                ? (localPairs as Pairings) ?? []
+                : currentExampleDataset
+            }
           />
         </div>
       )}

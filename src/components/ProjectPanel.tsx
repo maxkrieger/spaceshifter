@@ -2,7 +2,12 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../lib/db";
 import { Button } from "./ui/button";
 import { useAtom, useSetAtom } from "jotai";
-import { apiKeyAtom, currentDatasetAtom, projectPhaseAtom } from "@/lib/atoms";
+import {
+  apiKeyAtom,
+  currentDatasetAtom,
+  exampleDatasetAtom,
+  projectPhaseAtom,
+} from "@/lib/atoms";
 import ApiKey from "./ApiKey";
 import { ThemeProvider } from "./theme-provider";
 import {
@@ -27,6 +32,8 @@ import {
 import { Input } from "./ui/input";
 import { useCallback, useState } from "react";
 import { sortBy } from "lodash";
+import { loadExampleDataset } from "@/lib/example-utils";
+import { useToast } from "./ui/use-toast";
 
 const cardStyle =
   "border border-slate-500 bg-slate-900 rounded-md p-4 m-2 flex-1 min-w-[300px]";
@@ -40,10 +47,20 @@ function DatasetRow({
 }) {
   const setCurrentDataset = useSetAtom(currentDatasetAtom);
   const setPhase = useSetAtom(projectPhaseAtom);
+  const setExampleDataset = useSetAtom(exampleDatasetAtom);
+  const { toast } = useToast();
   const selectDataset = useCallback(() => {
-    setPhase(ProjectPhase.DataPresent);
-    setCurrentDataset(locator);
-  }, [setCurrentDataset, setPhase, locator]);
+    (async () => {
+      if (locator.type === "example") {
+        const { dismiss } = toast({ title: "Loading example..." });
+        const dataset = await loadExampleDataset(locator.datasetURL);
+        setExampleDataset(dataset);
+        dismiss();
+      }
+      setPhase(ProjectPhase.DataPresent);
+      setCurrentDataset(locator);
+    })();
+  }, [setCurrentDataset, setPhase, locator, setExampleDataset]);
   return (
     <div className="mt-2">
       <Button
@@ -88,19 +105,36 @@ export default function ProjectPanel() {
           </div>
           <div className="py-2">
             <DatasetRow
+              name="City Facts JSON"
+              locator={{
+                type: "example",
+                datasetURL:
+                  "https://gist.githubusercontent.com/maxkrieger/33434e8ee941a47e921f6c5b78566d1b/raw/d76524287bcf2446ebd0f290c97090003d184ce8/cities_dataset.json",
+                embeddingsURL:
+                  "https://gistcdn.githack.com/maxkrieger/e411a7c77b7af9c81844bb1fbcf9e117/raw/2b897bdc58433d78254de6982140945698eb74bf/cities_embeddings.json",
+                name: "City Facts JSON",
+              }}
+            />
+            <DatasetRow
               name="MNLI Logical Entailment"
               locator={{
                 type: "example",
-                route: "mnli",
+                datasetURL:
+                  "https://gistcdn.githack.com/maxkrieger/42dd79326c56c1260def996f2f3a26e7/raw/0260dd24e28a171513f86756a3ac0470b4cef8f6/mnli_dataset.json",
+                embeddingsURL:
+                  "https://gistcdn.githack.com/maxkrieger/42dd79326c56c1260def996f2f3a26e7/raw/0260dd24e28a171513f86756a3ac0470b4cef8f6/mnli_embeddings.json",
                 name: "MNLI Logical Entailment",
               }}
             />
             <DatasetRow
-              name="StackOverflow Title to SQL"
+              name="StackOverflow Title and Question SQL"
               locator={{
                 type: "example",
-                route: "sql",
-                name: "StackOverflow Title to SQL",
+                datasetURL:
+                  "https://gistcdn.githack.com/maxkrieger/92e177867627e85e75b40c3733fd9ceb/raw/3cee4ff498b71ac8371e2c71bbae9df34fae958e/sql_dataset.json",
+                embeddingsURL:
+                  "https://gistcdn.githack.com/maxkrieger/92e177867627e85e75b40c3733fd9ceb/raw/3cee4ff498b71ac8371e2c71bbae9df34fae958e/sql_embeddings.json",
+                name: "StackOverflow Title and Question SQL",
               }}
             />
           </div>
