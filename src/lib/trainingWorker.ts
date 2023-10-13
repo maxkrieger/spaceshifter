@@ -60,6 +60,16 @@ class Trainer {
     });
   }
 
+  async fetchPrecomputedEmbeddings(url: string) {
+    const res = await fetch(url);
+    const json = await res.json();
+    if (this.embeddingCache) {
+      this.embeddingCache.cache = { ...this.embeddingCache.cache, ...json };
+    } else {
+      throw new Error("Embedding cache not initialized");
+    }
+  }
+
   async train(parameters: OptimizationParameters) {
     const matrix = makeMatrix(
       this.trainDataset!.embeddingSize,
@@ -95,11 +105,20 @@ addEventListener("message", async (e: MessageEvent<TrainerMessage>) => {
       case "setApiKey":
         trainer.embeddingCache = new EmbeddingCache(e.data.apiKey);
         break;
+      case "fetchPrecomputedEmbeddings":
+        trainer.fetchPrecomputedEmbeddings(e.data.url);
+        break;
       case "setPairings":
         await trainer.setPairings(e.data.allPairings, e.data.parameters);
         break;
       case "train":
         await trainer.train(e.data.parameters);
+        break;
+      case "getEmbeddingCache":
+        sendMessageToHost({
+          type: "dumpEmbeddingCache",
+          cache: trainer.embeddingCache?.cache ?? {},
+        });
         break;
       default:
         console.error("Unknown message type", e.data);

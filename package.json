@@ -1,6 +1,6 @@
 {
-  "name": "tunekit",
-  "private": true,
+  "name": "spaceshifter",
+  "license": "LGPL-3.0-or-later",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
@@ -37,6 +37,7 @@
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
     "react-plotly.js": "^2.6.0",
+    "swr": "^2.2.4",
     "tailwind-merge": "^1.14.0",
     "tailwindcss-animate": "^1.0.7"
   },

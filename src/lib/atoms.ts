@@ -6,6 +6,7 @@ import {
   ProjectPhase,
   OptimizationParameters,
   defaultOptimizationParameters,
+  Pairings,
 } from "./types";
 
 export const apiKeyAtom = atomWithStorage<string | null>("api-key", null);
@@ -24,3 +25,5 @@ export const bestMatrixAtom = atom<{
 export const exampleParametersAtom = atom<OptimizationParameters>(
   defaultOptimizationParameters
 );
+
+export const exampleDatasetAtom = atom<Pairings>([]);

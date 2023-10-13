@@ -35,7 +35,15 @@ function App() {
         )}
         <Toaster />
         <div className="text-center text-sm text-slate-500">
-          based on the Bias Matrix notebook by OpenAI. Fork on GitHub
+          adapted from the{" "}
+          <a
+            className="underline"
+            href="https://github.com/openai/openai-cookbook/blob/main/examples/Customizing_embeddings.ipynb"
+            target="_blank"
+          >
+            "Customizing embeddings"
+          </a>{" "}
+          cookbook by OpenAI. Fork on GitHub
         </div>
       </div>
     </TooltipProvider>

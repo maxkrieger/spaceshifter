@@ -12,6 +12,7 @@ import { currentDatasetAtom, projectPhaseAtom } from "@/lib/atoms";
 export default function DataViewer() {
   const currentDataset = useAtomValue(currentDatasetAtom);
   const [projectPhase, setProjectPhase] = useAtom(projectPhaseAtom);
+  const readonly = currentDataset?.type !== "local";
   const pairs = useLiveQuery(async () => {
     if (currentDataset?.type === "local") {
       const pairs = await db.pair
@@ -61,14 +62,19 @@ export default function DataViewer() {
         <div>
           <DataTable
             submit={(row) => addRows([row])}
+            readonly={readonly}
             columns={[
               { accessorKey: "text_1", header: "text_1", size: 1 / 3 },
               { accessorKey: "text_2", header: "text_2", size: 1 / 3 },
               { accessorKey: "label", header: "label", size: 1 / 4 },
-              {
-                id: "actions",
-                cell: CellDropdown,
-              },
+              ...(!readonly
+                ? [
+                    {
+                      id: "actions",
+                      cell: CellDropdown,
+                    },
+                  ]
+                : []),
             ]}
             data={pairs}
           />

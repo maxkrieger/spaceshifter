@@ -1,5 +1,5 @@
 import { currentDatasetAtom } from "@/lib/atoms";
-import { useSetAtom } from "jotai";
+import { useAtom } from "jotai";
 import DataViewer from "./DataViewer";
 import Trainer from "./Trainer";
 import Pretraining from "./Pretraining";
@@ -7,9 +7,11 @@ import useDataset from "@/lib/useDataset";
 import MatrixViewer from "./MatrixViewer";
 
 export default function Project() {
-  const setCurrentProject = useSetAtom(currentDatasetAtom);
-  const datasetValue = useDataset();
-  if (!datasetValue) {
+  const [currentDataset, setCurrentDataset] = useAtom(currentDatasetAtom);
+  const datasetName =
+    useDataset()?.name ??
+    (currentDataset?.type === "example" ? currentDataset.name : null);
+  if (!datasetName) {
     return <div>loading...</div>;
   }
   return (
@@ -18,11 +20,11 @@ export default function Project() {
         <h1 className="text-3xl">
           <span
             className="text-slate-500 text-2xl button cursor-pointer"
-            onClick={() => setCurrentProject(null)}
+            onClick={() => setCurrentDataset(null)}
           >
             projects/
           </span>
-          {datasetValue.name}
+          {datasetName}
         </h1>
       </div>
       <DataViewer />

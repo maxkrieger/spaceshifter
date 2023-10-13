@@ -62,6 +62,10 @@ export type PerformanceGroup = {
 
 export type TrainerMessage =
   | {
+      type: "fetchPrecomputedEmbeddings";
+      url: string;
+    }
+  | {
       type: "setApiKey";
       apiKey: string;
     }
@@ -73,7 +77,8 @@ export type TrainerMessage =
   | {
       type: "train";
       parameters: OptimizationParameters;
-    };
+    }
+  | { type: "getEmbeddingCache" };
 
 export type OutboundMessage =
   | {
@@ -95,7 +100,8 @@ export type OutboundMessage =
       matrixNpy: ArrayBuffer;
       shape: [number, number];
     }
-  | { type: "error"; message: string };
+  | { type: "error"; message: string }
+  | { type: "dumpEmbeddingCache"; cache: { [key: string]: number[] } };
 
 export type DatasetLocator =
   | { type: "local"; id: number }

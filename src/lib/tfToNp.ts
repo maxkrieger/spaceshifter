@@ -40,7 +40,6 @@ export async function tfToNp(tensor: Tensor): Promise<ArrayBuffer> {
   const dataLen = bytesPerElement * numEls(tensor.shape);
   const totalSize = unpaddedLength + padding.length + dataLen;
 
-  console.log("totalSize", totalSize);
   const ab = new ArrayBuffer(totalSize);
   const view = new DataView(ab);
   let pos = 0;

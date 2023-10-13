@@ -39,7 +39,11 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   submit,
-}: DataTableProps<TData, TValue> & { submit: (content: Pairing) => void }) {
+  readonly,
+}: DataTableProps<TData, TValue> & {
+  submit: (content: Pairing) => void;
+  readonly: boolean;
+}) {
   const table = useReactTable({
     data,
     columns,
@@ -64,43 +68,45 @@ export function DataTable<TData, TValue>({
     <div>
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2 py-4">
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button variant={"outline"} className="flex items-center">
-                <PlusIcon size={18} className="mr-2" /> Create Row
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader className="text-white">Create Row</DialogHeader>
-              <div className="text-white">
-                <Label htmlFor="text_1">text_1</Label>
-                <Input
-                  placeholder="text_1"
-                  id="text_1"
-                  value={text1}
-                  onChange={(e) => setText1(e.target.value)}
-                />
-                <Label htmlFor="text_2">text_2</Label>
-                <Input
-                  placeholder="text_2"
-                  id="text_2"
-                  value={text2}
-                  onChange={(e) => setText2(e.target.value)}
-                />
-                <div className="my-4 flex items-center space-x-2">
-                  <Switch
-                    id="label"
-                    checked={label === 1}
-                    onCheckedChange={(ch) => setLabel(ch ? 1 : -1)}
+          {!readonly && (
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button variant={"outline"} className="flex items-center">
+                  <PlusIcon size={18} className="mr-2" /> Create Row
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader className="text-white">Create Row</DialogHeader>
+                <div className="text-white">
+                  <Label htmlFor="text_1">text_1</Label>
+                  <Input
+                    placeholder="text_1"
+                    id="text_1"
+                    value={text1}
+                    onChange={(e) => setText1(e.target.value)}
                   />
-                  <Label htmlFor="label">
-                    Currently {label === 1 ? "Positive" : "Negative"}
-                  </Label>
+                  <Label htmlFor="text_2">text_2</Label>
+                  <Input
+                    placeholder="text_2"
+                    id="text_2"
+                    value={text2}
+                    onChange={(e) => setText2(e.target.value)}
+                  />
+                  <div className="my-4 flex items-center space-x-2">
+                    <Switch
+                      id="label"
+                      checked={label === 1}
+                      onCheckedChange={(ch) => setLabel(ch ? 1 : -1)}
+                    />
+                    <Label htmlFor="label">
+                      Currently {label === 1 ? "Positive" : "Negative"}
+                    </Label>
+                  </div>
                 </div>
-              </div>
-              <Button onClick={onSubmit}>save</Button>
-            </DialogContent>
-          </Dialog>
+                <Button onClick={onSubmit}>save</Button>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
         <div className="flex items-center space-x-2 py-4">
           <Button
