@@ -49,7 +49,7 @@ export default function Hero() {
       <div>
         <p className="text-slate-400 text-sm mt-1">(illustration only)</p>
         <p className="text-xl text-slate-300 mt-2">
-          Improve RAG by 10-25% without leaving this page.
+          Improve your RAG without leaving this page.
         </p>
       </div>
     </div>
