@@ -17,7 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "./ui/button";
-import { PlusIcon } from "lucide-react";
+import { DownloadIcon, PlusIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -41,9 +41,11 @@ export function DataTable<TData, TValue>({
   data,
   submit,
   readonly,
+  onDownload,
 }: DataTableProps<TData, TValue> & {
   submit: (content: Pairing) => void;
   readonly: boolean;
+  onDownload: () => void;
 }) {
   const table = useReactTable({
     data,
@@ -76,6 +78,13 @@ export function DataTable<TData, TValue>({
                   <PlusIcon size={18} className="mr-2" /> Create Row
                 </Button>
               </DialogTrigger>
+              <Button
+                variant="outline"
+                className="flex items-center"
+                onClick={onDownload}
+              >
+                <DownloadIcon size={18} className="mr-2" /> Download JSON
+              </Button>
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader className="text-white">Create Row</DialogHeader>
                 <div className="text-white">

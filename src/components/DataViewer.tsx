@@ -51,9 +51,23 @@ export default function DataViewer() {
     },
     [currentDataset, setProjectPhase]
   );
-  const [showDropzone, setShowDropzone] = useState<boolean>(false);
-  const dropzoneVisible =
-    !readonly && (!localPairs || localPairs.length === 0 || showDropzone);
+  const downloadJSON = useCallback(() => {
+    const cleaned = (localPairs as Pairings).map(
+      ({ text_1, text_2, label }) => ({
+        text_1,
+        text_2,
+        label,
+      })
+    );
+    const json = JSON.stringify(cleaned, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "data.json";
+    a.click();
+  }, [localPairs]);
+  const dropzoneVisible = !readonly && (!localPairs || localPairs.length === 0);
   return (
     <div className={cardClasses}>
       <h1 className="text-2xl">Dataset</h1>
@@ -68,6 +82,7 @@ export default function DataViewer() {
         <div>
           <DataTable
             submit={(row) => addRows([row])}
+            onDownload={downloadJSON}
             readonly={readonly}
             columns={[
               { accessorKey: "text_1", header: "text_1", size: 1 / 3 },
