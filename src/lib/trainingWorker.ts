@@ -48,11 +48,12 @@ class Trainer {
   async setPairings(
     pairs: Pairings,
     params: OptimizationParameters,
-    embedCacheUrl?: string
+    embedCacheUrl?: string,
+    model?: string
   ) {
     await tf_ready();
     if (!embedCacheUrl) {
-      await this.embeddingCache!.bulkEmbed(pairs);
+      await this.embeddingCache!.bulkEmbed(pairs, model);
     } else {
       await this.fetchPrecomputedEmbeddings(embedCacheUrl);
     }
@@ -160,7 +161,8 @@ addEventListener("message", async (e: MessageEvent<TrainerMessage>) => {
         await trainer.setPairings(
           e.data.allPairings,
           e.data.parameters,
-          e.data.cacheUrl
+          e.data.cacheUrl,
+          e.data.model
         );
         break;
       case "train":

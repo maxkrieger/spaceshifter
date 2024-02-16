@@ -70,6 +70,7 @@ export type TrainerMessage =
       allPairings: Pairings;
       parameters: OptimizationParameters;
       cacheUrl?: string;
+      model?: string;
     }
   | {
       type: "train";

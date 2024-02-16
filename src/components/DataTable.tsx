@@ -66,6 +66,11 @@ export function DataTable<TData, TValue>({
     submit({ text_1: text1, text_2: text2, label });
     setOpen(false);
   }, [submit, text1, text2, label]);
+  function handleKey(e) {
+    if (e.key === "Enter") {
+      onSubmit();
+    }
+  }
 
   return (
     <div>
@@ -94,6 +99,7 @@ export function DataTable<TData, TValue>({
                     id="text_1"
                     value={text1}
                     onChange={(e) => setText1(e.target.value)}
+                    onKeyDown={handleKey}
                   />
                   <Label htmlFor="text_2">text_2</Label>
                   <Input
@@ -101,6 +107,7 @@ export function DataTable<TData, TValue>({
                     id="text_2"
                     value={text2}
                     onChange={(e) => setText2(e.target.value)}
+                    onKeyDown={handleKey}
                   />
                   <div className="my-4 flex items-center space-x-2">
                     <Switch

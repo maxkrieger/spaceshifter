@@ -8,11 +8,11 @@ export interface Dataset {
   trainingParams: OptimizationParameters;
 }
 
-// For now, we don't store model type
 export interface Embedding {
   text: string;
   embedding: number[];
   dateCreated: Date;
+  model: string;
 }
 
 export interface SavedMatrix {
@@ -30,7 +30,7 @@ export type Pair = {
 } & Pairing;
 
 export class SpaceshifterDB extends Dexie {
-  embedding!: Table<Embedding>;
+  embeddings!: Table<Embedding>;
   dataset!: Table<Dataset>;
   pair!: Table<Pair>;
   savedMatrices!: Table<SavedMatrix>;
@@ -38,14 +38,14 @@ export class SpaceshifterDB extends Dexie {
   async deleteDataset(id: number) {
     return await this.transaction(
       "rw",
-      this.embedding,
+      this.embeddings,
       this.pair,
       this.dataset,
       async () => {
         const pairs = await this.pair.where("dataset").equals(id).toArray();
         for await (const { text_1, text_2 } of pairs) {
-          await this.embedding.where("text").equals(text_1).delete();
-          await this.embedding.where("text").equals(text_2).delete();
+          await this.embeddings.where("text").equals(text_1).delete();
+          await this.embeddings.where("text").equals(text_2).delete();
         }
         await this.pair.where("dataset").equals(id).delete();
         await this.dataset.delete(id);
@@ -60,6 +60,16 @@ export class SpaceshifterDB extends Dexie {
       pair: "++id, dataset, dateCreated, text_1, text_2, label",
       matrix: "++id, dataset, matrix, shape, dateCreated",
     });
+    this.version(2)
+      .stores({
+        embeddings: "[text+model], embedding, dateCreated",
+        dataset: "++id, name, dateCreated, trainingParams",
+        pair: "++id, dataset, dateCreated, text_1, text_2, label",
+        matrix: "++id, dataset, matrix, shape, dateCreated",
+      })
+      .upgrade(async (trans) => {
+        return trans.table("embedding").clear();
+      });
   }
 }
 

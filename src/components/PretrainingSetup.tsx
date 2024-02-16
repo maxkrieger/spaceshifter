@@ -2,6 +2,7 @@ import {
   apiKeyAtom,
   currentDatasetAtom,
   exampleDatasetAtom,
+  modelsAtom,
   projectPhaseAtom,
   trainingWorkerAtom,
 } from "@/lib/atoms";
@@ -18,6 +19,13 @@ import { PerformanceGroup, ProjectPhase } from "@/lib/types";
 import { Progress } from "./ui/progress";
 import useParameters from "@/lib/useParameters";
 import { cardClasses } from "@/lib/const";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 export default function PretrainingSetup({
   setPerformance,
@@ -50,6 +58,8 @@ export default function PretrainingSetup({
   const [embeddingProgress, setEmbeddingProgress] = useState<number | null>(
     null
   );
+  const embeddingModels = useAtomValue(modelsAtom);
+  const [selectedEmbeddingModel, setSelectedEmbeddingModel] = useState(0);
   const embedAndSplit = useCallback(() => {
     if (pairs) {
       const workerClient = new TrainingWorkerClient();
@@ -65,11 +75,16 @@ export default function PretrainingSetup({
       });
       setEmbeddingProgress(0);
       if (currentDataset?.type === "local") {
+        const model =
+          embeddingModels.state === "hasData"
+            ? embeddingModels.data[selectedEmbeddingModel]
+            : undefined;
         workerClient.sendMessage({ type: "setApiKey", apiKey: apiKey! });
         workerClient.sendMessage({
           type: "setPairings",
           allPairings: pairs,
           parameters,
+          model,
         });
       } else {
         workerClient.sendMessage({
@@ -89,6 +104,8 @@ export default function PretrainingSetup({
     setPhase,
     currentDataset,
     exampleDataset,
+    embeddingModels,
+    selectedEmbeddingModel,
   ]);
 
   if (embeddingProgress !== null) {
@@ -121,12 +138,18 @@ export default function PretrainingSetup({
         .
       </p>
       <p className="text-slate-300 text-l my-2">
-        There <span className="text-white">{positiveExamples}</span> positive
-        examples and{" "}
+        There are <span className="text-white">{positiveExamples}</span>{" "}
+        positive examples and{" "}
         <span className="text-white">{pairs.length - positiveExamples}</span>{" "}
         negative examples.{" "}
-        {pairs.length - positiveExamples < positiveExamples &&
-          "More negative examples can be generated."}
+        {pairs.length <= 1 && (
+          <span className="text-red-300 font-bold">
+            You need at least 2 examples to train.
+          </span>
+        )}
+        {pairs.length > 1 && pairs.length - positiveExamples < positiveExamples
+          ? "More negative examples can be generated."
+          : ""}
       </p>
       <div className="m-3 flex items-center space-x-2">
         <Switch
@@ -155,9 +178,34 @@ export default function PretrainingSetup({
         />
         <Label htmlFor="split">Fraction of dataset used for testing</Label>
       </div>
+      {currentDataset?.type === "local" && (
+        <div className="m-3 flex items-center space-x-2">
+          <Select
+            value={selectedEmbeddingModel.toString()}
+            onValueChange={(v) => setSelectedEmbeddingModel(parseInt(v, 10))}
+          >
+            <SelectTrigger className="w-[250px]" id="model">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {embeddingModels.state === "hasData" &&
+                embeddingModels.data.map((model, i) => (
+                  <SelectItem key={i} value={i.toString()}>
+                    {model}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+          <Label htmlFor="model">Embedding model</Label>
+        </div>
+      )}
       <div>
-        <Button className="w-full" onClick={embedAndSplit}>
-          Prepare Data
+        <Button
+          className="w-full"
+          onClick={embedAndSplit}
+          disabled={pairs.length <= 1}
+        >
+          {pairs.length <= 1 ? "Not enough examples" : "Prepare Data"}
         </Button>
       </div>
     </div>
