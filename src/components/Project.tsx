@@ -18,9 +18,11 @@ import {
 import { useCallback } from "react";
 import { db } from "@/lib/db";
 import { useToast } from "./ui/use-toast";
+import { DialogClose } from "@radix-ui/react-dialog";
 
 export default function Project() {
   const [currentDataset, setCurrentDataset] = useAtom(currentDatasetAtom);
+
   const datasetName =
     useDataset()?.name ??
     (currentDataset?.type === "example" ? currentDataset.name : null);
@@ -34,7 +36,7 @@ export default function Project() {
         setCurrentDataset(null);
       }
     })();
-  }, [currentDataset, setCurrentDataset]);
+  }, [currentDataset, setCurrentDataset, toast]);
   if (!datasetName) {
     return <div>loading...</div>;
   }
@@ -66,13 +68,15 @@ export default function Project() {
                   <Button variant="destructive" onClick={deleteProject}>
                     Delete
                   </Button>
-                  <Button
-                    variant="outline"
-                    type="submit"
-                    className="text-white"
-                  >
-                    Cancel
-                  </Button>
+                  <DialogClose asChild>
+                    <Button
+                      variant="outline"
+                      type="submit"
+                      className="text-white"
+                    >
+                      Cancel
+                    </Button>
+                  </DialogClose>
                 </DialogFooter>
               </DialogContent>
             </Dialog>

@@ -17,6 +17,7 @@ export default function ApiKey() {
   const [apiKey, setApiKey] = useAtom(apiKeyAtom);
   const [draftApiKey, setDraftApiKey] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const pasteFromClipboard = useCallback(() => {
     navigator.clipboard.readText().then((text) => {
@@ -28,31 +29,31 @@ export default function ApiKey() {
       setDraftApiKey(apiKey);
     }
   }, [setDraftApiKey, apiKey]);
-  const onSubmit = useCallback(() => {
-    (async () => {
-      try {
-        const res = await fetch("https://api.openai.com/v1/models", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${draftApiKey}`,
-          },
+  const onSubmit = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("https://api.openai.com/v1/models", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${draftApiKey}`,
+        },
+      });
+      if (res.status === 200) {
+        setError(null);
+        setApiKey(draftApiKey);
+        toast({ title: "API Key has been set" });
+      } else {
+        setError(`API Key is invalid: ${res.status}`);
+        toast({
+          title: "Could not use API key",
+          description: `Error code ${res.status}`,
+          variant: "destructive",
         });
-        if (res.status === 200) {
-          setError(null);
-          setApiKey(draftApiKey);
-          toast({ title: "API Key has been set" });
-        } else {
-          setError(`API Key is invalid: ${res.status}`);
-          toast({
-            title: "Could not use API key",
-            description: `Error code ${res.status}`,
-            variant: "destructive",
-          });
-        }
-      } catch (e) {
-        setError((e as Error).toString());
       }
-    })();
+    } catch (e) {
+      setError((e as Error).toString());
+    }
+    setLoading(false);
   }, [setApiKey, draftApiKey, toast]);
   return (
     <Dialog>
@@ -92,8 +93,9 @@ export default function ApiKey() {
             <Button
               className="button text-white rounded-md px-2 py-1 m-2"
               onClick={onSubmit}
+              disabled={loading}
             >
-              Done
+              {loading ? "Verifying..." : "Done"}
             </Button>
           </div>
           <div>
