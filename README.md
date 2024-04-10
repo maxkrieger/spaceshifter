@@ -17,3 +17,15 @@ pnpm install
 ```
 pnpm run dev
 ```
+
+# Building
+
+Set an appropriate [`base`](https://vitejs.dev/config/shared-options.html#base) in `vite.config.ts`.
+
+Run:
+
+```
+pnpm run build
+```
+
+Build is outputted to `dist/`.
