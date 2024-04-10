@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "types": ["bun-types"],
+    "types": [],
     "target": "ES2020",
     "useDefineForClassFields": true,
     "lib": ["webworker", "ES2020", "DOM", "DOM.Iterable"],
