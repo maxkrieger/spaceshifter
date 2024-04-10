@@ -1,4 +1,4 @@
-import { PerformanceGroup, ProjectPhase } from "@/lib/types";
+import { ProjectPhase } from "@/lib/types";
 import PretrainingSetup from "./PretrainingSetup";
 import { useAtom, useAtomValue } from "jotai";
 import {
@@ -6,11 +6,12 @@ import {
   projectPhaseAtom,
   trainingWorkerAtom,
 } from "@/lib/atoms";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import Histogram from "./Histogram";
 import { Button } from "./ui/button";
 import { Download } from "lucide-react";
 import { cardClasses } from "@/lib/const";
+import TooltipWrapper from "./TooltipWrapper";
 
 export default function Pretraining() {
   const currentPhase = useAtomValue(projectPhaseAtom);
@@ -62,13 +63,15 @@ export default function Pretraining() {
     <div className={cardClasses}>
       <div className="flex flex-row justify-between">
         <h1 className="text-2xl mb-3">Pretraining</h1>
-        <Button
-          variant={"ghost"}
-          onClick={downloadEmbeddings}
-          aria-label="Download all embeddings"
-        >
-          <Download size={14} />
-        </Button>
+        <TooltipWrapper tooltip="Download all embeddings">
+          <Button
+            variant={"ghost"}
+            onClick={downloadEmbeddings}
+            aria-label="Download all embeddings"
+          >
+            <Download size={14} />
+          </Button>
+        </TooltipWrapper>
       </div>
       <div className="flex flex-wrap flex-row sm:justify-start md:justify-around items-center">
         <div className="md:w-[400px]">
