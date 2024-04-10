@@ -20,8 +20,6 @@ function sendMessageToHost(message: OutboundMessage) {
   postMessage(message);
 }
 
-// https://github.com/propelml/tfjs-npy/blob/master/npy.ts
-
 class Trainer {
   trainDataset?: TensorDataset;
   testDataset?: TensorDataset;
