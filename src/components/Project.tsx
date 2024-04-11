@@ -3,7 +3,6 @@ import { useAtom } from "jotai";
 import DataViewer from "./DataViewer";
 import Trainer from "./Trainer";
 import Pretraining from "./Pretraining";
-import useDataset from "@/lib/useDataset";
 import MatrixViewer from "./MatrixViewer";
 import { Button } from "./ui/button";
 import { TrashIcon } from "lucide-react";
@@ -19,14 +18,21 @@ import { useCallback } from "react";
 import { db } from "@/lib/db";
 import { useToast } from "./ui/use-toast";
 import { DialogClose } from "@radix-ui/react-dialog";
+import { useLiveQuery } from "dexie-react-hooks";
 
 export default function Project() {
   const [currentDataset, setCurrentDataset] = useAtom(currentDatasetAtom);
 
-  const datasetName =
-    useDataset()?.name ??
-    (currentDataset?.type === "example" ? currentDataset.name : null);
+  const datasetName = useLiveQuery(async () => {
+    if (currentDataset?.type === "local") {
+      const dataset = await db.dataset.get(currentDataset.id);
+      return dataset?.name;
+    }
+    return currentDataset?.name;
+  }, [currentDataset]);
+
   const { toast } = useToast();
+
   const deleteProject = useCallback(async () => {
     if (currentDataset?.type === "local") {
       const { dismiss } = toast({ title: "Deleting dataset..." });
@@ -35,6 +41,7 @@ export default function Project() {
       setCurrentDataset(null);
     }
   }, [currentDataset, setCurrentDataset, toast]);
+
   if (!datasetName) {
     return <div>loading...</div>;
   }
