@@ -16,7 +16,7 @@ export default function pairingToDataset(
     e2s.push(e2);
     labels.push(label);
   }
-  // This is redundant, but due to batching allocating more memory anyway, it's fine
+  // We (redundantly) allocate tensors for the loss function and datasets for the training
   const e1Tensor = tensor2d(e1s);
   const e2Tensor = tensor2d(e2s);
   const labelsTensor = tensor1d(labels);
