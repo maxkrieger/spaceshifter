@@ -59,13 +59,9 @@ export async function parseJSONL(jsonLFile: File): Promise<Pairings | null> {
   try {
     const text = await jsonLFile.text();
     const parsed = text
-      // To prevent from parsing newlines in strings
-      .replaceAll("\\n", "{{NEWLINE_REPLACEME}}")
       .split("\n")
       .filter((line) => line.length > 0)
-      .map((line) =>
-        JSON.parse(line.replaceAll("{{NEWLINE_REPLACEME}}", "\\n"))
-      );
+      .map((line) => JSON.parse(line));
     if (isValidJSON(parsed)) {
       return parsed;
     } else {
