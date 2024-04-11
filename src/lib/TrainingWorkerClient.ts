@@ -1,17 +1,17 @@
 import log from "loglevel";
 import TrainingWorker from "@/lib/TrainingWorker.ts?worker";
-import { OutboundMessage, TrainerMessage } from "../types";
+import { MessageFromTrainer, MessageToTrainer } from "../types";
 export default class TrainingWorkerClient {
   worker: Worker;
-  sendMessage(message: TrainerMessage) {
+  sendMessage(message: MessageToTrainer) {
     this.worker.postMessage(message);
   }
   /**
    * Listens for messages from the worker
    * @returns Cancel function
    */
-  addListener(listener: (message: OutboundMessage) => void) {
-    function handler(e: MessageEvent<OutboundMessage>) {
+  addListener(listener: (message: MessageFromTrainer) => void) {
+    function handler(e: MessageEvent<MessageFromTrainer>) {
       listener(e.data);
     }
     this.worker.addEventListener("message", handler);

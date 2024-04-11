@@ -7,17 +7,17 @@ import pairingToDataset from "./pairingToDataset";
 import {
   EmbeddingCacheData,
   OptimizationParameters,
-  OutboundMessage,
+  MessageFromTrainer,
   Pairings,
   PerformanceGroup,
   TensorDataset,
-  TrainerMessage,
+  MessageToTrainer,
 } from "../types";
 import augmentNegatives from "./augmentNegatives";
 import trainTestSplit from "./trainTestSplit";
 import { tfToNp } from "./tfToNp";
 
-function sendMessageToHost(message: OutboundMessage) {
+function sendMessageToHost(message: MessageFromTrainer) {
   postMessage(message);
 }
 
@@ -125,7 +125,7 @@ class Trainer {
 
 const trainer = new Trainer();
 
-addEventListener("message", async (e: MessageEvent<TrainerMessage>) => {
+addEventListener("message", async (e: MessageEvent<MessageToTrainer>) => {
   try {
     switch (e.data.type) {
       case "initializeLocalDataset":

@@ -63,7 +63,7 @@ export type PerformanceGroup = {
   trainAccuracyAndSE: AccuracyAndSE;
 };
 
-export type TrainerMessage =
+export type MessageToTrainer =
   | {
       type: "initializeLocalDataset";
       allPairings: Pairings;
@@ -83,7 +83,7 @@ export type TrainerMessage =
     }
   | { type: "getEmbeddingCache" };
 
-export type OutboundMessage =
+export type MessageFromTrainer =
   | { type: "fetchingStatus"; status: "complete" | "fetching" }
   | {
       type: "embeddingProgress";
