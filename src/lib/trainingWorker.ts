@@ -44,22 +44,14 @@ class Trainer {
       trainAccuracyAndSE,
     };
   }
-  async setPairings(
-    pairs: Pairings,
-    params: OptimizationParameters,
-    embedCacheUrl?: string,
-    model?: string
-  ) {
-    await tf_ready();
-    if (!embedCacheUrl) {
-      await this.embeddingCache!.bulkEmbed(pairs, model);
-    } else {
-      await this.fetchPrecomputedEmbeddings(embedCacheUrl);
-    }
+
+  async initDataset(pairs: Pairings, params: OptimizationParameters) {
     const { train, test } = trainTestSplit(pairs, params.testSplitFraction);
     const shouldAugment = params.generateSyntheticNegatives;
     const testAugmented = shouldAugment ? augmentNegatives(test) : test;
     const trainAugmented = shouldAugment ? augmentNegatives(train) : train;
+
+    await tf_ready();
     this.trainDataset = pairingToDataset(trainAugmented, this.embeddingCache!);
     this.testDataset = pairingToDataset(testAugmented, this.embeddingCache!);
 
@@ -67,6 +59,10 @@ class Trainer {
       type: "initialPerformance",
       performance: await this.getPerformance(),
     });
+  }
+
+  async embedLocalPairings(pairs: Pairings, model?: string) {
+    await this.embeddingCache!.bulkEmbed(pairs, model);
   }
 
   async fetchPrecomputedEmbeddings(url: string) {
@@ -131,13 +127,13 @@ addEventListener("message", async (e: MessageEvent<TrainerMessage>) => {
       case "setApiKey":
         trainer.embeddingCache.apiKey = e.data.apiKey;
         break;
-      case "setPairings":
-        await trainer.setPairings(
-          e.data.allPairings,
-          e.data.parameters,
-          e.data.cacheUrl,
-          e.data.model
-        );
+      case "initializeLocalDataset":
+        await trainer.embedLocalPairings(e.data.allPairings, e.data.model);
+        await trainer.initDataset(e.data.allPairings, e.data.parameters);
+        break;
+      case "initializeExampleDataset":
+        await trainer.fetchPrecomputedEmbeddings(e.data.cacheUrl);
+        await trainer.initDataset(e.data.allPairings, e.data.parameters);
         break;
       case "train":
         await trainer.train(e.data.parameters);

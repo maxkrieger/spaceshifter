@@ -1,6 +1,6 @@
 import { currentDatasetAtom } from "@/lib/atoms";
 import { useAtom } from "jotai";
-import DataViewer from "./DataViewer";
+import DataViewer from "./trainingData/DataViewer";
 import Trainer from "./Trainer";
 import Pretraining from "./Pretraining";
 import MatrixViewer from "./MatrixViewer";

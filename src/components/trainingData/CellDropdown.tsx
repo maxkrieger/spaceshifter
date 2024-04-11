@@ -14,11 +14,11 @@ import {
   DialogContent,
   DialogHeader,
   DialogTrigger,
-} from "./ui/dialog";
-import { Input } from "./ui/input";
+} from "../ui/dialog";
+import { Input } from "../ui/input";
 import { useCallback, useState } from "react";
-import { Label } from "./ui/label";
-import { Switch } from "./ui/switch";
+import { Label } from "../ui/label";
+import { Switch } from "../ui/switch";
 import { useSetAtom } from "jotai";
 import { projectPhaseAtom } from "@/lib/atoms";
 import { ProjectPhase } from "@/lib/types";

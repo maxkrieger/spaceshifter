@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { apiKeyAtom } from "../lib/atoms";
+import { apiKeyAtom } from "../../lib/atoms";
 import { useCallback, useEffect, useState } from "react";
 import {
   Dialog,
@@ -8,10 +8,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { useToast } from "./ui/use-toast";
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { useToast } from "../ui/use-toast";
 
 export default function ApiKey() {
   const [apiKey, setApiKey] = useAtom(apiKeyAtom);

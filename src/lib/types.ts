@@ -69,11 +69,16 @@ export type TrainerMessage =
       apiKey: string;
     }
   | {
-      type: "setPairings";
+      type: "initializeLocalDataset";
       allPairings: Pairings;
       parameters: OptimizationParameters;
-      cacheUrl?: string;
       model?: string;
+    }
+  | {
+      type: "initializeExampleDataset";
+      allPairings: Pairings;
+      parameters: OptimizationParameters;
+      cacheUrl: string;
     }
   | {
       type: "train";

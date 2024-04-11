@@ -9,7 +9,7 @@ import {
 import { Settings } from "lucide-react";
 import { sortBy } from "lodash";
 import { DatasetRow } from "./DatasetRow";
-import ApiKey from "../ApiKey";
+import ApiKey from "./ApiKey";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../lib/db";
 import { useAtom } from "jotai";

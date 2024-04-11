@@ -1,7 +1,7 @@
 import { useDropzone } from "react-dropzone";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { useCallback } from "react";
-import { useToast } from "./ui/use-toast";
+import { useToast } from "../ui/use-toast";
 import { Pairings } from "@/lib/types";
 import { parseCSV, parseJSON, parseJSONL } from "@/lib/parseData";
 export default function Dropzone({
