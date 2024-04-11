@@ -2,11 +2,10 @@ import { useAtom } from "jotai";
 import { currentDatasetAtom } from "./lib/atoms";
 import logotype from "./assets/logotype.svg";
 import logo from "./assets/logo.svg";
-import Hero from "./components/projects/Hero";
-import ProjectPanel from "./components/projects/ProjectPanel";
-import Project from "./components/Project";
+import Project from "./pages/Project";
 import { Toaster } from "./components/ui/toaster";
 import { TooltipProvider } from "./components/ui/tooltip";
+import Home from "./pages/Home";
 
 function App() {
   const [currentDataset, setCurrentDataset] = useAtom(currentDatasetAtom);
@@ -28,14 +27,7 @@ function App() {
             />
           </div>
         </button>
-        {currentDataset.type === "none" ? (
-          <div>
-            <Hero />
-            <ProjectPanel />
-          </div>
-        ) : (
-          <Project />
-        )}
+        {currentDataset.type === "none" ? <Home /> : <Project />}
         <Toaster />
         <footer className="mt-[100px]">
           <div className="text-center text-sm text-slate-500">

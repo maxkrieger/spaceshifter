@@ -9,10 +9,10 @@ import { db } from "@/lib/db";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useState } from "react";
-import { Label } from "./ui/label";
-import { Switch } from "./ui/switch";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
+import { Label } from "../ui/label";
+import { Switch } from "../ui/switch";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
 import TrainingWorkerClient from "@/lib/TrainingWorkerClient";
 import {
   PerformanceGroup,
@@ -20,7 +20,7 @@ import {
   OptimizationParameters,
   Pairings,
 } from "@/types";
-import { Progress } from "./ui/progress";
+import { Progress } from "../ui/progress";
 import useParameters from "@/hooks/useParameters";
 import { cardStyles as cardStyles } from "@/lib/const";
 import {
@@ -29,7 +29,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
+} from "../ui/select";
 import { Loader2Icon } from "lucide-react";
 
 type EmbeddingStatus =

@@ -2,11 +2,11 @@ import { ProjectPhase } from "@/types";
 import PretrainingSetup from "./PretrainingSetup";
 import { useAtom, useAtomValue } from "jotai";
 import { pretrainingPerformanceAtom, projectPhaseAtom } from "@/lib/atoms";
-import Histogram from "./Histogram";
-import { Button } from "./ui/button";
+import Histogram from "../Histogram";
+import { Button } from "../ui/button";
 import { Download } from "lucide-react";
 import { cardStyles } from "@/lib/const";
-import TooltipWrapper from "./TooltipWrapper";
+import TooltipWrapper from "../util/TooltipWrapper";
 import useDownloadEmbeddings from "@/hooks/useDownloadEmbeddings";
 
 export default function Pretraining() {

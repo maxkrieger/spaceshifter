@@ -1,4 +1,4 @@
-import { ThemeProvider } from "../theme-provider";
+import { ThemeProvider } from "../util/theme-provider";
 
 import ExampleDatasets from "./ExampleDatasets";
 import MyDatasets from "./MyDatasets";

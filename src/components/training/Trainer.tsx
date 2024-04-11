@@ -13,7 +13,7 @@ import { useCallback, useState } from "react";
 import { Button } from "../ui/button";
 import { Progress } from "../ui/progress";
 import Histogram from "../Histogram";
-import LossCurve from "../LossCurve";
+import LossCurve from "./LossCurve";
 import { cardStyles } from "@/lib/const";
 import ParametersSetup from "./ParametersSetup";
 

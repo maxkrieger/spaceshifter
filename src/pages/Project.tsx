@@ -1,10 +1,10 @@
 import { currentDatasetAtom } from "@/lib/atoms";
 import { useAtom } from "jotai";
-import DataViewer from "./trainingData/DataViewer";
-import Trainer from "./training/Trainer";
-import Pretraining from "./Pretraining";
-import MatrixViewer from "./MatrixViewer";
-import { Button } from "./ui/button";
+import DataViewer from "../components/trainingData/DataViewer";
+import Trainer from "../components/training/Trainer";
+import Pretraining from "../components/pretraining/Pretraining";
+import MatrixViewer from "../components/MatrixViewer";
+import { Button } from "../components/ui/button";
 import { TrashIcon } from "lucide-react";
 import {
   Dialog,
@@ -13,10 +13,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog";
+} from "../components/ui/dialog";
 import { useCallback } from "react";
 import { db } from "@/lib/db";
-import { useToast } from "./ui/use-toast";
+import { useToast } from "../components/ui/use-toast";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { useLiveQuery } from "dexie-react-hooks";
 
