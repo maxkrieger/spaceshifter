@@ -124,7 +124,6 @@ export type CurrentDataset =
   | {
       type: "example";
       embeddingsURL: string;
-      datasetURL: string;
       name: string;
       pairings: Pairings;
     }

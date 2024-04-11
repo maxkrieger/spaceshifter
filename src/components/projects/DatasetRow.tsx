@@ -25,7 +25,6 @@ export function DatasetRow({
       setCurrentDataset({
         type: "example",
         embeddingsURL: locator.embeddingsURL,
-        datasetURL: locator.datasetURL,
         name: locator.name,
         pairings,
       });
