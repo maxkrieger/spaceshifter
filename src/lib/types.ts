@@ -65,13 +65,10 @@ export type PerformanceGroup = {
 
 export type TrainerMessage =
   | {
-      type: "setApiKey";
-      apiKey: string;
-    }
-  | {
       type: "initializeLocalDataset";
       allPairings: Pairings;
       parameters: OptimizationParameters;
+      apiKey: string;
       model?: string;
     }
   | {

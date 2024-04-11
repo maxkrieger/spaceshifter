@@ -95,20 +95,20 @@ export default function PretrainingSetup({
           embeddingModels.state === "hasData"
             ? embeddingModels.data[selectedEmbeddingModel]
             : undefined;
-        workerClient.sendMessage({ type: "setApiKey", apiKey: apiKey! });
         workerClient.sendMessage({
-          type: "setPairings",
+          type: "initializeLocalDataset",
           allPairings: pairs,
           parameters,
+          apiKey: apiKey!,
           model,
         });
         setEmbeddingStatus({ type: "embeddingProgress", progress: 0 });
       } else {
         workerClient.sendMessage({
-          type: "setPairings",
+          type: "initializeExampleDataset",
           allPairings: exampleDataset,
           parameters,
-          cacheUrl: currentDataset?.embeddingsURL,
+          cacheUrl: currentDataset!.embeddingsURL,
         });
       }
     }

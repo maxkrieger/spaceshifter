@@ -61,8 +61,8 @@ class Trainer {
     });
   }
 
-  async embedLocalPairings(pairs: Pairings, model?: string) {
-    await this.embeddingCache!.bulkEmbed(pairs, model);
+  async embedLocalPairings(pairs: Pairings, apiKey: string, model?: string) {
+    await this.embeddingCache!.bulkEmbed(pairs, apiKey, model);
   }
 
   async fetchPrecomputedEmbeddings(url: string) {
@@ -117,6 +117,10 @@ class Trainer {
     );
     matrix.dispose();
   }
+
+  getEmbeddingCache() {
+    return this.embeddingCache.getCache();
+  }
 }
 
 const trainer = new Trainer();
@@ -124,11 +128,12 @@ const trainer = new Trainer();
 addEventListener("message", async (e: MessageEvent<TrainerMessage>) => {
   try {
     switch (e.data.type) {
-      case "setApiKey":
-        trainer.embeddingCache.apiKey = e.data.apiKey;
-        break;
       case "initializeLocalDataset":
-        await trainer.embedLocalPairings(e.data.allPairings, e.data.model);
+        await trainer.embedLocalPairings(
+          e.data.allPairings,
+          e.data.apiKey,
+          e.data.model
+        );
         await trainer.initDataset(e.data.allPairings, e.data.parameters);
         break;
       case "initializeExampleDataset":
@@ -141,7 +146,7 @@ addEventListener("message", async (e: MessageEvent<TrainerMessage>) => {
       case "getEmbeddingCache":
         sendMessageToHost({
           type: "dumpEmbeddingCache",
-          cache: trainer.embeddingCache?.cache ?? {},
+          cache: trainer.getEmbeddingCache(),
         });
         break;
       default:

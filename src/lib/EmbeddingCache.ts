@@ -6,11 +6,13 @@ import { backOff } from "exponential-backoff";
 
 export default class EmbeddingCache {
   cache: EmbeddingCacheData = {};
-  apiKey: string = "";
   constructor() {}
 
   addToCache(add: EmbeddingCacheData) {
     this.cache = { ...this.cache, ...add };
+  }
+  getCache(): EmbeddingCacheData {
+    return this.cache;
   }
 
   getEmbeddingFast(text: string): number[] {
@@ -21,6 +23,7 @@ export default class EmbeddingCache {
   }
   async bulkEmbed(
     pairs: Pairings,
+    apiKey: string,
     model = "text-embedding-ada-002"
   ): Promise<void> {
     log.info("Bulk embedding...");
@@ -52,7 +55,7 @@ export default class EmbeddingCache {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${this.apiKey}`,
+              Authorization: `Bearer ${apiKey}`,
             },
             body: JSON.stringify({
               model,
