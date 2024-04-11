@@ -1,4 +1,7 @@
 import { Tensor1D, Tensor2D, data, TensorContainer } from "@tensorflow/tfjs";
+
+export type EmbeddingCacheData = { [key: string]: number[] };
+
 export type Pairing = {
   text_1: string;
   text_2: string;
@@ -79,6 +82,7 @@ export type TrainerMessage =
   | { type: "getEmbeddingCache" };
 
 export type OutboundMessage =
+  | { type: "fetchingStatus"; status: "complete" | "fetching" }
   | {
       type: "embeddingProgress";
       progress: number;
@@ -99,7 +103,7 @@ export type OutboundMessage =
       shape: [number, number];
     }
   | { type: "error"; message: string }
-  | { type: "dumpEmbeddingCache"; cache: { [key: string]: number[] } };
+  | { type: "dumpEmbeddingCache"; cache: EmbeddingCacheData };
 
 export type DatasetLocator =
   | { type: "local"; id: number }

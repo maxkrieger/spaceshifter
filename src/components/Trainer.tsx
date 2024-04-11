@@ -30,7 +30,7 @@ import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
 import Histogram from "./Histogram";
 import LossCurve from "./LossCurve";
-import { cardClasses } from "@/lib/const";
+import { cardStyles } from "@/lib/const";
 
 export default function Trainer() {
   const { toast } = useToast();
@@ -123,7 +123,7 @@ export default function Trainer() {
 
   if (projectPhase < ProjectPhase.Embedded || !workerClient) {
     return (
-      <div className={cardClasses + " opacity-50"}>
+      <div className={cardStyles + " opacity-50"}>
         <h1 className="text-2xl">Training</h1>
       </div>
     );
@@ -141,7 +141,7 @@ export default function Trainer() {
           (pretrainingPerformance?.testAccuracyAndSE?.accuracy ?? 0))
     ) / 100;
   return (
-    <div className={cardClasses}>
+    <div className={cardStyles}>
       <h1 className="text-2xl mb-3">Training</h1>
       {currentEpoch === null && (
         <div>

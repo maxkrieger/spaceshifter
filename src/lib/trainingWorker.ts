@@ -5,6 +5,7 @@ import computeCosinePairings from "./cosinePairings";
 import { makeMatrix, trainMatrix } from "./model";
 import pairingToDataset from "./pairingToDataset";
 import {
+  EmbeddingCacheData,
   OptimizationParameters,
   OutboundMessage,
   Pairings,
@@ -69,47 +70,22 @@ class Trainer {
   }
 
   async fetchPrecomputedEmbeddings(url: string) {
-    const res = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Transfer-Encoding": "chunked",
-      },
-    });
-    const reader = res.body!.getReader();
-    let receivedLength = 0;
-    let maxchunks = 600;
-    const chunks = [];
-    while (true) {
-      if (chunks.length > maxchunks - 100) {
-        maxchunks *= 2;
-      }
-      const { done, value } = await reader.read();
-      if (done) {
-        break;
-      }
-      chunks.push(value);
-      receivedLength += value!.length;
-      sendMessageToHost({
-        type: "embeddingProgress",
-        total: maxchunks,
-        progress: chunks.length / maxchunks,
+    try {
+      sendMessageToHost({ type: "fetchingStatus", status: "fetching" });
+      const res = await fetch(url, {
+        method: "GET",
       });
-    }
-    const allChunks = new Uint8Array(receivedLength);
-    let position = 0;
-    for (const chunk of chunks) {
-      allChunks.set(chunk, position);
-      position += chunk.length;
-    }
 
-    const result = new TextDecoder("utf-8").decode(allChunks);
+      const json = (await res.json()) as EmbeddingCacheData;
 
-    const json = JSON.parse(result);
-
-    if (this.embeddingCache) {
-      this.embeddingCache.cache = { ...this.embeddingCache.cache, ...json };
-    } else {
-      throw new Error("Embedding cache not initialized");
+      if (this.embeddingCache) {
+        this.embeddingCache.addToCache(json);
+        sendMessageToHost({ type: "fetchingStatus", status: "complete" });
+      } else {
+        throw new Error("Embedding cache not initialized");
+      }
+    } catch (e) {
+      sendMessageToHost({ type: "error", message: (e as Error).toString() });
     }
   }
 

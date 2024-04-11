@@ -12,7 +12,7 @@ import {
   exampleDatasetAtom,
   projectPhaseAtom,
 } from "@/lib/atoms";
-import { cardClasses } from "@/lib/const";
+import { cardStyles } from "@/lib/const";
 
 export default function DataViewer() {
   const currentDataset = useAtomValue(currentDatasetAtom);
@@ -69,7 +69,7 @@ export default function DataViewer() {
   }, [localPairs]);
   const dropzoneVisible = !readonly && (!localPairs || localPairs.length === 0);
   return (
-    <div className={cardClasses}>
+    <div className={cardStyles}>
       <h1 className="text-2xl">Dataset</h1>
       <p className="text-slate-300 text-l my-2">
         To train a bias matrix, provide 100+ text pairs you want to be{" "}

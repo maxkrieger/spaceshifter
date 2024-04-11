@@ -1,13 +1,17 @@
 import { Embedding, db } from "./db";
 import log from "loglevel";
-import { Pairings } from "./types";
+import { EmbeddingCacheData, Pairings } from "./types";
 import { chunk } from "lodash";
 import { backOff } from "exponential-backoff";
 
 export default class EmbeddingCache {
-  cache: { [key: string]: number[] } = {};
+  cache: EmbeddingCacheData = {};
   apiKey: string = "";
   constructor() {}
+
+  addToCache(add: EmbeddingCacheData) {
+    this.cache = { ...this.cache, ...add };
+  }
 
   getEmbeddingFast(text: string): number[] {
     if (!(text in this.cache)) {

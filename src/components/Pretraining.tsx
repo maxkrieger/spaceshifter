@@ -10,7 +10,7 @@ import { useCallback } from "react";
 import Histogram from "./Histogram";
 import { Button } from "./ui/button";
 import { Download } from "lucide-react";
-import { cardClasses } from "@/lib/const";
+import { cardStyles } from "@/lib/const";
 import TooltipWrapper from "./TooltipWrapper";
 
 export default function Pretraining() {
@@ -47,7 +47,7 @@ export default function Pretraining() {
   }, [trainingWorker]);
   if (currentPhase < ProjectPhase.DataPresent) {
     return (
-      <div className={cardClasses + " opacity-50"}>
+      <div className={cardStyles + " opacity-50"}>
         <h1 className="text-2xl">Embeddings</h1>
       </div>
     );
@@ -60,7 +60,7 @@ export default function Pretraining() {
   }
 
   return (
-    <div className={cardClasses}>
+    <div className={cardStyles}>
       <div className="flex flex-row justify-between">
         <h1 className="text-2xl mb-3">Pretraining</h1>
         <TooltipWrapper tooltip="Download all embeddings">

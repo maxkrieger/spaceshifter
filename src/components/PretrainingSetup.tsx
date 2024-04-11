@@ -18,7 +18,7 @@ import TrainingWorkerClient from "@/lib/TrainingWorkerClient";
 import { PerformanceGroup, ProjectPhase } from "@/lib/types";
 import { Progress } from "./ui/progress";
 import useParameters from "@/lib/useParameters";
-import { cardClasses } from "@/lib/const";
+import { cardStyles as cardStyles } from "@/lib/const";
 import {
   Select,
   SelectContent,
@@ -26,6 +26,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { Loader2Icon } from "lucide-react";
+
+type EmbeddingStatus =
+  | { type: "embeddingProgress"; progress: number }
+  | { type: "fetching" }
+  | { type: "idle" };
 
 export default function PretrainingSetup({
   setPerformance,
@@ -55,9 +61,9 @@ export default function PretrainingSetup({
     },
     [parameters, setParameters]
   );
-  const [embeddingProgress, setEmbeddingProgress] = useState<number | null>(
-    null
-  );
+  const [embeddingStatus, setEmbeddingStatus] = useState<EmbeddingStatus>({
+    type: "idle",
+  });
   const embeddingModels = useAtomValue(modelsAtom);
   const [selectedEmbeddingModel, setSelectedEmbeddingModel] = useState(0);
   const embedAndSplit = useCallback(() => {
@@ -66,14 +72,20 @@ export default function PretrainingSetup({
       setWorkerClient(workerClient);
       workerClient.addListener((message) => {
         if (message.type === "embeddingProgress") {
-          setEmbeddingProgress(message.progress);
+          setEmbeddingStatus({
+            type: "embeddingProgress",
+            progress: message.progress,
+          });
         } else if (message.type === "initialPerformance") {
           setPerformance(message.performance);
-          setEmbeddingProgress(null);
+          setEmbeddingStatus({ type: "idle" });
           setPhase(ProjectPhase.Embedded);
+        } else if (message.type === "fetchingStatus") {
+          setEmbeddingStatus({
+            type: message.status === "fetching" ? "fetching" : "idle",
+          });
         }
       });
-      setEmbeddingProgress(0);
       if (currentDataset?.type === "local") {
         const model =
           embeddingModels.state === "hasData"
@@ -86,6 +98,7 @@ export default function PretrainingSetup({
           parameters,
           model,
         });
+        setEmbeddingStatus({ type: "embeddingProgress", progress: 0 });
       } else {
         workerClient.sendMessage({
           type: "setPairings",
@@ -108,15 +121,29 @@ export default function PretrainingSetup({
     selectedEmbeddingModel,
   ]);
 
-  if (embeddingProgress !== null) {
+  if (embeddingStatus.type === "fetching") {
     return (
-      <div className={cardClasses}>
+      <div className={cardStyles}>
+        <h1 className="text-2xl">Pretraining</h1>
+        <div className="p-2 w-full flex flex-col justify-center items-center">
+          <p className="py-2 text-slate-300">
+            Fetching precomputed embeddings...
+          </p>
+          <Loader2Icon className="animate-spin" />
+        </div>
+      </div>
+    );
+  }
+  if (embeddingStatus.type === "embeddingProgress") {
+    return (
+      <div className={cardStyles}>
         <h1 className="text-2xl">Pretraining</h1>
         <div className="p-2">
           <p className="py-2 text-slate-300">
-            embedding & caching ({Math.round(embeddingProgress * 100)}%)...
+            embedding & caching ({Math.round(embeddingStatus.progress * 100)}
+            %)...
           </p>
-          <Progress value={embeddingProgress * 100} />
+          <Progress value={embeddingStatus.progress * 100} />
         </div>
       </div>
     );
@@ -126,7 +153,7 @@ export default function PretrainingSetup({
   }
   const positiveExamples = pairs.filter((pair) => pair.label === 1).length;
   return (
-    <div className={cardClasses}>
+    <div className={cardStyles}>
       <h1 className="text-2xl">Pretraining</h1>
       <p className="text-slate-300 text-l my-2">
         In this step, we prepare the data for training by embedding it and

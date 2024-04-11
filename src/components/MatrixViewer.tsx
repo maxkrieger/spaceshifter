@@ -3,7 +3,7 @@ import { ProjectPhase } from "@/lib/types";
 import { useAtomValue } from "jotai";
 import { Button } from "./ui/button";
 import { useCallback } from "react";
-import { cardClasses } from "@/lib/const";
+import { cardStyles } from "@/lib/const";
 import { DownloadIcon } from "lucide-react";
 
 export default function MatrixViewer() {
@@ -23,13 +23,13 @@ export default function MatrixViewer() {
   }, [bestMatrix]);
   if (projectPhase < ProjectPhase.Trained || bestMatrix === null) {
     return (
-      <div className={cardClasses + " opacity-50"}>
+      <div className={cardStyles + " opacity-50"}>
         <h1 className="text-2xl">Matrix</h1>
       </div>
     );
   }
   return (
-    <div className={cardClasses}>
+    <div className={cardStyles}>
       <h1 className="text-2xl mb-3">Matrix</h1>
       <div>
         <div>
