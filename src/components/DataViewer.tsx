@@ -25,10 +25,7 @@ export default function DataViewer() {
         .where("dataset")
         .equals(currentDataset.id)
         .toArray();
-      // If it got preloaded
-      if (pairs.length > 0 && projectPhase <= ProjectPhase.NoData) {
-        setProjectPhase(ProjectPhase.DataPresent);
-      }
+
       return pairs;
     }
     return null;
