@@ -85,19 +85,15 @@ async function* gradientDescentOptimize(
   draftMatrix.dispose();
 }
 
-async function* tfOptimize(
+async function* adamaxOptimize(
   dataset: TensorDataset,
   parameters: OptimizationParameters,
-  matrix: Variable,
-  optimizerType: "adamax"
+  matrix: Variable
 ): AsyncGenerator<number> {
   const shuffledBatchDataset = dataset.tfDataset
     .shuffle(dataset.tfDataset.size)
     .batch(parameters.batchSize);
-  const optimizer =
-    optimizerType === "adamax"
-      ? tf_train.adamax(parameters.learningRate)
-      : tf_train.adam(parameters.learningRate);
+  const optimizer = tf_train.adamax(parameters.learningRate);
   for (let epoch = 0; epoch < parameters.epochs; epoch++) {
     await shuffledBatchDataset.forEachAsync((batch) => {
       const { e1, e2, labels } = batch as DatasetSlice;
@@ -129,6 +125,6 @@ export function trainMatrix(
     case "gradient":
       return gradientDescentOptimize(dataset, parameters, matrix);
     case "adamax":
-      return tfOptimize(dataset, parameters, matrix, "adamax");
+      return adamaxOptimize(dataset, parameters, matrix);
   }
 }
