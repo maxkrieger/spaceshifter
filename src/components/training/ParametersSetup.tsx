@@ -24,7 +24,9 @@ function ParameterField({
 }) {
   return (
     <>
-      <Label htmlFor={identifier}>{name}</Label>
+      <Label htmlFor={identifier} className="md:text-right sm:text-left">
+        {name}
+      </Label>
       {children}
       <p className="text-sm text-slate-200">{description}</p>
     </>
@@ -60,8 +62,10 @@ export default function ParametersSetup({
   );
   return (
     <div>
-      <p className="text-slate-200">Adjust the following parameters to improve performance.</p>
-      <div className="p-3 grid md:grid-cols-[auto,220px,3fr] gap-x-5 gap-y-3 items-center sm:grid-cols-1">
+      <p className="text-slate-200">
+        Adjust the following parameters to improve performance.
+      </p>
+      <div className="p-3 grid md:grid-cols-[auto,220px,3fr] sm:grid-cols-1 gap-x-5 gap-y-3 items-center">
         <ParameterField
           identifier="targetEmbeddingSize"
           name="Target Embedding Size"
@@ -103,7 +107,9 @@ export default function ParametersSetup({
           <Input
             type="text"
             value={parameters.learningRate}
-            onChange={(e) => changeValue(Number(e.target.value), "learningRate")}
+            onChange={(e) =>
+              changeValue(Number(e.target.value), "learningRate")
+            }
             id="learningRate"
           />
         </ParameterField>
@@ -145,7 +151,9 @@ export default function ParametersSetup({
             max={1}
             step={0.05}
             value={parameters.dropoutFraction}
-            onChange={(e) => changeValue(Number(e.target.value), "dropoutFraction")}
+            onChange={(e) =>
+              changeValue(Number(e.target.value), "dropoutFraction")
+            }
             id="dropoutFraction"
           />
         </ParameterField>

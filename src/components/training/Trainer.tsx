@@ -98,7 +98,7 @@ export default function Trainer() {
       <h1 className="text-2xl mb-3">Training</h1>
       {currentEpoch === null && (
         <ParametersSetup>
-          <div className="flex flex-row px-3">
+          <div className="flex flex-row p-3">
             <Button onClick={train} className="w-full">
               Train
             </Button>

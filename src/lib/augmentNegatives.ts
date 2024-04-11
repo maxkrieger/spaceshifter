@@ -1,5 +1,6 @@
 import { Pairing, Pairings } from "../types";
-import { partition, shuffle } from "lodash";
+import { shuffle } from "lodash";
+import { countLabels } from "./utils";
 
 /**
  * Hash function for a pairing
@@ -20,15 +21,9 @@ function keyPairing({
  * Must have >1 positive example to augment negatives
  */
 export default function augmentNegatives(pairings: Pairings): Pairings {
-  const [positives, negatives] = partition(
-    pairings,
-    ({ label }) => label === 1
-  );
+  const { positives, negatives } = countLabels(pairings);
 
-  const numberOfNegativesToAdd = Math.max(
-    positives.length - negatives.length,
-    0
-  );
+  const numberOfNegativesToAdd = Math.max(positives - negatives, 0);
   if (numberOfNegativesToAdd === 0) {
     return pairings;
   }

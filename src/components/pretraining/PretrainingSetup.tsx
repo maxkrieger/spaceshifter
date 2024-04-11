@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Loader2Icon } from "lucide-react";
+import { countLabels } from "@/lib/utils";
 
 type EmbeddingStatus =
   | { type: "embeddingProgress"; progress: number }
@@ -153,7 +154,7 @@ export default function PretrainingSetup({
   if (!pairs) {
     return <div>loading...</div>;
   }
-  const positiveExamples = pairs.filter((pair) => pair.label === 1).length;
+  const { positives, negatives } = countLabels(pairs);
   return (
     <div className={cardStyles}>
       <h1 className="text-2xl">Pretraining</h1>
@@ -167,32 +168,36 @@ export default function PretrainingSetup({
         .
       </p>
       <p className="text-slate-300 text-l my-2">
-        There are <span className="text-white">{positiveExamples}</span>{" "}
-        positive examples and{" "}
-        <span className="text-white">{pairs.length - positiveExamples}</span>{" "}
-        negative examples.{" "}
+        There are <span className="text-white">{positives}</span> positive
+        examples and <span className="text-white">{negatives}</span> negative
+        examples.{" "}
         {pairs.length <= 1 && (
           <span className="text-red-300 font-bold">
             You need at least 2 examples to train.
           </span>
         )}
-        {pairs.length > 1 && pairs.length - positiveExamples < positiveExamples
+        {pairs.length > 1 && negatives < positives
           ? "More negative examples can be generated."
           : ""}
       </p>
-      <div className="m-3 flex items-center space-x-2">
-        <Switch
-          id="augment"
-          checked={parameters.generateSyntheticNegatives}
-          onCheckedChange={(b) =>
-            setTrainingParam("generateSyntheticNegatives", b)
-          }
-        />
-        <Label htmlFor="augment">
-          Generate enough negative examples to match positives
+      <div className="grid grid-cols-[250px,1fr] gap-3 p-3 items-center">
+        {positives - negatives > 0 && (
+          <>
+            <Label htmlFor="augment" className="md:text-right sm:text-left">
+              Generate {Math.max(positives - negatives, 0)} negative examples
+            </Label>
+            <Switch
+              id="augment"
+              checked={parameters.generateSyntheticNegatives}
+              onCheckedChange={(b) =>
+                setTrainingParam("generateSyntheticNegatives", b)
+              }
+            />
+          </>
+        )}
+        <Label htmlFor="split" className="md:text-right sm:text-left">
+          Fraction of dataset used for testing
         </Label>
-      </div>
-      <div className="m-3 flex items-center space-x-2">
         <Input
           id="split"
           type="number"
@@ -205,29 +210,30 @@ export default function PretrainingSetup({
             setTrainingParam("testSplitFraction", Number(e.target.value))
           }
         />
-        <Label htmlFor="split">Fraction of dataset used for testing</Label>
+        {currentDataset.type === "local" && (
+          <>
+            <Label htmlFor="model" className="md:text-right sm:text-left">
+              Embedding model
+            </Label>
+            <Select
+              value={selectedEmbeddingModel.toString()}
+              onValueChange={(v) => setSelectedEmbeddingModel(parseInt(v, 10))}
+            >
+              <SelectTrigger className="md:w-[250px] sm:w-[200px]" id="model">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {embeddingModels.state === "hasData" &&
+                  embeddingModels.data.map((model, i) => (
+                    <SelectItem key={i} value={i.toString()}>
+                      {model}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </>
+        )}
       </div>
-      {currentDataset.type === "local" && (
-        <div className="m-3 flex items-center space-x-2">
-          <Select
-            value={selectedEmbeddingModel.toString()}
-            onValueChange={(v) => setSelectedEmbeddingModel(parseInt(v, 10))}
-          >
-            <SelectTrigger className="w-[250px]" id="model">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {embeddingModels.state === "hasData" &&
-                embeddingModels.data.map((model, i) => (
-                  <SelectItem key={i} value={i.toString()}>
-                    {model}
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
-          <Label htmlFor="model">Embedding model</Label>
-        </div>
-      )}
       <div className="w-full px-3">
         <Button
           className="w-full"
