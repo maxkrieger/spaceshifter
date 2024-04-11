@@ -20,6 +20,19 @@ function keyPairing({
  * Must have >1 positive example to augment negatives
  */
 export default function augmentNegatives(pairings: Pairings): Pairings {
+  const [positives, negatives] = partition(
+    pairings,
+    ({ label }) => label === 1
+  );
+
+  const numberOfNegativesToAdd = Math.max(
+    positives.length - negatives.length,
+    0
+  );
+  if (numberOfNegativesToAdd === 0) {
+    return pairings;
+  }
+
   const allTexts = new Set<string>();
   const pairs = new Set<string>();
   for (const { text_1, text_2 } of pairings) {
@@ -42,16 +55,9 @@ export default function augmentNegatives(pairings: Pairings): Pairings {
     }
   }
 
-  const [positives, negatives] = partition(
-    pairings,
-    ({ label }) => label === 1
+  const selectedNegatives = shuffle(augmentedNegatives).slice(
+    0,
+    numberOfNegativesToAdd
   );
-
-  return [
-    ...pairings,
-    ...shuffle(augmentedNegatives).slice(
-      0,
-      positives.length - negatives.length
-    ),
-  ];
+  return [...pairings, ...selectedNegatives];
 }
