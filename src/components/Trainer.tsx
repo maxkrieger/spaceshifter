@@ -270,35 +270,31 @@ export default function Trainer() {
           </div>
         )}
         {currentPerformance && (
-          <div className="my-4 flex flex-row justify-center">
-            <p className="text-slate-300 mb-4">
-              Currently, test accuracy is{" "}
-              <span className="text-white">
-                {currentPerformance.testAccuracyAndSE.message}
-              </span>{" "}
-              (
-              <span
-                className={testPerfDiff > 0 ? "text-green-300" : "text-red-300"}
-              >
-                {testPerfDiff > 0 ? "+" : ""}
-                {testPerfDiff}%
-              </span>
-              ) and train accuracy is{" "}
-              <span className="text-white">
-                {currentPerformance.trainAccuracyAndSE.message}
-              </span>{" "}
-              (
-              <span
-                className={
-                  trainPerfDiff > 0 ? "text-green-300" : "text-red-300"
-                }
-              >
-                {trainPerfDiff > 0 ? "+" : ""}
-                {trainPerfDiff}%
-              </span>
-              ).
-            </p>
-          </div>
+          <p className="text-slate-300 my-4">
+            Currently, test accuracy is{" "}
+            <span className="text-white">
+              {currentPerformance.testAccuracyAndSE.message}
+            </span>{" "}
+            (
+            <span
+              className={testPerfDiff > 0 ? "text-green-300" : "text-red-300"}
+            >
+              {testPerfDiff > 0 ? "+" : ""}
+              {testPerfDiff}%
+            </span>
+            ) and train accuracy is{" "}
+            <span className="text-white">
+              {currentPerformance.trainAccuracyAndSE.message}
+            </span>{" "}
+            (
+            <span
+              className={trainPerfDiff > 0 ? "text-green-300" : "text-red-300"}
+            >
+              {trainPerfDiff > 0 ? "+" : ""}
+              {trainPerfDiff}%
+            </span>
+            ).
+          </p>
         )}
         <div className="flex flex-row items-center justify-center flex-wrap">
           {performanceHistory.length > 0 && (
