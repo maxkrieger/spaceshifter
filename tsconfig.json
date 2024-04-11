@@ -3,7 +3,7 @@
     "types": [],
     "target": "ES2020",
     "useDefineForClassFields": true,
-    "lib": ["webworker", "ES2020", "DOM", "DOM.Iterable"],
+    "lib": ["webworker", "ES2021", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
 
