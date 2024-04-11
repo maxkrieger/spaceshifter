@@ -58,8 +58,8 @@ class Trainer {
     }
     const { train, test } = trainTestSplit(pairs, params.testSplitFraction);
     const shouldAugment = params.generateSyntheticNegatives;
-    const testAugmented = shouldAugment ? augmentNegatives(test, 1) : test;
-    const trainAugmented = shouldAugment ? augmentNegatives(train, 1) : train;
+    const testAugmented = shouldAugment ? augmentNegatives(test) : test;
+    const trainAugmented = shouldAugment ? augmentNegatives(train) : train;
     this.trainDataset = pairingToDataset(trainAugmented, this.embeddingCache!);
     this.testDataset = pairingToDataset(testAugmented, this.embeddingCache!);
 
