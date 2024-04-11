@@ -31,7 +31,10 @@ export default function Trainer() {
   const [parameters] = useParameters();
 
   const train = useCallback(async () => {
-    workerClient?.addListener((message) => {
+    if (!workerClient) {
+      return;
+    }
+    const cancel = workerClient.addListener((message) => {
       if (message.type === "updatedPerformance") {
         setCurrentEpoch(message.epoch);
         setCurrentPerformance(message.performance);
@@ -46,6 +49,7 @@ export default function Trainer() {
         setProjectPhase(ProjectPhase.Trained);
         setCurrentEpoch(null);
         setBestMatrix({ matrixNpy: message.matrixNpy, shape: message.shape });
+        cancel();
       } else if (message.type === "error") {
         toast({
           title: "Error",
@@ -53,6 +57,7 @@ export default function Trainer() {
           variant: "destructive",
         });
         setCurrentEpoch(null);
+        cancel();
       }
     });
     setProjectPhase(ProjectPhase.Embedded);

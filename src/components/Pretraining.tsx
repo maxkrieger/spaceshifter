@@ -21,7 +21,7 @@ export default function Pretraining() {
   const trainingWorker = useAtomValue(trainingWorkerAtom);
   const downloadEmbeddings = useCallback(() => {
     if (trainingWorker) {
-      trainingWorker.addListener((message) => {
+      const cancel = trainingWorker.addListener((message) => {
         if (message.type === "dumpEmbeddingCache") {
           const blob = new Blob([JSON.stringify(message.cache)], {
             type: "text/json",
@@ -40,6 +40,7 @@ export default function Pretraining() {
           link.click();
           link.remove();
           URL.revokeObjectURL(url);
+          cancel();
         }
       });
       trainingWorker.sendMessage({ type: "getEmbeddingCache" });
