@@ -2,7 +2,6 @@ import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useToast } from "./ui/use-toast";
 import {
   bestMatrixAtom,
-  currentDatasetAtom,
   pretrainingPerformanceAtom,
   projectPhaseAtom,
   trainingWorkerAtom,
@@ -35,7 +34,6 @@ import { cardStyles } from "@/lib/const";
 export default function Trainer() {
   const { toast } = useToast();
   const [projectPhase, setProjectPhase] = useAtom(projectPhaseAtom);
-  const currentDataset = useAtomValue(currentDatasetAtom);
   const [parameters, setParameters] = useParameters();
   const workerClient = useAtomValue(trainingWorkerAtom);
   const [currentEpoch, setCurrentEpoch] = useState<number | null>(null);
@@ -82,15 +80,6 @@ export default function Trainer() {
         setProjectPhase(ProjectPhase.Trained);
         setCurrentEpoch(null);
         setBestMatrix({ matrixNpy: message.matrixNpy, shape: message.shape });
-        if (currentDataset.type === "local") {
-          // TODO
-          // await db.savedMatrices.add({
-          //   matrix: message.matrixNpy,
-          //   shape: message.shape,
-          //   dataset: currentDataset.id,
-          //   dateCreated: new Date(),
-          // });
-        }
       } else if (message.type === "error") {
         toast({
           title: "Error",
@@ -105,14 +94,7 @@ export default function Trainer() {
     setCurrentPerformance(null);
     setPerformanceHistory([]);
     workerClient?.sendMessage({ type: "train", parameters });
-  }, [
-    workerClient,
-    toast,
-    setProjectPhase,
-    parameters,
-    currentDataset,
-    setBestMatrix,
-  ]);
+  }, [workerClient, toast, setProjectPhase, parameters, setBestMatrix]);
   const stop = useCallback(() => {
     workerClient?.terminate();
     setCurrentEpoch(null);
