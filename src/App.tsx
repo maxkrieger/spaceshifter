@@ -9,12 +9,15 @@ import { Toaster } from "./components/ui/toaster";
 import { TooltipProvider } from "./components/ui/tooltip";
 
 function App() {
-  const [currentProject, setCurrentProject] = useAtom(currentDatasetAtom);
+  const [currentDataset, setCurrentDataset] = useAtom(currentDatasetAtom);
 
   return (
     <TooltipProvider>
       <div className="p-5 text-white">
-        <button className="button" onClick={() => setCurrentProject(null)}>
+        <button
+          className="button"
+          onClick={() => setCurrentDataset({ type: "none" })}
+        >
           <div className="flex flex-row align-center py-3 ">
             <img src={logo} width={40} />
             <img
@@ -25,7 +28,7 @@ function App() {
             />
           </div>
         </button>
-        {currentProject === null ? (
+        {currentDataset.type === "none" ? (
           <div>
             <Hero />
             <ProjectPanel />

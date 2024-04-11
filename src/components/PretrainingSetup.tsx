@@ -1,7 +1,6 @@
 import {
   apiKeyAtom,
   currentDatasetAtom,
-  exampleDatasetAtom,
   modelsAtom,
   projectPhaseAtom,
   trainingWorkerAtom,
@@ -48,17 +47,17 @@ export default function PretrainingSetup({
   const setPhase = useSetAtom(projectPhaseAtom);
   const apiKey = useAtomValue(apiKeyAtom);
   const [parameters, setParameters] = useParameters();
-  const exampleDataset = useAtomValue(exampleDatasetAtom);
   const pairs = useLiveQuery(async () => {
-    if (currentDataset?.type === "local") {
+    if (currentDataset.type === "local") {
       const pairs = await db.pair
         .where("dataset")
         .equals(currentDataset.id)
         .toArray();
       return pairs as Pairings;
+    } else if (currentDataset.type === "example") {
+      return currentDataset.pairings;
     }
-    return exampleDataset;
-  }, [currentDataset, exampleDataset]);
+  }, [currentDataset]);
   const setTrainingParam = useCallback(
     (key: keyof OptimizationParameters, value: boolean | number) => {
       setParameters({ ...parameters, [key]: value });
@@ -90,7 +89,7 @@ export default function PretrainingSetup({
           });
         }
       });
-      if (currentDataset?.type === "local") {
+      if (currentDataset.type === "local") {
         const model =
           embeddingModels.state === "hasData"
             ? embeddingModels.data[selectedEmbeddingModel]
@@ -103,12 +102,12 @@ export default function PretrainingSetup({
           model,
         });
         setEmbeddingStatus({ type: "embeddingProgress", progress: 0 });
-      } else {
+      } else if (currentDataset.type === "example") {
         workerClient.sendMessage({
           type: "initializeExampleDataset",
-          allPairings: exampleDataset,
+          allPairings: currentDataset.pairings,
           parameters,
-          cacheUrl: currentDataset!.embeddingsURL,
+          cacheUrl: currentDataset.embeddingsURL,
         });
       }
     }
@@ -120,7 +119,6 @@ export default function PretrainingSetup({
     setPerformance,
     setPhase,
     currentDataset,
-    exampleDataset,
     embeddingModels,
     selectedEmbeddingModel,
   ]);
@@ -209,7 +207,7 @@ export default function PretrainingSetup({
         />
         <Label htmlFor="split">Fraction of dataset used for testing</Label>
       </div>
-      {currentDataset?.type === "local" && (
+      {currentDataset.type === "local" && (
         <div className="m-3 flex items-center space-x-2">
           <Select
             value={selectedEmbeddingModel.toString()}

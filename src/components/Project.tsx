@@ -24,21 +24,22 @@ export default function Project() {
   const [currentDataset, setCurrentDataset] = useAtom(currentDatasetAtom);
 
   const datasetName = useLiveQuery(async () => {
-    if (currentDataset?.type === "local") {
+    if (currentDataset.type === "local") {
       const dataset = await db.dataset.get(currentDataset.id);
       return dataset?.name;
+    } else if (currentDataset.type === "example") {
+      return currentDataset.name;
     }
-    return currentDataset?.name;
   }, [currentDataset]);
 
   const { toast } = useToast();
 
   const deleteProject = useCallback(async () => {
-    if (currentDataset?.type === "local") {
+    if (currentDataset.type === "local") {
       const { dismiss } = toast({ title: "Deleting dataset..." });
       await db.deleteDataset(currentDataset.id);
       dismiss();
-      setCurrentDataset(null);
+      setCurrentDataset({ type: "none" });
     }
   }, [currentDataset, setCurrentDataset, toast]);
 
@@ -51,14 +52,14 @@ export default function Project() {
         <h1 className="text-3xl">
           <span
             className="text-slate-500 text-2xl button cursor-pointer"
-            onClick={() => setCurrentDataset(null)}
+            onClick={() => setCurrentDataset({ type: "none" })}
           >
             projects/
           </span>
           {datasetName}
         </h1>
         <div>
-          {currentDataset?.type === "local" && (
+          {currentDataset.type === "local" && (
             <Dialog>
               <DialogTrigger>
                 <TrashIcon size={15} className="opacity-50" />

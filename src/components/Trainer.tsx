@@ -82,7 +82,7 @@ export default function Trainer() {
         setProjectPhase(ProjectPhase.Trained);
         setCurrentEpoch(null);
         setBestMatrix({ matrixNpy: message.matrixNpy, shape: message.shape });
-        if (currentDataset?.type === "local") {
+        if (currentDataset.type === "local") {
           // TODO
           // await db.savedMatrices.add({
           //   matrix: message.matrixNpy,

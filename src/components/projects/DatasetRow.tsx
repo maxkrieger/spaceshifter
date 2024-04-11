@@ -1,10 +1,6 @@
 import { Button } from "../ui/button";
 import { useSetAtom } from "jotai";
-import {
-  currentDatasetAtom,
-  exampleDatasetAtom,
-  projectPhaseAtom,
-} from "@/lib/atoms";
+import { currentDatasetAtom, projectPhaseAtom } from "@/lib/atoms";
 import { ChevronRight } from "lucide-react";
 import { DatasetLocator, Pairings, ProjectPhase } from "@/lib/types";
 import { useCallback } from "react";
@@ -19,19 +15,29 @@ export function DatasetRow({
 }) {
   const setCurrentDataset = useSetAtom(currentDatasetAtom);
   const setPhase = useSetAtom(projectPhaseAtom);
-  const setExampleDataset = useSetAtom(exampleDatasetAtom);
+
   const { toast } = useToast();
   const selectDataset = useCallback(async () => {
     if (locator.type === "example") {
       const { dismiss } = toast({ title: "Loading example..." });
       const res = await fetch(locator.datasetURL);
-      const dataset = (await res.json()) as Pairings;
-      setExampleDataset(dataset);
+      const pairings = (await res.json()) as Pairings;
+      setCurrentDataset({
+        type: "example",
+        embeddingsURL: locator.embeddingsURL,
+        datasetURL: locator.datasetURL,
+        name: locator.name,
+        pairings,
+      });
       dismiss();
+    } else {
+      setCurrentDataset({
+        type: "local",
+        id: locator.id,
+      });
     }
     setPhase(ProjectPhase.DataPresent);
-    setCurrentDataset(locator);
-  }, [setCurrentDataset, setPhase, locator, setExampleDataset, toast]);
+  }, [setCurrentDataset, setPhase, locator, toast]);
   return (
     <div className="mt-2">
       <Button

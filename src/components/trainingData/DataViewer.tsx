@@ -7,21 +7,16 @@ import { DataTable } from "./DataTable";
 
 import CellDropdown from "./CellDropdown";
 import { useAtom, useAtomValue } from "jotai";
-import {
-  currentDatasetAtom,
-  exampleDatasetAtom,
-  projectPhaseAtom,
-} from "@/lib/atoms";
+import { currentDatasetAtom, projectPhaseAtom } from "@/lib/atoms";
 import { cardStyles } from "@/lib/const";
 import TableButtons from "./TableButtons";
 
 export default function DataViewer() {
   const currentDataset = useAtomValue(currentDatasetAtom);
   const [projectPhase, setProjectPhase] = useAtom(projectPhaseAtom);
-  const readonly = currentDataset?.type !== "local";
-  const currentExampleDataset = useAtomValue(exampleDatasetAtom);
+  const readonly = currentDataset.type !== "local";
   const localPairs = useLiveQuery(async () => {
-    if (currentDataset?.type === "local") {
+    if (currentDataset.type === "local") {
       const pairs = await db.pair
         .where("dataset")
         .equals(currentDataset.id)
@@ -33,7 +28,7 @@ export default function DataViewer() {
   }, [currentDataset, projectPhase]);
   const addRows = useCallback(
     async (rows: Pairings) => {
-      if (currentDataset?.type === "local") {
+      if (currentDataset.type === "local") {
         await db.pair.bulkAdd(
           rows.map((pairing) => ({
             ...pairing,
@@ -84,7 +79,9 @@ export default function DataViewer() {
                   onAddPairing={(pairing) => addRows([pairing])}
                   onDownload={downloadJSON}
                 />
-              ) : null
+              ) : (
+                <div />
+              )
             }
             columns={[
               { accessorKey: "text_1", header: "text_1", size: 1 / 3 },
@@ -100,9 +97,11 @@ export default function DataViewer() {
                 : []),
             ]}
             data={
-              currentDataset?.type === "local"
+              currentDataset.type === "local"
                 ? localPairs ?? []
-                : currentExampleDataset
+                : currentDataset.type === "example"
+                ? currentDataset.pairings
+                : []
             }
           />
         </div>

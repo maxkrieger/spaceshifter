@@ -2,19 +2,18 @@ import { atomWithStorage, loadable } from "jotai/utils";
 import { atom } from "jotai";
 import TrainingWorkerClient from "./TrainingWorkerClient";
 import {
-  DatasetLocator,
   ProjectPhase,
   OptimizationParameters,
   defaultOptimizationParameters,
-  Pairings,
   PerformanceGroup,
+  CurrentDataset,
 } from "./types";
 
 export const apiKeyAtom = atomWithStorage<string | null>("api-key", null);
 
 export const trainingWorkerAtom = atom<TrainingWorkerClient | null>(null);
 
-export const currentDatasetAtom = atom<DatasetLocator | null>(null);
+export const currentDatasetAtom = atom<CurrentDataset>({ type: "none" });
 
 export const projectPhaseAtom = atom<ProjectPhase>(ProjectPhase.NoData);
 
@@ -28,8 +27,6 @@ export const bestMatrixAtom = atom<{
 export const exampleParametersAtom = atom<OptimizationParameters>(
   defaultOptimizationParameters
 );
-
-export const exampleDatasetAtom = atom<Pairings>([]);
 
 const _modelsAtom = atom<Promise<string[]>>(async (get) => {
   const apiKey = get(apiKeyAtom);

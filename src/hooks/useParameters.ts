@@ -18,7 +18,7 @@ export default function useParameters(): [
     exampleParametersAtom
   );
   const localParams = useLiveQuery(async () => {
-    if (currentDataset?.type === "local") {
+    if (currentDataset.type === "local") {
       const params = await db.dataset.get(currentDataset.id);
       if (params) {
         return params.trainingParams;
@@ -28,7 +28,7 @@ export default function useParameters(): [
   }, [currentDataset]);
   const setParams = useCallback(
     async (parameters: OptimizationParameters) => {
-      if (currentDataset?.type === "local") {
+      if (currentDataset.type === "local") {
         await db.dataset.update(currentDataset.id, {
           trainingParams: parameters,
         });
@@ -36,7 +36,7 @@ export default function useParameters(): [
     },
     [currentDataset]
   );
-  const local = currentDataset?.type === "local";
+  const local = currentDataset.type === "local";
   return [
     local && localParams ? localParams : exampleParams,
     local ? setParams : setExampleParameters,

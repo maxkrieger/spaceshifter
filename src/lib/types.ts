@@ -116,6 +116,20 @@ export type DatasetLocator =
       name: string;
     };
 
+export type CurrentDataset =
+  | {
+      type: "local";
+      id: number;
+    }
+  | {
+      type: "example";
+      embeddingsURL: string;
+      datasetURL: string;
+      name: string;
+      pairings: Pairings;
+    }
+  | { type: "none" };
+
 export type PerformanceHistory = {
   test: AccuracyAndSE;
   train: AccuracyAndSE;
