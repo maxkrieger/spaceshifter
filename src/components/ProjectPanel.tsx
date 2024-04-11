@@ -2,12 +2,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../lib/db";
 import { Button } from "./ui/button";
 import { useAtom, useSetAtom } from "jotai";
-import {
-  apiKeyAtom,
-  currentDatasetAtom,
-  exampleDatasetAtom,
-  projectPhaseAtom,
-} from "@/lib/atoms";
+import { apiKeyAtom, currentDatasetAtom, projectPhaseAtom } from "@/lib/atoms";
 import ApiKey from "./ApiKey";
 import { ThemeProvider } from "./theme-provider";
 import {
@@ -16,13 +11,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Settings, ChevronRight } from "lucide-react";
-import {
-  DatasetLocator,
-  Pairings,
-  ProjectPhase,
-  defaultOptimizationParameters,
-} from "@/lib/types";
+import { Settings } from "lucide-react";
+import { ProjectPhase, defaultOptimizationParameters } from "@/lib/types";
 import {
   Dialog,
   DialogContent,
@@ -33,46 +23,11 @@ import {
 import { Input } from "./ui/input";
 import { useCallback, useState } from "react";
 import { sortBy } from "lodash";
-import { useToast } from "./ui/use-toast";
+import { DatasetRow } from "./DatasetRow";
 
 const cardStyle =
   "border border-slate-500 bg-slate-900 rounded-md p-4 m-2 flex-1 min-w-[300px]";
 
-function DatasetRow({
-  name,
-  locator,
-}: {
-  name: string;
-  locator: DatasetLocator;
-}) {
-  const setCurrentDataset = useSetAtom(currentDatasetAtom);
-  const setPhase = useSetAtom(projectPhaseAtom);
-  const setExampleDataset = useSetAtom(exampleDatasetAtom);
-  const { toast } = useToast();
-  const selectDataset = useCallback(async () => {
-    if (locator.type === "example") {
-      const { dismiss } = toast({ title: "Loading example..." });
-      const res = await fetch(locator.datasetURL);
-      const dataset = (await res.json()) as Pairings;
-      setExampleDataset(dataset);
-      dismiss();
-    }
-    setPhase(ProjectPhase.DataPresent);
-    setCurrentDataset(locator);
-  }, [setCurrentDataset, setPhase, locator, setExampleDataset, toast]);
-  return (
-    <div className="mt-2">
-      <Button
-        variant="outline"
-        className="w-full text-left justify-between text-l font-bold"
-        onClick={selectDataset}
-      >
-        <div>{name}</div>
-        <ChevronRight className="h-4 w-4" />
-      </Button>
-    </div>
-  );
-}
 export default function ProjectPanel() {
   const localDatasets = useLiveQuery(async () => {
     const ds = await db.dataset.toArray();
