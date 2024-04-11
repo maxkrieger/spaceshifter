@@ -30,7 +30,6 @@ import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
 import Histogram from "./Histogram";
 import LossCurve from "./LossCurve";
-import { db } from "@/lib/db";
 import { cardClasses } from "@/lib/const";
 
 export default function Trainer() {
@@ -67,7 +66,7 @@ export default function Trainer() {
     },
     [parameters, setParameters]
   );
-  const train = useCallback(() => {
+  const train = useCallback(async () => {
     workerClient?.addListener((message) => {
       if (message.type === "updatedPerformance") {
         setCurrentEpoch(message.epoch);
@@ -84,15 +83,13 @@ export default function Trainer() {
         setCurrentEpoch(null);
         setBestMatrix({ matrixNpy: message.matrixNpy, shape: message.shape });
         if (currentDataset?.type === "local") {
-          (async () => {
-            // TODO
-            // await db.savedMatrices.add({
-            //   matrix: message.matrixNpy,
-            //   shape: message.shape,
-            //   dataset: currentDataset.id,
-            //   dateCreated: new Date(),
-            // });
-          })();
+          // TODO
+          // await db.savedMatrices.add({
+          //   matrix: message.matrixNpy,
+          //   shape: message.shape,
+          //   dataset: currentDataset.id,
+          //   dateCreated: new Date(),
+          // });
         }
       } else if (message.type === "error") {
         toast({

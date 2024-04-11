@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { Pairings, ProjectPhase } from "@/lib/types";
 import { useLiveQuery } from "dexie-react-hooks";
 import Dropzone from "./Dropzone";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { DataTable } from "./DataTable";
 
 import CellDropdown from "./CellDropdown";
@@ -32,7 +32,7 @@ export default function DataViewer() {
       return pairs;
     }
     return null;
-  }, [currentDataset, setProjectPhase, projectPhase]);
+  }, [currentDataset, projectPhase]);
   const addRows = useCallback(
     (rows: Pairings) => {
       (async () => {
@@ -72,9 +72,10 @@ export default function DataViewer() {
     <div className={cardClasses}>
       <h1 className="text-2xl">Dataset</h1>
       <p className="text-slate-300 text-l my-2">
-        To train a spaceshifting matrix, provide 100+ text pairs you want to be{" "}
+        To train a bias matrix, provide 100+ text pairs you want to be{" "}
         <span className="text-white">close together (1)</span> or{" "}
-        <span className="text-white">far apart (-1)</span>.
+        <span className="text-white">far apart (-1)</span> in the resultant
+        embedding space.
       </p>
       {dropzoneVisible ? (
         <Dropzone addRows={addRows} />
@@ -99,7 +100,7 @@ export default function DataViewer() {
             ]}
             data={
               currentDataset?.type === "local"
-                ? (localPairs as Pairings) ?? []
+                ? localPairs ?? []
                 : currentExampleDataset
             }
           />
