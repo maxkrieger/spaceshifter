@@ -1,51 +1,20 @@
 import { ProjectPhase } from "@/types";
 import PretrainingSetup from "./PretrainingSetup";
 import { useAtom, useAtomValue } from "jotai";
-import {
-  pretrainingPerformanceAtom,
-  projectPhaseAtom,
-  trainingWorkerAtom,
-} from "@/lib/atoms";
-import { useCallback } from "react";
+import { pretrainingPerformanceAtom, projectPhaseAtom } from "@/lib/atoms";
 import Histogram from "./Histogram";
 import { Button } from "./ui/button";
 import { Download } from "lucide-react";
 import { cardStyles } from "@/lib/const";
 import TooltipWrapper from "./TooltipWrapper";
+import useDownloadEmbeddings from "@/hooks/useDownloadEmbeddings";
 
 export default function Pretraining() {
   const currentPhase = useAtomValue(projectPhaseAtom);
   const [initialPerformance, setInitialPerformance] = useAtom(
     pretrainingPerformanceAtom
   );
-  const trainingWorker = useAtomValue(trainingWorkerAtom);
-  const downloadEmbeddings = useCallback(() => {
-    if (trainingWorker) {
-      const cancel = trainingWorker.addListener((message) => {
-        if (message.type === "dumpEmbeddingCache") {
-          const blob = new Blob([JSON.stringify(message.cache)], {
-            type: "text/json",
-          });
-          const link = document.createElement("a");
-          const url = URL.createObjectURL(blob);
-
-          link.download = "embeddings.json";
-          link.href = url;
-          link.dataset.downloadurl = [
-            "text/json",
-            link.download,
-            link.href,
-          ].join(":");
-
-          link.click();
-          link.remove();
-          URL.revokeObjectURL(url);
-          cancel();
-        }
-      });
-      trainingWorker.sendMessage({ type: "getEmbeddingCache" });
-    }
-  }, [trainingWorker]);
+  const downloadEmbeddings = useDownloadEmbeddings();
   if (currentPhase < ProjectPhase.DataPresent) {
     return (
       <div className={cardStyles + " opacity-50"}>
