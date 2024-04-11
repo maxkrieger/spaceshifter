@@ -19,9 +19,10 @@ import {
   PerformanceGroup,
   ProjectPhase,
   OptimizationParameters,
+  Pairings,
 } from "@/lib/types";
 import { Progress } from "./ui/progress";
-import useParameters from "@/lib/useParameters";
+import useParameters from "@/hooks/useParameters";
 import { cardStyles as cardStyles } from "@/lib/const";
 import {
   Select,
@@ -54,10 +55,9 @@ export default function PretrainingSetup({
         .where("dataset")
         .equals(currentDataset.id)
         .toArray();
-      return pairs;
-    } else {
-      return exampleDataset;
+      return pairs as Pairings;
     }
+    return exampleDataset;
   }, [currentDataset, exampleDataset]);
   const setTrainingParam = useCallback(
     (key: keyof OptimizationParameters, value: boolean | number) => {

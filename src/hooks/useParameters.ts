@@ -1,10 +1,14 @@
 import { useAtom, useAtomValue } from "jotai";
-import { OptimizationParameters } from "./types";
+import { OptimizationParameters } from "../lib/types";
 import { useLiveQuery } from "dexie-react-hooks";
-import { currentDatasetAtom, exampleParametersAtom } from "./atoms";
-import { db } from "./db";
+import { currentDatasetAtom, exampleParametersAtom } from "../lib/atoms";
+import { db } from "../lib/db";
 import { useCallback } from "react";
 
+/**
+ *
+ * @returns [parameters, setParameters(parameters)]
+ */
 export default function useParameters(): [
   OptimizationParameters,
   (params: OptimizationParameters) => void

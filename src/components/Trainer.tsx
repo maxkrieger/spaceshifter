@@ -14,7 +14,7 @@ import {
   PerformanceHistory,
   ProjectPhase,
 } from "@/lib/types";
-import useParameters from "@/lib/useParameters";
+import useParameters from "@/hooks/useParameters";
 import { Label } from "./ui/label";
 import TooltipWrapper from "./TooltipWrapper";
 import {
