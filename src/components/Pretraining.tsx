@@ -73,8 +73,8 @@ export default function Pretraining() {
           </Button>
         </TooltipWrapper>
       </div>
-      <div className="flex flex-wrap flex-row sm:justify-start md:justify-around items-start">
-        <div className="md:w-[400px] py-3">
+      <div>
+        <div className="py-3">
           <p className="text-slate-300 text-l">
             The test set has{" "}
             <span className="text-white">

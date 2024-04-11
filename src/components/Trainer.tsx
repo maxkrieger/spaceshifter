@@ -270,8 +270,8 @@ export default function Trainer() {
           </div>
         )}
         {currentPerformance && (
-          <div className="flex flex-row justify-around items-center my-4 flex-wrap">
-            <p className="text-slate-300 max-w-[400px] mb-4">
+          <div className="my-4 flex flex-row justify-center">
+            <p className="text-slate-300 mb-4">
               Currently, test accuracy is{" "}
               <span className="text-white">
                 {currentPerformance.testAccuracyAndSE.message}
@@ -298,12 +298,12 @@ export default function Trainer() {
               </span>
               ).
             </p>
-            {performanceHistory.length > 0 && (
-              <LossCurve performanceHistory={performanceHistory} />
-            )}
           </div>
         )}
-        <div className="flex flex-col items-center">
+        <div className="flex flex-row items-center justify-center flex-wrap">
+          {performanceHistory.length > 0 && (
+            <LossCurve performanceHistory={performanceHistory} />
+          )}
           {currentPerformance && (
             <Histogram
               testPairings={currentPerformance.testCosinePairings}
