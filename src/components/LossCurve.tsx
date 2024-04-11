@@ -1,4 +1,4 @@
-import { PerformanceHistory } from "@/lib/types";
+import { PerformanceHistory } from "@/types";
 import { range } from "lodash";
 import Plot from "react-plotly.js";
 

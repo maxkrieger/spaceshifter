@@ -1,4 +1,4 @@
-import { Pairings } from "./types";
+import { Pairings } from "../types";
 import { sortBy, shuffle } from "lodash";
 
 export default function trainTestSplit(

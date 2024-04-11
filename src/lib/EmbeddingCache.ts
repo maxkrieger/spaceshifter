@@ -1,6 +1,6 @@
 import { Embedding, db } from "./db";
 import log from "loglevel";
-import { EmbeddingCacheData, Pairings } from "./types";
+import { EmbeddingCacheData, Pairings } from "../types";
 import { chunk } from "lodash";
 import { backOff } from "exponential-backoff";
 

@@ -6,7 +6,7 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import { Input } from "../ui/input";
-import { ProjectPhase, defaultOptimizationParameters } from "@/lib/types";
+import { ProjectPhase, defaultOptimizationParameters } from "@/types";
 import { useCallback, useState } from "react";
 import { Button } from "../ui/button";
 import { useSetAtom } from "jotai";

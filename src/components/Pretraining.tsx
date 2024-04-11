@@ -1,4 +1,4 @@
-import { ProjectPhase } from "@/lib/types";
+import { ProjectPhase } from "@/types";
 import PretrainingSetup from "./PretrainingSetup";
 import { useAtom, useAtomValue } from "jotai";
 import {

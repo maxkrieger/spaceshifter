@@ -1,4 +1,4 @@
-import { Pairings } from "./types";
+import { Pairings } from "../types";
 import Papa from "papaparse";
 export function isValidJSON(json: object): json is Pairings {
   return (

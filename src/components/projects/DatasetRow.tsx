@@ -2,7 +2,7 @@ import { Button } from "../ui/button";
 import { useSetAtom } from "jotai";
 import { currentDatasetAtom, projectPhaseAtom } from "@/lib/atoms";
 import { ChevronRight } from "lucide-react";
-import { DatasetLocator, Pairings, ProjectPhase } from "@/lib/types";
+import { DatasetLocator, Pairings, ProjectPhase } from "@/types";
 import { useCallback } from "react";
 import { useToast } from "../ui/use-toast";
 

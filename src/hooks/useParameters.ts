@@ -1,5 +1,5 @@
 import { useAtom, useAtomValue } from "jotai";
-import { OptimizationParameters } from "../lib/types";
+import { OptimizationParameters } from "../types";
 import { useLiveQuery } from "dexie-react-hooks";
 import { currentDatasetAtom, exampleParametersAtom } from "../lib/atoms";
 import { db } from "../lib/db";

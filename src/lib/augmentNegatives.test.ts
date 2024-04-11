@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { Pairings } from "./types";
+import { Pairings } from "../types";
 import augmentNegatives from "./augmentNegatives";
 import { partition } from "lodash";
 

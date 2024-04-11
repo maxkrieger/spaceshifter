@@ -12,7 +12,7 @@ import {
   PerformanceGroup,
   PerformanceHistory,
   ProjectPhase,
-} from "@/lib/types";
+} from "@/types";
 import useParameters from "@/hooks/useParameters";
 import { Label } from "./ui/label";
 import TooltipWrapper from "./TooltipWrapper";

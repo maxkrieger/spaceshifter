@@ -1,4 +1,4 @@
-import { Pairing, Pairings } from "./types";
+import { Pairing, Pairings } from "../types";
 import { partition, shuffle } from "lodash";
 
 /**

@@ -1,4 +1,4 @@
-import { DatasetSlice, OptimizationParameters, TensorDataset } from "./types";
+import { DatasetSlice, OptimizationParameters, TensorDataset } from "../types";
 import {
   dropout as tf_dropout,
   tidy as tf_tidy,

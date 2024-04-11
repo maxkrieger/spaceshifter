@@ -1,6 +1,6 @@
 import log from "loglevel";
 import TrainingWorker from "@/lib/TrainingWorker.ts?worker";
-import { OutboundMessage, TrainerMessage } from "./types";
+import { OutboundMessage, TrainerMessage } from "../types";
 export default class TrainingWorkerClient {
   worker: Worker;
   sendMessage(message: TrainerMessage) {

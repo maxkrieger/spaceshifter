@@ -1,6 +1,6 @@
 import Plot from "react-plotly.js";
 import { Data } from "plotly.js";
-import { CosinePairings } from "../lib/types";
+import { CosinePairings } from "../types";
 function makeDataset(pairings: CosinePairings, id: number): Data[] {
   return [
     {

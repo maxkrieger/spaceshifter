@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { Pairings, ProjectPhase } from "@/lib/types";
+import { Pairings, ProjectPhase } from "@/types";
 import { useLiveQuery } from "dexie-react-hooks";
 import Dropzone from "./Dropzone";
 import { useCallback } from "react";

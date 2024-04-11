@@ -1,4 +1,4 @@
-import { AccuracyAndSE, CosinePairings } from "./types";
+import { AccuracyAndSE, CosinePairings } from "../types";
 import { range, max } from "lodash";
 
 // Adapted from https://github.com/openai/openai-cookbook/blob/main/examples/Customizing_embeddings.ipynb

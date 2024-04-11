@@ -12,7 +12,7 @@ import {
   PerformanceGroup,
   TensorDataset,
   TrainerMessage,
-} from "./types";
+} from "../types";
 import augmentNegatives from "./augmentNegatives";
 import trainTestSplit from "./trainTestSplit";
 import { tfToNp } from "./tfToNp";

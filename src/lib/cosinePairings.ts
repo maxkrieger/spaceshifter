@@ -1,5 +1,5 @@
 import { zip } from "lodash";
-import { CosinePairings, TensorDataset } from "./types";
+import { CosinePairings, TensorDataset } from "../types";
 import { metrics, tidy, Tensor2D } from "@tensorflow/tfjs";
 
 function matMul(tensor: Tensor2D, mat?: Tensor2D) {

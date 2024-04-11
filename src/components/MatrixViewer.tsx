@@ -1,5 +1,5 @@
 import { bestMatrixAtom, projectPhaseAtom } from "@/lib/atoms";
-import { ProjectPhase } from "@/lib/types";
+import { ProjectPhase } from "@/types";
 import { useAtomValue } from "jotai";
 import { Button } from "./ui/button";
 import { useCallback } from "react";

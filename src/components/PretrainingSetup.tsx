@@ -19,7 +19,7 @@ import {
   ProjectPhase,
   OptimizationParameters,
   Pairings,
-} from "@/lib/types";
+} from "@/types";
 import { Progress } from "./ui/progress";
 import useParameters from "@/hooks/useParameters";
 import { cardStyles as cardStyles } from "@/lib/const";

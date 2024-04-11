@@ -7,7 +7,7 @@ import {
   defaultOptimizationParameters,
   PerformanceGroup,
   CurrentDataset,
-} from "./types";
+} from "../types";
 
 export const apiKeyAtom = atomWithStorage<string | null>("api-key", null);
 

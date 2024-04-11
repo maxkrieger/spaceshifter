@@ -11,7 +11,7 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 import { Button } from "../ui/button";
-import { Pairing } from "@/lib/types";
+import { Pairing } from "@/types";
 
 export default function TableButtons({
   onAddPairing,

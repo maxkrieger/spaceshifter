@@ -1,5 +1,5 @@
 import Dexie, { Table } from "dexie";
-import { OptimizationParameters, Pairing } from "./types";
+import { OptimizationParameters, Pairing } from "../types";
 
 export interface Dataset {
   id?: number;
