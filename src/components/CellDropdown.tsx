@@ -31,25 +31,21 @@ export default function CellDropdown({ row }: { row: Row<Pair> }) {
   const [text2, setText2] = useState<string>(r.text_2);
   const [label, setLabel] = useState<number>(r.label);
   const setProjectPhase = useSetAtom(projectPhaseAtom);
-  const submit = useCallback(() => {
-    (async () => {
-      await db.pair.update(r.id!, {
-        text_1: text1,
-        text_2: text2,
-        label,
-      });
-      setEditing(false);
-      setMenuOpen(false);
-      setProjectPhase(ProjectPhase.DataPresent);
-    })();
+  const submit = useCallback(async () => {
+    await db.pair.update(r.id!, {
+      text_1: text1,
+      text_2: text2,
+      label,
+    });
+    setEditing(false);
+    setMenuOpen(false);
+    setProjectPhase(ProjectPhase.DataPresent);
   }, [text1, text2, label, r, setProjectPhase]);
-  const deleteRow = useCallback(() => {
-    (async () => {
-      await db.pair.delete(r.id!);
-      setDeleting(false);
-      setMenuOpen(false);
-      setProjectPhase(ProjectPhase.DataPresent);
-    })();
+  const deleteRow = useCallback(async () => {
+    await db.pair.delete(r.id!);
+    setDeleting(false);
+    setMenuOpen(false);
+    setProjectPhase(ProjectPhase.DataPresent);
   }, [r, setProjectPhase]);
   return (
     <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} modal={false}>

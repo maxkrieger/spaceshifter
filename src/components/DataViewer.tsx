@@ -34,20 +34,18 @@ export default function DataViewer() {
     return null;
   }, [currentDataset, projectPhase]);
   const addRows = useCallback(
-    (rows: Pairings) => {
-      (async () => {
-        if (currentDataset?.type === "local") {
-          await db.pair.bulkAdd(
-            rows.map((pairing) => ({
-              ...pairing,
-              dataset: currentDataset.id,
-              dateCreated: new Date(),
-            }))
-          );
-          // Reset the project phase to force regeneration
-          setProjectPhase(ProjectPhase.DataPresent);
-        }
-      })();
+    async (rows: Pairings) => {
+      if (currentDataset?.type === "local") {
+        await db.pair.bulkAdd(
+          rows.map((pairing) => ({
+            ...pairing,
+            dataset: currentDataset.id,
+            dateCreated: new Date(),
+          }))
+        );
+        // Reset the project phase to force regeneration
+        setProjectPhase(ProjectPhase.DataPresent);
+      }
     },
     [currentDataset, setProjectPhase]
   );

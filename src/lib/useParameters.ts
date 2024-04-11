@@ -23,14 +23,12 @@ export default function useParameters(): [
     return null;
   }, [currentDataset]);
   const setParams = useCallback(
-    (parameters: OptimizationParameters) => {
-      (async () => {
-        if (currentDataset?.type === "local") {
-          await db.dataset.update(currentDataset.id, {
-            trainingParams: parameters,
-          });
-        }
-      })();
+    async (parameters: OptimizationParameters) => {
+      if (currentDataset?.type === "local") {
+        await db.dataset.update(currentDataset.id, {
+          trainingParams: parameters,
+        });
+      }
     },
     [currentDataset]
   );

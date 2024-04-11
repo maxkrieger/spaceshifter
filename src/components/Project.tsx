@@ -27,15 +27,13 @@ export default function Project() {
     useDataset()?.name ??
     (currentDataset?.type === "example" ? currentDataset.name : null);
   const { toast } = useToast();
-  const deleteProject = useCallback(() => {
-    (async () => {
-      if (currentDataset?.type === "local") {
-        const { dismiss } = toast({ title: "Deleting dataset..." });
-        await db.deleteDataset(currentDataset.id);
-        dismiss();
-        setCurrentDataset(null);
-      }
-    })();
+  const deleteProject = useCallback(async () => {
+    if (currentDataset?.type === "local") {
+      const { dismiss } = toast({ title: "Deleting dataset..." });
+      await db.deleteDataset(currentDataset.id);
+      dismiss();
+      setCurrentDataset(null);
+    }
   }, [currentDataset, setCurrentDataset, toast]);
   if (!datasetName) {
     return <div>loading...</div>;

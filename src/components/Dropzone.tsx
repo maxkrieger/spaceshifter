@@ -11,34 +11,32 @@ export default function Dropzone({
 }) {
   const { toast } = useToast();
   const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
+    async (acceptedFiles: File[]) => {
       const file = acceptedFiles[0];
-      (async () => {
-        if (file.name.endsWith("json")) {
-          const parsed = await parseJSON(file);
-          if (parsed) {
-            addRows(parsed);
-          } else {
-            toast({ title: `Could not parse JSON ${file.name}` });
-          }
-        } else if (file.name.endsWith("jsonl")) {
-          const parsed = await parseJSONL(file);
-          if (parsed) {
-            addRows(parsed);
-          } else {
-            toast({ title: `Could not parse JSONL ${file.name}` });
-          }
-        } else if (file.name.endsWith("csv")) {
-          const parsed = await parseCSV(file);
-          if (parsed) {
-            addRows(parsed);
-          } else {
-            toast({ title: `Could not parse CSV ${file.name}` });
-          }
+      if (file.name.endsWith("json")) {
+        const parsed = await parseJSON(file);
+        if (parsed) {
+          addRows(parsed);
         } else {
-          toast({ title: `Could not identify file type of ${file.name}` });
+          toast({ title: `Could not parse JSON ${file.name}` });
         }
-      })();
+      } else if (file.name.endsWith("jsonl")) {
+        const parsed = await parseJSONL(file);
+        if (parsed) {
+          addRows(parsed);
+        } else {
+          toast({ title: `Could not parse JSONL ${file.name}` });
+        }
+      } else if (file.name.endsWith("csv")) {
+        const parsed = await parseCSV(file);
+        if (parsed) {
+          addRows(parsed);
+        } else {
+          toast({ title: `Could not parse CSV ${file.name}` });
+        }
+      } else {
+        toast({ title: `Could not identify file type of ${file.name}` });
+      }
     },
     [addRows, toast]
   );

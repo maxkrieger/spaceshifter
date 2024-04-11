@@ -49,19 +49,17 @@ function DatasetRow({
   const setPhase = useSetAtom(projectPhaseAtom);
   const setExampleDataset = useSetAtom(exampleDatasetAtom);
   const { toast } = useToast();
-  const selectDataset = useCallback(() => {
-    (async () => {
-      if (locator.type === "example") {
-        const { dismiss } = toast({ title: "Loading example..." });
-        const res = await fetch(locator.datasetURL);
-        const dataset = (await res.json()) as Pairings;
-        setExampleDataset(dataset);
-        dismiss();
-      }
-      setPhase(ProjectPhase.DataPresent);
-      setCurrentDataset(locator);
-    })();
-  }, [setCurrentDataset, setPhase, locator, setExampleDataset]);
+  const selectDataset = useCallback(async () => {
+    if (locator.type === "example") {
+      const { dismiss } = toast({ title: "Loading example..." });
+      const res = await fetch(locator.datasetURL);
+      const dataset = (await res.json()) as Pairings;
+      setExampleDataset(dataset);
+      dismiss();
+    }
+    setPhase(ProjectPhase.DataPresent);
+    setCurrentDataset(locator);
+  }, [setCurrentDataset, setPhase, locator, setExampleDataset, toast]);
   return (
     <div className="mt-2">
       <Button
@@ -84,17 +82,15 @@ export default function ProjectPanel() {
   const [datasetTitle, setDatasetTitle] = useState<string>("");
   const setCurrentDataset = useSetAtom(currentDatasetAtom);
   const setPhase = useSetAtom(projectPhaseAtom);
-  const onCreateDataset = useCallback(() => {
-    (async () => {
-      const dataset = await db.dataset.add({
-        name: datasetTitle,
-        dateCreated: new Date(),
-        trainingParams: defaultOptimizationParameters,
-      });
-      setCurrentDataset({ type: "local", id: dataset as number });
-      setPhase(ProjectPhase.NoData);
-      setDatasetTitle("");
-    })();
+  const onCreateDataset = useCallback(async () => {
+    const dataset = await db.dataset.add({
+      name: datasetTitle,
+      dateCreated: new Date(),
+      trainingParams: defaultOptimizationParameters,
+    });
+    setCurrentDataset({ type: "local", id: dataset as number });
+    setPhase(ProjectPhase.NoData);
+    setDatasetTitle("");
   }, [datasetTitle, setDatasetTitle, setCurrentDataset, setPhase]);
   return (
     <ThemeProvider defaultTheme="dark">
