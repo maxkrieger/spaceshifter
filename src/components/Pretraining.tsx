@@ -63,7 +63,7 @@ export default function Pretraining() {
     <div className={cardStyles}>
       <div className="flex flex-row justify-between">
         <h1 className="text-2xl mb-3">Pretraining</h1>
-        <TooltipWrapper tooltip="Download all embeddings">
+        <TooltipWrapper tooltip="Download all embeddings" asChild>
           <Button
             variant={"ghost"}
             onClick={downloadEmbeddings}

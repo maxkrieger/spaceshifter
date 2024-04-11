@@ -82,7 +82,7 @@ export default function PretrainingSetup({
           setPhase(ProjectPhase.Embedded);
         } else if (message.type === "fetchingStatus") {
           setEmbeddingStatus({
-            type: message.status === "fetching" ? "fetching" : "idle",
+            type: "fetching",
           });
         }
       });
