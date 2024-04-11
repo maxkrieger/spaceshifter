@@ -31,7 +31,7 @@ const testPairings: Pairings = [
   },
 ];
 
-test("Augmenting negatives", () => {
+test("Augmenting negatives with 4 positives, 1 negative", () => {
   const augmented = augmentNegatives(testPairings);
   const [negatives, positives] = partition(
     augmented,
@@ -46,4 +46,24 @@ test("Augmenting negatives", () => {
       label: -1,
     });
   }
+});
+test("Augmenting negatives with 1 positive should produce 0 negatives", () => {
+  const augmented = augmentNegatives(testPairings.slice(0, 1));
+
+  const [negatives, positives] = partition(
+    augmented,
+    ({ label }) => label === -1
+  );
+  expect(positives.length).toBe(1);
+  expect(negatives.length).toBe(0);
+});
+
+test("Augmenting negatives two positives should produce two negatives", () => {
+  const augmented = augmentNegatives(testPairings.slice(0, 2));
+  const [negatives, positives] = partition(
+    augmented,
+    ({ label }) => label === -1
+  );
+  expect(positives.length).toBe(2);
+  expect(negatives.length).toBe(2);
 });
