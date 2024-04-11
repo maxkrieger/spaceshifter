@@ -15,7 +15,7 @@ export default class EmbeddingCache {
     return this.cache;
   }
 
-  getEmbeddingFast(text: string): number[] {
+  getCachedEmbedding(text: string): number[] {
     if (!(text in this.cache)) {
       throw new Error(`Text not cached in embedding ${text}}`);
     }

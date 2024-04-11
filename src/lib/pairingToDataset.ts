@@ -10,8 +10,8 @@ export default function pairingToDataset(
   const e2s = [];
   const labels = [];
   for (const { text_1, text_2, label } of pairings) {
-    const e1 = embeddingCache.getEmbeddingFast(text_1);
-    const e2 = embeddingCache.getEmbeddingFast(text_2);
+    const e1 = embeddingCache.getCachedEmbedding(text_1);
+    const e2 = embeddingCache.getCachedEmbedding(text_2);
     e1s.push(e1);
     e2s.push(e2);
     labels.push(label);
