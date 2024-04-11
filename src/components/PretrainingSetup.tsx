@@ -15,7 +15,11 @@ import { Switch } from "./ui/switch";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import TrainingWorkerClient from "@/lib/TrainingWorkerClient";
-import { PerformanceGroup, ProjectPhase } from "@/lib/types";
+import {
+  PerformanceGroup,
+  ProjectPhase,
+  OptimizationParameters,
+} from "@/lib/types";
 import { Progress } from "./ui/progress";
 import useParameters from "@/lib/useParameters";
 import { cardStyles as cardStyles } from "@/lib/const";
@@ -56,7 +60,7 @@ export default function PretrainingSetup({
     }
   }, [currentDataset, exampleDataset]);
   const setTrainingParam = useCallback(
-    (key: string, value: boolean | number) => {
+    (key: keyof OptimizationParameters, value: boolean | number) => {
       setParameters({ ...parameters, [key]: value });
     },
     [parameters, setParameters]
