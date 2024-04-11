@@ -1,4 +1,4 @@
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { useSetAtom } from "jotai";
 import {
   currentDatasetAtom,
@@ -8,7 +8,7 @@ import {
 import { ChevronRight } from "lucide-react";
 import { DatasetLocator, Pairings, ProjectPhase } from "@/lib/types";
 import { useCallback } from "react";
-import { useToast } from "./ui/use-toast";
+import { useToast } from "../ui/use-toast";
 
 export function DatasetRow({
   name,
