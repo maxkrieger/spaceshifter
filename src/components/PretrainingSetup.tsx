@@ -228,7 +228,7 @@ export default function PretrainingSetup({
           <Label htmlFor="model">Embedding model</Label>
         </div>
       )}
-      <div>
+      <div className="w-full px-3">
         <Button
           className="w-full"
           onClick={embedAndSplit}
