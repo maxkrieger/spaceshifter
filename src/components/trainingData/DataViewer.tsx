@@ -13,6 +13,7 @@ import {
   projectPhaseAtom,
 } from "@/lib/atoms";
 import { cardStyles } from "@/lib/const";
+import TableButtons from "./TableButtons";
 
 export default function DataViewer() {
   const currentDataset = useAtomValue(currentDatasetAtom);
@@ -77,9 +78,14 @@ export default function DataViewer() {
       ) : (
         <div>
           <DataTable
-            submit={(row) => addRows([row])}
-            onDownload={downloadJSON}
-            readonly={readonly}
+            buttons={
+              !readonly ? (
+                <TableButtons
+                  onAddPairing={(pairing) => addRows([pairing])}
+                  onDownload={downloadJSON}
+                />
+              ) : null
+            }
             columns={[
               { accessorKey: "text_1", header: "text_1", size: 1 / 3 },
               { accessorKey: "text_2", header: "text_2", size: 1 / 3 },
