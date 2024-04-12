@@ -50,7 +50,7 @@ export default function MatrixViewer() {
         </div>
         <div className="flex flex-row flex-wrap my-3">
           <div>
-            <h2 className="text-xl">Usage</h2>
+            <h2 className="text-xl my-2">Usage</h2>
             <div className="max-w-[500px] min-w-[200px] py-3 px-4 mt-1 text-left text-sm bg-slate-900 rounded-md border border-slate-500 font-mono inline-block">
               <span className="block">
                 <span className="text-blue-300">import</span>{" "}
