@@ -8,13 +8,12 @@ import {
 import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useState } from "react";
 import useParameters from "./useParameters";
-import { useLiveQuery } from "dexie-react-hooks";
-import { Pairings, ProjectPhase } from "@/types";
-import { db } from "@/lib/db";
+import { ProjectPhase } from "@/types";
 import trainTestSplit from "@/lib/trainTestSplit";
 import augmentNegatives from "@/lib/augmentNegatives";
 import TrainingWorkerClient from "@/lib/TrainingWorkerClient";
 import { countLabels } from "@/lib/utils";
+import usePairings from "./usePairings";
 
 type PretrainingStatus =
   | { type: "embeddingProgress"; progress: number }
@@ -36,18 +35,7 @@ export default function usePretraining(): {
   const setWorkerClient = useSetAtom(trainingWorkerAtom);
 
   const currentDataset = useAtomValue(currentDatasetAtom);
-
-  const pairs = useLiveQuery(async () => {
-    if (currentDataset.type === "local") {
-      const pairs = await db.pair
-        .where("dataset")
-        .equals(currentDataset.id)
-        .toArray();
-      return pairs as Pairings;
-    } else if (currentDataset.type === "example") {
-      return currentDataset.pairings;
-    }
-  }, [currentDataset]);
+  const pairings = usePairings();
 
   const [pretrainingStatus, setPretrainingStatus] = useState<PretrainingStatus>(
     {
@@ -82,10 +70,13 @@ export default function usePretraining(): {
 
   const apiKey = useAtomValue(apiKeyAtom);
   const initializeDataset = useCallback(() => {
-    if (!pairs) {
+    if (!pairings) {
       throw new Error("Pairs not loaded");
     }
-    let { train, test } = trainTestSplit(pairs, parameters.testSplitFraction);
+    let { train, test } = trainTestSplit(
+      pairings,
+      parameters.testSplitFraction
+    );
     if (parameters.generateSyntheticNegatives) {
       // We do not store these long-term because of the risk of leakage between train and test
       train = augmentNegatives(train);
@@ -112,7 +103,7 @@ export default function usePretraining(): {
         cacheUrl: currentDataset.embeddingsURL,
       });
     }
-  }, [parameters, initializeWorkerClient, pairs, currentDataset, apiKey]);
-  const datasetCounts = pairs ? countLabels(pairs) : null;
+  }, [parameters, initializeWorkerClient, pairings, currentDataset, apiKey]);
+  const datasetCounts = pairings ? countLabels(pairings) : null;
   return { initializeDataset, status: pretrainingStatus, datasetCounts };
 }

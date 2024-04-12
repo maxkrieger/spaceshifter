@@ -1,31 +1,21 @@
 import { db } from "@/lib/db";
 import { Pairings, ProjectPhase } from "@/types";
-import { useLiveQuery } from "dexie-react-hooks";
 import Dropzone from "./Dropzone";
 import { useCallback } from "react";
 import { DataTable } from "./DataTable";
 
-import CellDropdown from "./CellDropdown";
-import { useAtom, useAtomValue } from "jotai";
+import CellEditor from "./CellEditor";
+import { useAtomValue, useSetAtom } from "jotai";
 import { currentDatasetAtom, projectPhaseAtom } from "@/lib/atoms";
 import { cardStyles } from "@/lib/const";
 import TableButtons from "./TableButtons";
+import usePairings from "@/hooks/usePairings";
 
 export default function DataViewer() {
   const currentDataset = useAtomValue(currentDatasetAtom);
-  const [projectPhase, setProjectPhase] = useAtom(projectPhaseAtom);
+  const setProjectPhase = useSetAtom(projectPhaseAtom);
   const readonly = currentDataset.type !== "local";
-  const localPairs = useLiveQuery(async () => {
-    if (currentDataset.type === "local") {
-      const pairs = await db.pair
-        .where("dataset")
-        .equals(currentDataset.id)
-        .toArray();
-
-      return pairs;
-    }
-    return null;
-  }, [currentDataset, projectPhase]);
+  const pairings = usePairings();
   const addRows = useCallback(
     async (rows: Pairings) => {
       if (currentDataset.type === "local") {
@@ -43,13 +33,11 @@ export default function DataViewer() {
     [currentDataset, setProjectPhase]
   );
   const downloadJSON = useCallback(() => {
-    const cleaned = (localPairs as Pairings).map(
-      ({ text_1, text_2, label }) => ({
-        text_1,
-        text_2,
-        label,
-      })
-    );
+    const cleaned = pairings.map(({ text_1, text_2, label }) => ({
+      text_1,
+      text_2,
+      label,
+    }));
     const json = JSON.stringify(cleaned, null, 2);
     const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -57,8 +45,8 @@ export default function DataViewer() {
     a.href = url;
     a.download = "data.json";
     a.click();
-  }, [localPairs]);
-  const dropzoneVisible = !readonly && (!localPairs || localPairs.length === 0);
+  }, [pairings]);
+  const dropzoneVisible = !readonly && pairings.length === 0;
   return (
     <div className={cardStyles}>
       <h1 className="text-2xl">Dataset</h1>
@@ -91,18 +79,12 @@ export default function DataViewer() {
                 ? [
                     {
                       id: "actions",
-                      cell: CellDropdown,
+                      cell: CellEditor,
                     },
                   ]
                 : []),
             ]}
-            data={
-              currentDataset.type === "local"
-                ? localPairs ?? []
-                : currentDataset.type === "example"
-                ? currentDataset.pairings
-                : []
-            }
+            data={pairings}
           />
         </div>
       )}

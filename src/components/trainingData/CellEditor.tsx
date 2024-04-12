@@ -22,7 +22,7 @@ import { Switch } from "../ui/switch";
 import { useSetAtom } from "jotai";
 import { projectPhaseAtom } from "@/lib/atoms";
 import { ProjectPhase } from "@/types";
-export default function CellDropdown({ row }: { row: Row<Pair> }) {
+export default function CellEditor({ row }: { row: Row<Pair> }) {
   const r = row.original;
   const [editing, setEditing] = useState<boolean>(false);
   const [deleting, setDeleting] = useState<boolean>(false);
