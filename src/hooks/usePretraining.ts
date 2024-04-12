@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import useParameters from "./useParameters";
 import { countLabels } from "@/lib/utils";
 import usePairings from "./usePairings";
-import useTrainer from "./useTrainer";
+import useTrainer from "./trainer/useTrainer";
 
 /**
  * Takes a flat dataset of pairings, augments it, and sends it to a new worker

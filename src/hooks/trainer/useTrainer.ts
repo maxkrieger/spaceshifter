@@ -2,102 +2,18 @@ import { useToast } from "@/components/ui/use-toast";
 import TrainingWorkerClient from "@/worker/TrainingWorkerClient";
 import { downloadEmbeddingCache } from "@/lib/utils";
 import {
-  PerformanceGroup,
-  PerformanceHistory,
   ExampleDatasetInitializer,
   LocalDatasetInitializer,
   OptimizationParameters,
   MessageFromTrainer,
 } from "@/types";
-import { atom, useAtom, useSetAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import { useCallback } from "react";
-
-type BestMatrix = {
-  matrixNpy: ArrayBuffer;
-  shape: [number, number];
-};
-
-type UninitializedState = {
-  type: "uninitialized";
-};
-
-type FetchingEmbeddingsState = {
-  type: "fetchingEmbeddings";
-};
-
-type EmbeddingProgressState = {
-  type: "embeddingProgress";
-  progress: number;
-};
-
-type PretrainingState = {
-  type: "pretrained";
-  pretrainingPerformance: PerformanceGroup;
-};
-
-type TrainingStartedState = {
-  type: "trainingStarted";
-  currentEpoch: 0;
-  pretrainingPerformance: PerformanceGroup;
-};
-
-export type TrainingArtifacts = {
-  performanceHistory: PerformanceHistory;
-  currentPerformance: PerformanceGroup;
-  pretrainingPerformance: PerformanceGroup;
-};
-
-type TrainingState = {
-  type: "training";
-  currentEpoch: number;
-} & TrainingArtifacts;
-
-type DoneTrainingState = {
-  type: "doneTraining";
-  bestMatrix: BestMatrix;
-} & TrainingArtifacts;
-
-type TrainerState =
-  | UninitializedState
-  | FetchingEmbeddingsState
-  | EmbeddingProgressState
-  | PretrainingState
-  | TrainingStartedState
-  | TrainingState
-  | DoneTrainingState;
-
-const trainingWorkerAtom = atom<TrainingWorkerClient | null>(null);
-const trainingStateAtom = atom<TrainerState>({ type: "uninitialized" });
-
-type EmbeddingsDownloadable = {
-  downloadEmbeddings: () => void;
-};
-
-type Trainable = {
-  train: (parameters: OptimizationParameters) => void;
-};
-
-type Resettable = {
-  reset: () => void;
-};
-
-export type TrainerAPI =
-  | (UninitializedState & {
-      initializeLocal: (options: LocalDatasetInitializer) => void;
-      initializeExample: (initializer: ExampleDatasetInitializer) => void;
-    })
-  | ((
-      | FetchingEmbeddingsState
-      | EmbeddingProgressState
-      | (PretrainingState & EmbeddingsDownloadable & Trainable)
-      | (TrainingStartedState & EmbeddingsDownloadable)
-      | (TrainingState &
-          EmbeddingsDownloadable & {
-            stop: () => void;
-          })
-      | (DoneTrainingState & EmbeddingsDownloadable & Trainable)
-    ) &
-      Resettable);
+import {
+  TrainerAPI,
+  trainingStateAtom,
+  trainingWorkerAtom,
+} from "./trainerState";
 
 function useOnWorkerMessage() {
   const { toast } = useToast();
@@ -162,7 +78,16 @@ function useOnWorkerMessage() {
             return {
               type: "training",
               currentEpoch: message.epoch,
-              performanceHistory: [],
+              performanceHistory: [
+                {
+                  test: prev.pretrainingPerformance.testAccuracyAndSE,
+                  train: prev.pretrainingPerformance.trainAccuracyAndSE,
+                },
+                {
+                  test: message.performance.testAccuracyAndSE,
+                  train: message.performance.trainAccuracyAndSE,
+                },
+              ],
               currentPerformance: message.performance,
               pretrainingPerformance: prev.pretrainingPerformance,
             };
@@ -233,14 +158,6 @@ export default function useTrainer(): TrainerAPI {
     trainingWorker.sendMessage({ type: "getEmbeddingCache" });
   }, [trainingWorker]);
 
-  const onStop = useCallback(() => {
-    if (!trainingWorker) {
-      throw new Error("Worker not initialized");
-    }
-    trainingWorker.terminate();
-    setTrainingState({ type: "uninitialized" });
-  }, [trainingWorker, setTrainingState]);
-
   const onReset = useCallback(() => {
     if (trainingWorker) {
       trainingWorker.terminate();
@@ -272,7 +189,10 @@ export default function useTrainer(): TrainerAPI {
     };
   }
 
-  if (trainingState.type === "trainingStarted") {
+  if (
+    trainingState.type === "trainingStarted" ||
+    trainingState.type === "training"
+  ) {
     return {
       ...trainingState,
       downloadEmbeddings: onDownloadEmbeddings,
@@ -280,15 +200,7 @@ export default function useTrainer(): TrainerAPI {
     };
   }
 
-  if (trainingState.type === "training") {
-    return {
-      ...trainingState,
-      downloadEmbeddings: onDownloadEmbeddings,
-      stop: onStop,
-      reset: onReset,
-    };
-  }
-
+  // Done training state
   return {
     ...trainingState,
     downloadEmbeddings: onDownloadEmbeddings,

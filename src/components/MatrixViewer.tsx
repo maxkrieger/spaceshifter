@@ -2,7 +2,7 @@ import { Button } from "./ui/button";
 import { useCallback } from "react";
 import { cardStyles } from "@/lib/const";
 import { DownloadIcon } from "lucide-react";
-import useTrainer from "@/hooks/useTrainer";
+import useTrainer from "@/hooks/trainer/useTrainer";
 
 export default function MatrixViewer() {
   const trainer = useTrainer();

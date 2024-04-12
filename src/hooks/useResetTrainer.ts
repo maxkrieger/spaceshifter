@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import useTrainer from "./useTrainer";
+import useTrainer from "./trainer/useTrainer";
 
 /**
  * Resets trainer state. Useful for changes to training data.

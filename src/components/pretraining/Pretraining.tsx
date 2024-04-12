@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 import { Download, Loader2Icon } from "lucide-react";
 import { cardStyles } from "@/lib/const";
 import TooltipWrapper from "../util/TooltipWrapper";
-import useTrainer from "@/hooks/useTrainer";
+import useTrainer from "@/hooks/trainer/useTrainer";
 import usePairings from "@/hooks/usePairings";
 import { Progress } from "../ui/progress";
 

@@ -6,7 +6,8 @@ import Histogram from "../Histogram";
 import LossCurve from "./LossCurve";
 import { cardStyles } from "@/lib/const";
 import ParametersSetup from "./ParametersSetup";
-import useTrainer, { TrainerAPI } from "@/hooks/useTrainer";
+import useTrainer from "@/hooks/trainer/useTrainer";
+import { TrainerAPI } from "@/hooks/trainer/trainerState";
 
 function Accuracy({ state }: { state: TrainerAPI }) {
   if (state.type !== "doneTraining" && state.type !== "training") {
@@ -116,7 +117,7 @@ export default function Trainer() {
         <RenderGraphics state={trainer} />
         <div className="flex flex-row justify-end">
           {trainer.type === "training" ? (
-            <Button variant={"destructive"} onClick={trainer.stop}>
+            <Button variant={"destructive"} onClick={trainer.reset}>
               Stop
             </Button>
           ) : null}
