@@ -5,6 +5,7 @@ import { ChevronRight } from "lucide-react";
 import { DatasetLocator, Pairings } from "@/types";
 import { useCallback } from "react";
 import { useToast } from "../ui/use-toast";
+import useResetTrainer from "@/hooks/useResetTrainer";
 
 export function DatasetRow({
   name,
@@ -16,6 +17,7 @@ export function DatasetRow({
   const setCurrentDataset = useSetAtom(currentDatasetAtom);
 
   const { toast } = useToast();
+  const resetTrainer = useResetTrainer();
   const selectDataset = useCallback(async () => {
     if (locator.type === "example") {
       const { dismiss } = toast({ title: "Loading example..." });
@@ -34,7 +36,8 @@ export function DatasetRow({
         id: locator.id,
       });
     }
-  }, [setCurrentDataset, locator, toast]);
+    resetTrainer();
+  }, [setCurrentDataset, locator, toast, resetTrainer]);
   return (
     <div className="mt-2">
       <Button
