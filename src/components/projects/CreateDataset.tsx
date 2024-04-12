@@ -6,17 +6,16 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import { Input } from "../ui/input";
-import { ProjectPhase, defaultOptimizationParameters } from "@/types";
+import { defaultOptimizationParameters } from "@/types";
 import { useCallback, useState } from "react";
 import { Button } from "../ui/button";
 import { useSetAtom } from "jotai";
-import { currentDatasetAtom, projectPhaseAtom } from "@/lib/atoms";
+import { currentDatasetAtom } from "@/lib/atoms";
 import { db } from "@/lib/db";
 
 export default function CreateDataset() {
   const [datasetTitle, setDatasetTitle] = useState<string>("");
   const setCurrentDataset = useSetAtom(currentDatasetAtom);
-  const setPhase = useSetAtom(projectPhaseAtom);
 
   const onCreateDataset = useCallback(async () => {
     const dataset = await db.dataset.add({
@@ -25,9 +24,8 @@ export default function CreateDataset() {
       trainingParams: defaultOptimizationParameters,
     });
     setCurrentDataset({ type: "local", id: dataset as number });
-    setPhase(ProjectPhase.NoData);
     setDatasetTitle("");
-  }, [datasetTitle, setCurrentDataset, setPhase]);
+  }, [datasetTitle, setCurrentDataset]);
   return (
     <Dialog>
       <DialogTrigger asChild>

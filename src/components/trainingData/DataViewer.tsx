@@ -1,21 +1,22 @@
 import { db } from "@/lib/db";
-import { Pairings, ProjectPhase } from "@/types";
+import { Pairings } from "@/types";
 import Dropzone from "./Dropzone";
 import { useCallback } from "react";
 import { DataTable } from "./DataTable";
 
 import CellEditor from "./CellEditor";
-import { useAtomValue, useSetAtom } from "jotai";
-import { currentDatasetAtom, projectPhaseAtom } from "@/lib/atoms";
+import { useAtomValue } from "jotai";
+import { currentDatasetAtom } from "@/lib/atoms";
 import { cardStyles } from "@/lib/const";
 import TableButtons from "./TableButtons";
 import usePairings from "@/hooks/usePairings";
+import useResetTrainer from "@/hooks/useResetTrainer";
 
 export default function DataViewer() {
   const currentDataset = useAtomValue(currentDatasetAtom);
-  const setProjectPhase = useSetAtom(projectPhaseAtom);
   const readonly = currentDataset.type !== "local";
   const pairings = usePairings();
+  const resetTrainer = useResetTrainer();
   const addRows = useCallback(
     async (rows: Pairings) => {
       if (currentDataset.type === "local") {
@@ -26,11 +27,11 @@ export default function DataViewer() {
             dateCreated: new Date(),
           }))
         );
-        // Reset the project phase to force regeneration
-        setProjectPhase(ProjectPhase.DataPresent);
+        // Reset the project to force regeneration
+        resetTrainer();
       }
     },
-    [currentDataset, setProjectPhase]
+    [currentDataset, resetTrainer]
   );
   const downloadJSON = useCallback(() => {
     const cleaned = pairings.map(({ text_1, text_2, label }) => ({

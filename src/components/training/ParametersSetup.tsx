@@ -97,7 +97,9 @@ export default function ParametersSetup({
           description="How big of a gradient to apply at each step."
         >
           <Input
-            type="text"
+            type="number"
+            min={0}
+            step={0.01}
             value={parameters.learningRate}
             onChange={(e) =>
               setParameter("learningRate", Number(e.target.value))
@@ -112,7 +114,9 @@ export default function ParametersSetup({
           description="How many examples to show on each update."
         >
           <Input
-            type="text"
+            type="number"
+            min={1}
+            step={1}
             value={parameters.batchSize}
             onChange={(e) => setParameter("batchSize", Number(e.target.value))}
             id="batchSize"
@@ -125,7 +129,9 @@ export default function ParametersSetup({
           description="How many times all examples should be shown to the model."
         >
           <Input
-            type="text"
+            type="number"
+            min={1}
+            step={1}
             value={parameters.epochs}
             onChange={(e) => setParameter("epochs", Number(e.target.value))}
             id="epochs"
@@ -138,7 +144,7 @@ export default function ParametersSetup({
           description="Proportion of weights to randomly ignore. To prevent overfitting."
         >
           <Input
-            type="text"
+            type="number"
             min={0}
             max={1}
             step={0.05}

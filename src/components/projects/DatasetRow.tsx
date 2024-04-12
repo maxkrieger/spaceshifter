@@ -1,8 +1,8 @@
 import { Button } from "../ui/button";
 import { useSetAtom } from "jotai";
-import { currentDatasetAtom, projectPhaseAtom } from "@/lib/atoms";
+import { currentDatasetAtom } from "@/lib/atoms";
 import { ChevronRight } from "lucide-react";
-import { DatasetLocator, Pairings, ProjectPhase } from "@/types";
+import { DatasetLocator, Pairings } from "@/types";
 import { useCallback } from "react";
 import { useToast } from "../ui/use-toast";
 
@@ -14,7 +14,6 @@ export function DatasetRow({
   locator: DatasetLocator;
 }) {
   const setCurrentDataset = useSetAtom(currentDatasetAtom);
-  const setPhase = useSetAtom(projectPhaseAtom);
 
   const { toast } = useToast();
   const selectDataset = useCallback(async () => {
@@ -35,8 +34,7 @@ export function DatasetRow({
         id: locator.id,
       });
     }
-    setPhase(ProjectPhase.DataPresent);
-  }, [setCurrentDataset, setPhase, locator, toast]);
+  }, [setCurrentDataset, locator, toast]);
   return (
     <div className="mt-2">
       <Button

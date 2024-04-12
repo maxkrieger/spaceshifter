@@ -1,163 +1,122 @@
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useToast } from "../ui/use-toast";
-import {
-  bestMatrixAtom,
-  pretrainingPerformanceAtom,
-  projectPhaseAtom,
-  trainingWorkerAtom,
-} from "@/lib/atoms";
-import { PerformanceGroup, PerformanceHistory, ProjectPhase } from "@/types";
 import useParameters from "@/hooks/useParameters";
 
-import { useCallback, useState } from "react";
 import { Button } from "../ui/button";
 import { Progress } from "../ui/progress";
 import Histogram from "../Histogram";
 import LossCurve from "./LossCurve";
 import { cardStyles } from "@/lib/const";
 import ParametersSetup from "./ParametersSetup";
+import useTrainer, { TrainerAPI } from "@/hooks/useTrainer";
+
+function Accuracy({ state }: { state: TrainerAPI }) {
+  if (state.type !== "doneTraining" && state.type !== "training") {
+    return null;
+  }
+  const trainPerfDiff =
+    Math.round(
+      10000 *
+        (state.currentPerformance.trainAccuracyAndSE.accuracy -
+          state.pretrainingPerformance.trainAccuracyAndSE.accuracy)
+    ) / 100;
+  const testPerfDiff =
+    Math.round(
+      10000 *
+        (state.currentPerformance.testAccuracyAndSE.accuracy -
+          state.pretrainingPerformance.testAccuracyAndSE.accuracy)
+    ) / 100;
+  return (
+    <p className="text-slate-300 my-4">
+      Currently, test accuracy is{" "}
+      <span className="text-white">
+        {state.currentPerformance.testAccuracyAndSE.message}
+      </span>{" "}
+      (
+      <span className={testPerfDiff > 0 ? "text-green-300" : "text-red-300"}>
+        {testPerfDiff > 0 ? "+" : ""}
+        {testPerfDiff}%
+      </span>
+      ) and train accuracy is{" "}
+      <span className="text-white">
+        {state.currentPerformance.trainAccuracyAndSE.message}
+      </span>{" "}
+      (
+      <span className={trainPerfDiff > 0 ? "text-green-300" : "text-red-300"}>
+        {trainPerfDiff > 0 ? "+" : ""}
+        {trainPerfDiff}%
+      </span>
+      ).
+    </p>
+  );
+}
+
+function RenderGraphics({ state }: { state: TrainerAPI }) {
+  if (state.type !== "doneTraining" && state.type !== "training") {
+    return null;
+  }
+  return (
+    <div className="flex flex-row items-center justify-center flex-wrap">
+      (
+      <LossCurve performanceHistory={state.performanceHistory} />
+      )
+      <Histogram
+        testPairings={state.currentPerformance.testCosinePairings}
+        trainPairings={state.currentPerformance.trainCosinePairings}
+      />
+    </div>
+  );
+}
 
 export default function Trainer() {
-  const { toast } = useToast();
-  const [projectPhase, setProjectPhase] = useAtom(projectPhaseAtom);
-  const workerClient = useAtomValue(trainingWorkerAtom);
-  const [currentEpoch, setCurrentEpoch] = useState<number | null>(null);
-  const [currentPerformance, setCurrentPerformance] =
-    useState<PerformanceGroup | null>(null);
-  const [performanceHistory, setPerformanceHistory] =
-    useState<PerformanceHistory>([]);
-  const pretrainingPerformance = useAtomValue(pretrainingPerformanceAtom);
-  const setBestMatrix = useSetAtom(bestMatrixAtom);
   const [parameters] = useParameters();
+  const trainer = useTrainer();
 
-  const train = useCallback(async () => {
-    if (!workerClient) {
-      return;
-    }
-    const cancel = workerClient.addListener((message) => {
-      if (message.type === "updatedPerformance") {
-        setCurrentEpoch(message.epoch);
-        setCurrentPerformance(message.performance);
-        setPerformanceHistory((history) => [
-          ...history,
-          {
-            test: message.performance.testAccuracyAndSE,
-            train: message.performance.trainAccuracyAndSE,
-          },
-        ]);
-      } else if (message.type === "doneTraining") {
-        setProjectPhase(ProjectPhase.Trained);
-        setCurrentEpoch(null);
-        setBestMatrix({ matrixNpy: message.matrixNpy, shape: message.shape });
-        cancel();
-      } else if (message.type === "error") {
-        toast({
-          title: "Error",
-          description: message.message,
-          variant: "destructive",
-        });
-        setCurrentEpoch(null);
-        cancel();
-      }
-    });
-    setProjectPhase(ProjectPhase.Embedded);
-    setCurrentEpoch(0);
-    setCurrentPerformance(null);
-    setPerformanceHistory([]);
-    workerClient?.sendMessage({ type: "train", parameters });
-  }, [workerClient, toast, setProjectPhase, parameters, setBestMatrix]);
-  const stop = useCallback(() => {
-    workerClient?.terminate();
-    setCurrentEpoch(null);
-    setPerformanceHistory([]);
-    setCurrentPerformance(null);
-    setProjectPhase(ProjectPhase.DataPresent);
-  }, [workerClient, setProjectPhase]);
-
-  if (projectPhase < ProjectPhase.Embedded || !workerClient) {
+  if (
+    trainer.type === "uninitialized" ||
+    trainer.type === "embeddingProgress" ||
+    trainer.type === "fetchingEmbeddings"
+  ) {
     return (
       <div className={cardStyles + " opacity-50"}>
         <h1 className="text-2xl">Training</h1>
       </div>
     );
   }
-  const trainPerfDiff =
-    Math.round(
-      10000 *
-        ((currentPerformance?.trainAccuracyAndSE.accuracy ?? 0) -
-          (pretrainingPerformance?.trainAccuracyAndSE?.accuracy ?? 0))
-    ) / 100;
-  const testPerfDiff =
-    Math.round(
-      10000 *
-        ((currentPerformance?.testAccuracyAndSE.accuracy ?? 0) -
-          (pretrainingPerformance?.testAccuracyAndSE?.accuracy ?? 0))
-    ) / 100;
+
   return (
     <div className={cardStyles}>
       <h1 className="text-2xl mb-3">Training</h1>
-      {currentEpoch === null && (
+      {(trainer.type === "doneTraining" || trainer.type === "pretrained") && (
         <ParametersSetup>
           <div className="flex flex-row p-3">
-            <Button onClick={train} className="w-full">
+            <Button
+              onClick={() => trainer.train(parameters)}
+              className="w-full"
+            >
               Train
             </Button>
           </div>
         </ParametersSetup>
       )}
       <div>
-        {currentEpoch !== null && (
+        {(trainer.type === "training" ||
+          trainer.type === "trainingStarted") && (
           <div>
             <p className="text-slate-300 my-2">
-              Training (epoch {currentEpoch + 1}/{parameters.epochs})
+              Training (epoch {trainer.currentEpoch + 1}/{parameters.epochs})
             </p>
             <Progress
               className="h-[20px]"
-              value={Math.round((currentEpoch / parameters.epochs) * 100)}
+              value={Math.round(
+                (trainer.currentEpoch / parameters.epochs) * 100
+              )}
             />
           </div>
         )}
-        {currentPerformance && (
-          <p className="text-slate-300 my-4">
-            Currently, test accuracy is{" "}
-            <span className="text-white">
-              {currentPerformance.testAccuracyAndSE.message}
-            </span>{" "}
-            (
-            <span
-              className={testPerfDiff > 0 ? "text-green-300" : "text-red-300"}
-            >
-              {testPerfDiff > 0 ? "+" : ""}
-              {testPerfDiff}%
-            </span>
-            ) and train accuracy is{" "}
-            <span className="text-white">
-              {currentPerformance.trainAccuracyAndSE.message}
-            </span>{" "}
-            (
-            <span
-              className={trainPerfDiff > 0 ? "text-green-300" : "text-red-300"}
-            >
-              {trainPerfDiff > 0 ? "+" : ""}
-              {trainPerfDiff}%
-            </span>
-            ).
-          </p>
-        )}
-        <div className="flex flex-row items-center justify-center flex-wrap">
-          {performanceHistory.length > 0 && (
-            <LossCurve performanceHistory={performanceHistory} />
-          )}
-          {currentPerformance && (
-            <Histogram
-              testPairings={currentPerformance.testCosinePairings}
-              trainPairings={currentPerformance.trainCosinePairings}
-            />
-          )}
-        </div>
+        <Accuracy state={trainer} />
+        <RenderGraphics state={trainer} />
         <div className="flex flex-row justify-end">
-          {currentEpoch ? (
-            <Button variant={"destructive"} onClick={stop}>
+          {trainer.type === "training" ? (
+            <Button variant={"destructive"} onClick={trainer.stop}>
               Stop
             </Button>
           ) : null}

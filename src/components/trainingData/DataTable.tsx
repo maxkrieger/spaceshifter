@@ -44,7 +44,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         {buttons}
         <div className="flex items-center space-x-2 py-4">
           <Button

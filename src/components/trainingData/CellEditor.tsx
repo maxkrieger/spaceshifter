@@ -19,10 +19,10 @@ import { Input } from "../ui/input";
 import { useCallback, useState } from "react";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
-import { useSetAtom } from "jotai";
-import { projectPhaseAtom } from "@/lib/atoms";
-import { ProjectPhase } from "@/types";
+import useResetTrainer from "@/hooks/useResetTrainer";
+
 export default function CellEditor({ row }: { row: Row<Pair> }) {
+  const resetTrainer = useResetTrainer();
   const r = row.original;
   const [editing, setEditing] = useState<boolean>(false);
   const [deleting, setDeleting] = useState<boolean>(false);
@@ -30,7 +30,6 @@ export default function CellEditor({ row }: { row: Row<Pair> }) {
   const [text1, setText1] = useState<string>(r.text_1);
   const [text2, setText2] = useState<string>(r.text_2);
   const [label, setLabel] = useState<number>(r.label);
-  const setProjectPhase = useSetAtom(projectPhaseAtom);
   const submit = useCallback(async () => {
     await db.pair.update(r.id!, {
       text_1: text1,
@@ -39,14 +38,14 @@ export default function CellEditor({ row }: { row: Row<Pair> }) {
     });
     setEditing(false);
     setMenuOpen(false);
-    setProjectPhase(ProjectPhase.DataPresent);
-  }, [text1, text2, label, r, setProjectPhase]);
+    resetTrainer();
+  }, [text1, text2, label, r, resetTrainer]);
   const deleteRow = useCallback(async () => {
     await db.pair.delete(r.id!);
     setDeleting(false);
     setMenuOpen(false);
-    setProjectPhase(ProjectPhase.DataPresent);
-  }, [r, setProjectPhase]);
+    resetTrainer();
+  }, [r, resetTrainer]);
   return (
     <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} modal={false}>
       <DropdownMenuTrigger asChild>

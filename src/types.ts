@@ -71,16 +71,20 @@ type DatasetInitializer = {
   trainSet: Pairings;
   testSet: Pairings;
 };
+export type LocalDatasetInitializer = {
+  apiKey: string;
+} & DatasetInitializer;
+export type ExampleDatasetInitializer = {
+  cacheUrl: string;
+} & DatasetInitializer;
+
 export type MessageToTrainer =
   | ({
       type: "initializeLocalDataset";
-      apiKey: string;
-      model?: string;
-    } & DatasetInitializer)
+    } & LocalDatasetInitializer)
   | ({
       type: "initializeExampleDataset";
-      cacheUrl: string;
-    } & DatasetInitializer)
+    } & ExampleDatasetInitializer)
   | {
       type: "train";
       parameters: OptimizationParameters;
@@ -137,10 +141,3 @@ export type PerformanceHistory = {
   test: AccuracyAndSE;
   train: AccuracyAndSE;
 }[];
-
-export enum ProjectPhase {
-  NoData = 0,
-  DataPresent = 1,
-  Embedded = 2,
-  Trained = 3,
-}

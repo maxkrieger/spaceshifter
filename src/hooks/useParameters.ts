@@ -1,15 +1,21 @@
-import { useAtom, useAtomValue } from "jotai";
-import { OptimizationParameters } from "../types";
+import { atom, useAtom, useAtomValue } from "jotai";
+import {
+  OptimizationParameters,
+  defaultOptimizationParameters,
+} from "../types";
 import { useLiveQuery } from "dexie-react-hooks";
-import { currentDatasetAtom, exampleParametersAtom } from "../lib/atoms";
+import { currentDatasetAtom } from "../lib/atoms";
 import { db } from "../lib/db";
 import { useCallback } from "react";
+
+const exampleParametersAtom = atom<OptimizationParameters>(
+  defaultOptimizationParameters
+);
 
 type SetParameter = <K extends keyof OptimizationParameters>(
   key: K,
   value: OptimizationParameters[K]
 ) => void;
-
 
 export default function useParameters(): [
   OptimizationParameters,
@@ -27,10 +33,7 @@ export default function useParameters(): [
     return null;
   }, [currentDataset]);
   const setParameter: SetParameter = useCallback(
-    async (
-      key,
-      value
-    ) => {
+    async (key, value) => {
       if (currentDataset.type === "local" && localParams) {
         await db.dataset.update(currentDataset.id, {
           trainingParams: { ...localParams, [key]: value },
@@ -40,10 +43,7 @@ export default function useParameters(): [
     [currentDataset, localParams]
   );
   const setExampleParameter: SetParameter = useCallback(
-    (
-      key,
-      value
-    ) => {
+    (key, value) => {
       setExampleParameters((params) => ({ ...params, [key]: value }));
     },
     [setExampleParameters]

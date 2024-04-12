@@ -1,30 +1,52 @@
-import { ProjectPhase } from "@/types";
 import PretrainingSetup from "./PretrainingSetup";
-import { useAtomValue } from "jotai";
-import { pretrainingPerformanceAtom, projectPhaseAtom } from "@/lib/atoms";
 import Histogram from "../Histogram";
 import { Button } from "../ui/button";
-import { Download } from "lucide-react";
+import { Download, Loader2Icon } from "lucide-react";
 import { cardStyles } from "@/lib/const";
 import TooltipWrapper from "../util/TooltipWrapper";
-import useDownloadEmbeddings from "@/hooks/useDownloadEmbeddings";
+import useTrainer from "@/hooks/useTrainer";
+import usePairings from "@/hooks/usePairings";
+import { Progress } from "../ui/progress";
 
 export default function Pretraining() {
-  const currentPhase = useAtomValue(projectPhaseAtom);
-  const initialPerformance = useAtomValue(pretrainingPerformanceAtom);
-  const downloadEmbeddings = useDownloadEmbeddings();
-  if (currentPhase < ProjectPhase.DataPresent) {
+  const trainer = useTrainer();
+  const pairs = usePairings();
+  if (pairs.length === 0) {
     return (
       <div className={cardStyles + " opacity-50"}>
         <h1 className="text-2xl">Embeddings</h1>
       </div>
     );
   }
-  if (currentPhase < ProjectPhase.Embedded) {
+  if (trainer.type === "uninitialized") {
     return <PretrainingSetup />;
   }
-  if (!initialPerformance) {
-    return <div>loading...</div>;
+  if (trainer.type === "fetchingEmbeddings") {
+    return (
+      <div className={cardStyles}>
+        <h1 className="text-2xl">Pretraining</h1>
+        <div className="p-2 w-full flex flex-col justify-center items-center">
+          <p className="py-2 text-slate-300">
+            Fetching precomputed embeddings...
+          </p>
+          <Loader2Icon className="animate-spin" />
+        </div>
+      </div>
+    );
+  }
+  if (trainer.type === "embeddingProgress") {
+    return (
+      <div className={cardStyles}>
+        <h1 className="text-2xl">Pretraining</h1>
+        <div className="p-2">
+          <p className="py-2 text-slate-300">
+            embedding & caching ({Math.round(trainer.progress * 100)}
+            %)...
+          </p>
+          <Progress value={trainer.progress * 100} />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -34,7 +56,7 @@ export default function Pretraining() {
         <TooltipWrapper tooltip="Download all embeddings" asChild>
           <Button
             variant={"ghost"}
-            onClick={downloadEmbeddings}
+            onClick={trainer.downloadEmbeddings}
             aria-label="Download all embeddings"
           >
             <Download size={14} />
@@ -46,22 +68,22 @@ export default function Pretraining() {
           <p className="text-slate-300 text-l">
             The test set has{" "}
             <span className="text-white">
-              {initialPerformance.testCosinePairings.length}
+              {trainer.pretrainingPerformance.testCosinePairings.length}
             </span>{" "}
             pairs and the train set has{" "}
             <span className="text-white">
-              {initialPerformance.trainCosinePairings.length}
+              {trainer.pretrainingPerformance.trainCosinePairings.length}
             </span>{" "}
             pairs.
           </p>
           <p className="text-slate-300 text-l">
             Before training, the test set performance is{" "}
             <span className="text-white">
-              {initialPerformance.testAccuracyAndSE.message}
+              {trainer.pretrainingPerformance.testAccuracyAndSE.message}
             </span>{" "}
             and the train set performance is{" "}
             <span className="text-white">
-              {initialPerformance.trainAccuracyAndSE.message}
+              {trainer.pretrainingPerformance.trainAccuracyAndSE.message}
             </span>
             .
           </p>
@@ -72,8 +94,8 @@ export default function Pretraining() {
         </div>
         <div>
           <Histogram
-            trainPairings={initialPerformance.trainCosinePairings}
-            testPairings={initialPerformance.testCosinePairings}
+            trainPairings={trainer.pretrainingPerformance.trainCosinePairings}
+            testPairings={trainer.pretrainingPerformance.testCosinePairings}
           />
         </div>
       </div>

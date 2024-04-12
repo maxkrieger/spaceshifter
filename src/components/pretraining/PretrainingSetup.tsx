@@ -4,7 +4,6 @@ import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { Progress } from "../ui/progress";
 import useParameters from "@/hooks/useParameters";
 import { cardStyles as cardStyles } from "@/lib/const";
 import {
@@ -14,42 +13,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Loader2Icon } from "lucide-react";
 import usePretraining from "@/hooks/usePretraining";
 
 export default function PretrainingSetup() {
-  const { initializeDataset, status, datasetCounts } = usePretraining();
+  const { initializeDataset, datasetCounts } = usePretraining();
   const [parameters, setParameter] = useParameters();
   const currentDataset = useAtomValue(currentDatasetAtom);
   const embeddingModels = useAtomValue(modelsAtom);
 
-  if (status.type === "fetching") {
-    return (
-      <div className={cardStyles}>
-        <h1 className="text-2xl">Pretraining</h1>
-        <div className="p-2 w-full flex flex-col justify-center items-center">
-          <p className="py-2 text-slate-300">
-            Fetching precomputed embeddings...
-          </p>
-          <Loader2Icon className="animate-spin" />
-        </div>
-      </div>
-    );
-  }
-  if (status.type === "embeddingProgress") {
-    return (
-      <div className={cardStyles}>
-        <h1 className="text-2xl">Pretraining</h1>
-        <div className="p-2">
-          <p className="py-2 text-slate-300">
-            embedding & caching ({Math.round(status.progress * 100)}
-            %)...
-          </p>
-          <Progress value={status.progress * 100} />
-        </div>
-      </div>
-    );
-  }
   if (!datasetCounts) {
     return <div>loading...</div>;
   }
@@ -104,8 +75,8 @@ export default function PretrainingSetup() {
           id="split"
           type="number"
           className="max-w-[100px]"
-          max={0.9}
-          min={0.1}
+          max={0.95}
+          min={0.01}
           step={0.1}
           value={parameters.testSplitFraction}
           onChange={(e) =>

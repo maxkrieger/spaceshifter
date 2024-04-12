@@ -1,27 +1,27 @@
-import { bestMatrixAtom, projectPhaseAtom } from "@/lib/atoms";
-import { ProjectPhase } from "@/types";
-import { useAtomValue } from "jotai";
 import { Button } from "./ui/button";
 import { useCallback } from "react";
 import { cardStyles } from "@/lib/const";
 import { DownloadIcon } from "lucide-react";
+import useTrainer from "@/hooks/useTrainer";
 
 export default function MatrixViewer() {
-  const bestMatrix = useAtomValue(bestMatrixAtom);
-  const projectPhase = useAtomValue(projectPhaseAtom);
+  const trainer = useTrainer();
+
   const downloadNumpy = useCallback(() => {
-    const blob = new Blob([bestMatrix!.matrixNpy], {
-      type: "application/octet-stream",
-    });
-    const link = document.createElement("a");
-    const url = window.URL.createObjectURL(blob);
-    link.href = url;
-    link.download = "spaceshifted.npy";
-    link.click();
-    URL.revokeObjectURL(url);
-    link.remove();
-  }, [bestMatrix]);
-  if (projectPhase < ProjectPhase.Trained || bestMatrix === null) {
+    if (trainer.type === "doneTraining") {
+      const blob = new Blob([trainer.bestMatrix.matrixNpy], {
+        type: "application/octet-stream",
+      });
+      const link = document.createElement("a");
+      const url = window.URL.createObjectURL(blob);
+      link.href = url;
+      link.download = "spaceshifted.npy";
+      link.click();
+      URL.revokeObjectURL(url);
+      link.remove();
+    }
+  }, [trainer]);
+  if (trainer.type !== "doneTraining") {
     return (
       <div className={cardStyles + " opacity-50"}>
         <h1 className="text-2xl">Matrix</h1>
@@ -36,15 +36,16 @@ export default function MatrixViewer() {
           <p className="text-slate-300">
             We trained a <span className="text-white">bias matrix</span> of size{" "}
             <span className="text-white">
-              ({bestMatrix.shape[0]}, {bestMatrix.shape[1]})
+              ({trainer.bestMatrix.shape[0]}, {trainer.bestMatrix.shape[1]})
             </span>
             .
           </p>
           <p className="text-slate-300">
             You can multiply it with vectors of size{" "}
-            <span className="text-white">{bestMatrix.shape[0]}</span> to get{" "}
-            <span className="text-purple-200">Spaceshifted</span> vectors of
-            size <span className="text-white">{bestMatrix.shape[1]}</span>.
+            <span className="text-white">{trainer.bestMatrix.shape[0]}</span> to
+            get <span className="text-purple-200">Spaceshifted</span> vectors of
+            size{" "}
+            <span className="text-white">{trainer.bestMatrix.shape[1]}</span>.
           </p>
         </div>
         <div className="flex flex-row flex-wrap my-3">
@@ -68,7 +69,7 @@ export default function MatrixViewer() {
               <span className="block">
                 <span className="text-yellow-300">v</span> ={" "}
                 <span className="text-gray-300">
-                  # vector of size ({bestMatrix.shape[0]},)
+                  # vector of size ({trainer.bestMatrix.shape[0]},)
                 </span>
               </span>
               <span className="block">

@@ -131,7 +131,7 @@ addEventListener("message", async (e: MessageEvent<MessageToTrainer>) => {
         await trainer.embedLocalPairings(
           e.data.testSet.concat(e.data.trainSet),
           e.data.apiKey,
-          e.data.model
+          e.data.parameters.embeddingModel
         );
         await trainer.initDatasets({
           train: e.data.trainSet,

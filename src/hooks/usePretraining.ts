@@ -1,24 +1,12 @@
-import {
-  apiKeyAtom,
-  currentDatasetAtom,
-  pretrainingPerformanceAtom,
-  projectPhaseAtom,
-  trainingWorkerAtom,
-} from "@/lib/atoms";
-import { useAtomValue, useSetAtom } from "jotai";
-import { useCallback, useState } from "react";
+import { apiKeyAtom, currentDatasetAtom } from "@/lib/atoms";
+import { useAtomValue } from "jotai";
+import { useCallback } from "react";
 import useParameters from "./useParameters";
-import { ProjectPhase } from "@/types";
 import trainTestSplit from "@/lib/trainTestSplit";
 import augmentNegatives from "@/lib/augmentNegatives";
-import TrainingWorkerClient from "@/lib/TrainingWorkerClient";
 import { countLabels } from "@/lib/utils";
 import usePairings from "./usePairings";
-
-type PretrainingStatus =
-  | { type: "embeddingProgress"; progress: number }
-  | { type: "fetching" }
-  | { type: "idle" };
+import useTrainer from "./useTrainer";
 
 /**
  * Takes a flat dataset of pairings, augments it, and sends it to a new worker
@@ -26,52 +14,24 @@ type PretrainingStatus =
  */
 export default function usePretraining(): {
   initializeDataset: () => void;
-  status: PretrainingStatus;
   datasetCounts: {
     positives: number;
     negatives: number;
   } | null;
 } {
-  const setWorkerClient = useSetAtom(trainingWorkerAtom);
+  const trainer = useTrainer();
 
   const currentDataset = useAtomValue(currentDatasetAtom);
   const pairings = usePairings();
-
-  const [pretrainingStatus, setPretrainingStatus] = useState<PretrainingStatus>(
-    {
-      type: "idle",
-    }
-  );
   const [parameters] = useParameters();
-  const setPerformance = useSetAtom(pretrainingPerformanceAtom);
-  const setProjectPhase = useSetAtom(projectPhaseAtom);
-
-  const initializeWorkerClient = useCallback(() => {
-    const workerClient = new TrainingWorkerClient();
-    setWorkerClient(workerClient);
-    workerClient.addListener((message) => {
-      if (message.type === "embeddingProgress") {
-        setPretrainingStatus({
-          type: "embeddingProgress",
-          progress: message.progress,
-        });
-      } else if (message.type === "initialPerformance") {
-        setPerformance(message.performance);
-        setPretrainingStatus({ type: "idle" });
-        setProjectPhase(ProjectPhase.Embedded);
-      } else if (message.type === "fetchingStatus") {
-        setPretrainingStatus({
-          type: "fetching",
-        });
-      }
-    });
-    return workerClient;
-  }, [setWorkerClient, setPerformance, setProjectPhase]);
-
   const apiKey = useAtomValue(apiKeyAtom);
+
   const initializeDataset = useCallback(() => {
     if (!pairings) {
       throw new Error("Pairs not loaded");
+    }
+    if (trainer.type !== "uninitialized") {
+      throw new Error("Trainer already initialized");
     }
     let { train, test } = trainTestSplit(
       pairings,
@@ -82,28 +42,22 @@ export default function usePretraining(): {
       train = augmentNegatives(train);
       test = augmentNegatives(test);
     }
-    const worker = initializeWorkerClient();
     if (currentDataset.type === "local") {
-      const model = parameters.embeddingModel;
-      worker.sendMessage({
-        type: "initializeLocalDataset",
+      trainer.initializeLocal({
         trainSet: train,
         testSet: test,
         parameters,
         apiKey: apiKey || "",
-        model,
       });
-      setPretrainingStatus({ type: "embeddingProgress", progress: 0 });
     } else if (currentDataset.type === "example") {
-      worker.sendMessage({
-        type: "initializeExampleDataset",
+      trainer.initializeExample({
         trainSet: train,
         testSet: test,
         parameters,
         cacheUrl: currentDataset.embeddingsURL,
       });
     }
-  }, [parameters, initializeWorkerClient, pairings, currentDataset, apiKey]);
+  }, [parameters, pairings, currentDataset, apiKey, trainer]);
   const datasetCounts = pairings ? countLabels(pairings) : null;
-  return { initializeDataset, status: pretrainingStatus, datasetCounts };
+  return { initializeDataset, datasetCounts };
 }
