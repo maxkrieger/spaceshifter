@@ -56,6 +56,7 @@ export default class EmbeddingCache {
       for (let i = 0; i < chunked.length; i++) {
         const chunk = chunked[i];
         log.info(`Fetching ${chunk.length} embeddings chunk`);
+        console.log("ch", chunk);
         const res = await backOff(() =>
           fetch("https://api.openai.com/v1/embeddings", {
             method: "POST",
@@ -69,7 +70,12 @@ export default class EmbeddingCache {
             }),
           })
         );
+
         const json = await res.json();
+        if (res.status !== 200) {
+          log.error(json);
+          throw new Error(`Failed to fetch embeddings: ${json.error.message}`);
+        }
         const toAdd: Embedding[] = json.data.map(
           (res: { index: number; embedding: number[] }) => ({
             embedding: res.embedding,

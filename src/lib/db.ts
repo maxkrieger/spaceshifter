@@ -23,16 +23,18 @@ export interface SavedMatrix {
   dateCreated: Date;
 }
 
-export type Pair = {
+export type DBPair = {
   id?: number;
   dataset: number;
   dateCreated: Date;
 } & Pairing;
 
+export type DBPairs = DBPair[];
+
 export class SpaceshifterDB extends Dexie {
   embeddings!: Table<Embedding>;
   dataset!: Table<Dataset>;
-  pair!: Table<Pair>;
+  pair!: Table<DBPair>;
   savedMatrices!: Table<SavedMatrix>;
 
   async deleteDataset(id: number) {

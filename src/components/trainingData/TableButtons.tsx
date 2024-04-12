@@ -25,6 +25,9 @@ export default function TableButtons({
   const [label, setLabel] = useState<1 | -1>(1);
   const [open, setOpen] = useState<boolean>(false);
   const onSubmit = useCallback(() => {
+    if (text_1 === "" || text_2 === "") {
+      return;
+    }
     onAddPairing({ text_1, text_2, label });
     setOpen(false);
   }, [onAddPairing, text_1, text_2, label]);

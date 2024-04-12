@@ -1,4 +1,4 @@
-import { Pair, db } from "@/lib/db";
+import { DBPair, db } from "@/lib/db";
 import { Row } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 
@@ -21,7 +21,7 @@ import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 import useResetTrainer from "@/hooks/useResetTrainer";
 
-export default function CellEditor({ row }: { row: Row<Pair> }) {
+export default function CellEditor({ row }: { row: Row<DBPair> }) {
   const resetTrainer = useResetTrainer();
   const r = row.original;
   const [editing, setEditing] = useState<boolean>(false);
@@ -31,6 +31,9 @@ export default function CellEditor({ row }: { row: Row<Pair> }) {
   const [text2, setText2] = useState<string>(r.text_2);
   const [label, setLabel] = useState<number>(r.label);
   const submit = useCallback(async () => {
+    if (text1 === "" || text2 === "") {
+      return;
+    }
     await db.pair.update(r.id!, {
       text_1: text1,
       text_2: text2,

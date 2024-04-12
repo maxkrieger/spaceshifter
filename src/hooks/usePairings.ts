@@ -16,7 +16,7 @@ export default function usePairings(): Pairings {
       return pairs as Pairings;
     }
     return null;
-  });
+  }, [currentDataset]);
   const examplePairs =
     currentDataset.type === "example" ? currentDataset.pairings : null;
   if (localPairs) {
