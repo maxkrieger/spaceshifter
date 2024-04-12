@@ -56,9 +56,7 @@ function RenderGraphics({ state }: { state: TrainerAPI }) {
   }
   return (
     <div className="flex flex-row items-center justify-center flex-wrap">
-      (
       <LossCurve performanceHistory={state.performanceHistory} />
-      )
       <Histogram
         testPairings={state.currentPerformance.testCosinePairings}
         trainPairings={state.currentPerformance.trainCosinePairings}
