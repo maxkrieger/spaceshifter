@@ -30,7 +30,7 @@ function App() {
         {currentDataset.type === "none" ? <Home /> : <Project />}
         <Toaster />
         <footer className="mt-[100px]">
-          <div className="text-center text-sm text-slate-500">
+          <div className="text-center text-sm text-slate-400">
             adapted from the{" "}
             <a
               className="underline"

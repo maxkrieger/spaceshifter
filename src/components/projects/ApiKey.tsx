@@ -64,17 +64,16 @@ export default function ApiKey() {
         <DialogHeader>
           <DialogTitle className="text-white">Set API Key</DialogTitle>
           <DialogDescription>
-            Get a secret key from{" "}
-            <a
-              className="underline"
-              href="https://platform.openai.com/account/api-keys"
-              target="_blank"
-            >
-              the OpenAI API Keys page
-            </a>{" "}
-            and paste it here.{" "}
             <span className="text-slate-300">
-              It is stored locally and never shared with us.
+              Get a secret key from{" "}
+              <a
+                className="underline"
+                href="https://platform.openai.com/account/api-keys"
+                target="_blank"
+              >
+                the OpenAI API Keys page
+              </a>{" "}
+              and paste it here. It is stored locally and never shared with us.
             </span>
           </DialogDescription>
         </DialogHeader>
@@ -100,7 +99,7 @@ export default function ApiKey() {
           </div>
           <div>
             <button
-              className="button underline text-slate-500"
+              className="button underline text-slate-400"
               onClick={pasteFromClipboard}
             >
               paste from clipboard
