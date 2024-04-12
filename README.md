@@ -30,6 +30,14 @@ pnpm run build
 
 Build is outputted to `dist/`.
 
+# Testing
+
+Uses Vitest.
+
+```
+pnpm run test
+```
+
 # Architecture
 
 Spaceshifter is not a typical React app. It uses Tensorflow.js in a worker to accelerate the training process on the GPU.
@@ -43,6 +51,6 @@ User-created datasets, training parameters, and cached embeddings are all stored
 Important files include:
 
 * `src/lib/model.ts`, for the model that produces the matrix
-* `src/worker/TrainingWorker.ts`, for the worker
-* `src/hooks/useTrainer.ts`, for a typesafe, stateful API to the worker
+* `src/worker/TrainingWorker.ts`, for the training worker
+* `src/hooks/useTrainer.ts`, for a typesafe, stateful hook API to the training worker
 * `src/lib/db.ts`, for the database schema
