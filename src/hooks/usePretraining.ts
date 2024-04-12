@@ -2,8 +2,6 @@ import { apiKeyAtom, currentDatasetAtom } from "@/lib/atoms";
 import { useAtomValue } from "jotai";
 import { useCallback } from "react";
 import useParameters from "./useParameters";
-import trainTestSplit from "@/lib/trainTestSplit";
-import augmentNegatives from "@/lib/augmentNegatives";
 import { countLabels } from "@/lib/utils";
 import usePairings from "./usePairings";
 import useTrainer from "./useTrainer";
@@ -33,26 +31,16 @@ export default function usePretraining(): {
     if (trainer.type !== "uninitialized") {
       throw new Error("Trainer already initialized");
     }
-    let { train, test } = trainTestSplit(
-      pairings,
-      parameters.testSplitFraction
-    );
-    if (parameters.generateSyntheticNegatives) {
-      // We do not store these long-term because of the risk of leakage between train and test
-      train = augmentNegatives(train);
-      test = augmentNegatives(test);
-    }
+
     if (currentDataset.type === "local") {
       trainer.initializeLocal({
-        trainSet: train,
-        testSet: test,
+        pairings,
         parameters,
         apiKey: apiKey || "",
       });
     } else if (currentDataset.type === "example") {
       trainer.initializeExample({
-        trainSet: train,
-        testSet: test,
+        pairings,
         parameters,
         cacheUrl: currentDataset.embeddingsURL,
       });

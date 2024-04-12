@@ -1,5 +1,5 @@
 import { Pairings, TensorDataset } from "../types";
-import EmbeddingCache from "./EmbeddingCache";
+import EmbeddingCache from "../worker/EmbeddingCache";
 import { data as tf_data, tensor1d, tensor2d } from "@tensorflow/tfjs";
 
 export default function pairingToDataset(

@@ -68,8 +68,7 @@ export type PerformanceGroup = {
 
 type DatasetInitializer = {
   parameters: OptimizationParameters;
-  trainSet: Pairings;
-  testSet: Pairings;
+  pairings: Pairings;
 };
 export type LocalDatasetInitializer = {
   apiKey: string;
@@ -96,7 +95,6 @@ export type MessageFromTrainer =
   | {
       type: "embeddingProgress";
       progress: number;
-      total: number;
     }
   | {
       type: "initialPerformance";

@@ -1,9 +1,10 @@
-import { Embedding, db } from "./db";
+import { Embedding, db } from "../lib/db";
 import log from "loglevel";
 import { EmbeddingCacheData, Pairings } from "../types";
 import { chunk } from "lodash";
 import { backOff } from "exponential-backoff";
-import { defaultEmbeddingModel } from "./const";
+import { defaultEmbeddingModel } from "../lib/const";
+import { sendMessageToHost } from "./workerUtil";
 
 export default class EmbeddingCache {
   cache: EmbeddingCacheData = {};
@@ -27,6 +28,10 @@ export default class EmbeddingCache {
     apiKey: string,
     model = defaultEmbeddingModel
   ): Promise<void> {
+    sendMessageToHost({
+      type: "embeddingProgress",
+      progress: 0,
+    });
     log.info("Bulk embedding...");
     const flattenedPairs = [
       ...new Set(pairs.flatMap((p) => [p.text_1, p.text_2])),
@@ -78,10 +83,9 @@ export default class EmbeddingCache {
           this.cache[res.text] = res.embedding;
         });
 
-        postMessage({
+        sendMessageToHost({
           type: "embeddingProgress",
           progress: i / chunked.length,
-          total: missing.length,
         });
       }
       log.info(`Done fetching`);

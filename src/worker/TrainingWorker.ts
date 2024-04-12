@@ -1,22 +1,27 @@
 import { Tensor2D, getBackend, ready as tf_ready } from "@tensorflow/tfjs";
 import EmbeddingCache from "./EmbeddingCache";
-import accuracyAndSE from "./accuracyAndSE";
-import computeCosinePairings from "./cosinePairings";
-import { makeMatrix, trainMatrix } from "./model";
-import pairingToDataset from "./pairingToDataset";
+import accuracyAndSE from "../lib/accuracyAndSE";
+import computeCosinePairings from "../lib/cosinePairings";
+import { makeMatrix, trainMatrix } from "../lib/model";
+import pairingToDataset from "../lib/pairingToDataset";
 import {
   EmbeddingCacheData,
   OptimizationParameters,
-  MessageFromTrainer,
   Pairings,
   PerformanceGroup,
   TensorDataset,
   MessageToTrainer,
 } from "../types";
-import { tfToNp } from "./tfToNp";
+import { tfToNp } from "../lib/tfToNp";
+import trainTestSplit from "../lib/trainTestSplit";
+import augmentNegatives from "../lib/augmentNegatives";
+import { sendMessageToHost } from "./workerUtil";
+import log from "loglevel";
 
-function sendMessageToHost(message: MessageFromTrainer) {
-  postMessage(message);
+if (import.meta.env.PROD) {
+  log.setLevel(log.levels.WARN);
+} else {
+  log.setLevel(log.levels.DEBUG);
 }
 
 class Trainer {
@@ -46,7 +51,22 @@ class Trainer {
     };
   }
 
-  async initDatasets({ train, test }: { train: Pairings; test: Pairings }) {
+  async initDatasets({
+    pairings,
+    parameters,
+  }: {
+    pairings: Pairings;
+    parameters: OptimizationParameters;
+  }) {
+    let { train, test } = trainTestSplit(
+      pairings,
+      parameters.testSplitFraction
+    );
+    if (parameters.generateSyntheticNegatives) {
+      // We do not store these long-term because of the risk of leakage between train and test
+      train = augmentNegatives(train);
+      test = augmentNegatives(test);
+    }
     await tf_ready();
     this.trainDataset = pairingToDataset(train, this.embeddingCache);
     this.testDataset = pairingToDataset(test, this.embeddingCache);
@@ -110,6 +130,7 @@ class Trainer {
       });
     }
     const converted = await tfToNp(matrix as Tensor2D);
+    // Note we send the matrix as a transferable object
     postMessage(
       { type: "doneTraining", matrixNpy: converted, shape: matrix.shape },
       [converted]
@@ -129,20 +150,20 @@ addEventListener("message", async (e: MessageEvent<MessageToTrainer>) => {
     switch (e.data.type) {
       case "initializeLocalDataset":
         await trainer.embedLocalPairings(
-          e.data.testSet.concat(e.data.trainSet),
+          e.data.pairings,
           e.data.apiKey,
           e.data.parameters.embeddingModel
         );
         await trainer.initDatasets({
-          train: e.data.trainSet,
-          test: e.data.testSet,
+          pairings: e.data.pairings,
+          parameters: e.data.parameters,
         });
         break;
       case "initializeExampleDataset":
         await trainer.fetchPrecomputedEmbeddings(e.data.cacheUrl);
         await trainer.initDatasets({
-          train: e.data.trainSet,
-          test: e.data.testSet,
+          pairings: e.data.pairings,
+          parameters: e.data.parameters,
         });
         break;
       case "train":
@@ -155,8 +176,7 @@ addEventListener("message", async (e: MessageEvent<MessageToTrainer>) => {
         });
         break;
       default:
-        console.error("Unknown message type", e.data);
-        break;
+        throw new Error("Unknown message type " + e.data);
     }
   } catch (e: unknown) {
     sendMessageToHost({ type: "error", message: (e as Error).toString() });

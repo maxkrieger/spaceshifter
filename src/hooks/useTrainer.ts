@@ -1,5 +1,5 @@
 import { useToast } from "@/components/ui/use-toast";
-import TrainingWorkerClient from "@/lib/TrainingWorkerClient";
+import TrainingWorkerClient from "@/worker/TrainingWorkerClient";
 import { downloadEmbeddingCache } from "@/lib/utils";
 import {
   PerformanceGroup,
