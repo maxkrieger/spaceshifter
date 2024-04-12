@@ -52,5 +52,5 @@ Important files include:
 
 * `src/lib/model.ts`, for the model that produces the matrix
 * `src/worker/TrainingWorker.ts`, for the training worker
-* `src/hooks/useTrainer.ts`, for a typesafe, stateful hook API to the training worker
+* `src/hooks/{useTrainer,trainerState}.ts`, for a typesafe, stateful hook API to the training worker
 * `src/lib/db.ts`, for the database schema

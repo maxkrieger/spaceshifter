@@ -65,9 +65,6 @@ type TrainerState =
   | TrainingState
   | DoneTrainingState;
 
-export const trainingWorkerAtom = atom<TrainingWorkerClient | null>(null);
-export const trainingStateAtom = atom<TrainerState>({ type: "uninitialized" });
-
 type EmbeddingsDownloadable = {
   /**
    * Retrieves the embeddings cache for download
@@ -90,20 +87,70 @@ type Resettable = {
 };
 
 /**
+ * Trainer worker does not exist. Accepts a local or example dataset to transition to get embeddings
+ */
+export type Uninitialized = UninitializedState & {
+  initializeLocal: (options: LocalDatasetInitializer) => void;
+  initializeExample: (initializer: ExampleDatasetInitializer) => void;
+};
+
+/**
+ * Fetching precomputed embeddings for an example
+ */
+export type FetchingEmbeddings = FetchingEmbeddingsState & Resettable;
+
+/**
+ * Embedding new data and caching it
+ */
+export type EmbeddingProgress = EmbeddingProgressState & Resettable;
+
+/**
+ * Pretraining has been completed and the model can be trained
+ */
+export type Pretraining = PretrainingState &
+  EmbeddingsDownloadable &
+  Trainable &
+  Resettable;
+
+/**
+ * First state from training, before the first epoch
+ */
+export type TrainingStarted = TrainingStartedState &
+  EmbeddingsDownloadable &
+  Resettable;
+
+/**
+ * Training in progress
+ */
+export type Training = TrainingState & EmbeddingsDownloadable & Resettable;
+
+/**
+ * Training complete
+ */
+export type DoneTraining = DoneTrainingState &
+  EmbeddingsDownloadable &
+  Trainable &
+  Resettable;
+
+/**
  * Represents a stateful API for the training worker.
  * Different states have different callbacks available.
  */
 export type TrainerAPI =
-  | (UninitializedState & {
-      initializeLocal: (options: LocalDatasetInitializer) => void;
-      initializeExample: (initializer: ExampleDatasetInitializer) => void;
-    })
-  | ((
-      | FetchingEmbeddingsState
-      | EmbeddingProgressState
-      | (PretrainingState & EmbeddingsDownloadable & Trainable)
-      | (TrainingStartedState & EmbeddingsDownloadable)
-      | (TrainingState & EmbeddingsDownloadable)
-      | (DoneTrainingState & EmbeddingsDownloadable & Trainable)
-    ) &
-      Resettable);
+  | Uninitialized
+  | FetchingEmbeddings
+  | EmbeddingProgress
+  | Pretraining
+  | TrainingStarted
+  | Training
+  | DoneTraining;
+
+/**
+ * Holds a pointer to the training worker
+ */
+export const trainingWorkerAtom = atom<TrainingWorkerClient | null>(null);
+
+/**
+ * Holds the current internal state of the trainer hook
+ */
+export const trainingStateAtom = atom<TrainerState>({ type: "uninitialized" });
