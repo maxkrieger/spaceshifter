@@ -18,6 +18,9 @@ export default function CreateDataset() {
   const setCurrentDataset = useSetAtom(currentDatasetAtom);
 
   const onCreateDataset = useCallback(async () => {
+    if (datasetTitle === "") {
+      return;
+    }
     const dataset = await db.dataset.add({
       name: datasetTitle,
       dateCreated: new Date(),
