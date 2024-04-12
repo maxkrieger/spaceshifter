@@ -3,6 +3,7 @@ import log from "loglevel";
 import { EmbeddingCacheData, Pairings } from "../types";
 import { chunk } from "lodash";
 import { backOff } from "exponential-backoff";
+import { defaultEmbeddingModel } from "./const";
 
 export default class EmbeddingCache {
   cache: EmbeddingCacheData = {};
@@ -24,7 +25,7 @@ export default class EmbeddingCache {
   async bulkEmbed(
     pairs: Pairings,
     apiKey: string,
-    model = "text-embedding-ada-002"
+    model = defaultEmbeddingModel
   ): Promise<void> {
     log.info("Bulk embedding...");
     const flattenedPairs = [

@@ -5,18 +5,18 @@ import { currentDatasetAtom, exampleParametersAtom } from "../lib/atoms";
 import { db } from "../lib/db";
 import { useCallback } from "react";
 
-/**
- *
- * @returns [parameters, setParameters(parameters)]
- */
+type SetParameter = <K extends keyof OptimizationParameters>(
+  key: K,
+  value: OptimizationParameters[K]
+) => void;
+
+
 export default function useParameters(): [
   OptimizationParameters,
-  (params: OptimizationParameters) => void
+  SetParameter
 ] {
   const currentDataset = useAtomValue(currentDatasetAtom);
-  const [exampleParams, setExampleParameters] = useAtom<OptimizationParameters>(
-    exampleParametersAtom
-  );
+  const [exampleParams, setExampleParameters] = useAtom(exampleParametersAtom);
   const localParams = useLiveQuery(async () => {
     if (currentDataset.type === "local") {
       const params = await db.dataset.get(currentDataset.id);
@@ -26,19 +26,31 @@ export default function useParameters(): [
     }
     return null;
   }, [currentDataset]);
-  const setParams = useCallback(
-    async (parameters: OptimizationParameters) => {
-      if (currentDataset.type === "local") {
+  const setParameter: SetParameter = useCallback(
+    async (
+      key,
+      value
+    ) => {
+      if (currentDataset.type === "local" && localParams) {
         await db.dataset.update(currentDataset.id, {
-          trainingParams: parameters,
+          trainingParams: { ...localParams, [key]: value },
         });
       }
     },
-    [currentDataset]
+    [currentDataset, localParams]
+  );
+  const setExampleParameter: SetParameter = useCallback(
+    (
+      key,
+      value
+    ) => {
+      setExampleParameters((params) => ({ ...params, [key]: value }));
+    },
+    [setExampleParameters]
   );
   const local = currentDataset.type === "local";
   return [
     local && localParams ? localParams : exampleParams,
-    local ? setParams : setExampleParameters,
+    local ? setParameter : setExampleParameter,
   ];
 }

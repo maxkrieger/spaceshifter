@@ -13,8 +13,6 @@ import {
   TensorDataset,
   MessageToTrainer,
 } from "../types";
-import augmentNegatives from "./augmentNegatives";
-import trainTestSplit from "./trainTestSplit";
 import { tfToNp } from "./tfToNp";
 
 function sendMessageToHost(message: MessageFromTrainer) {
@@ -27,12 +25,15 @@ class Trainer {
   embeddingCache: EmbeddingCache = new EmbeddingCache();
   constructor() {}
   async getPerformance(mat?: Tensor2D): Promise<PerformanceGroup> {
+    if (!this.trainDataset || !this.testDataset) {
+      throw new Error("Datasets not initialized");
+    }
     const testCosinePairings = await computeCosinePairings(
-      this.testDataset!,
+      this.testDataset,
       mat
     );
     const trainCosinePairings = await computeCosinePairings(
-      this.trainDataset!,
+      this.trainDataset,
       mat
     );
     const testAccuracyAndSE = accuracyAndSE(testCosinePairings);
@@ -45,15 +46,10 @@ class Trainer {
     };
   }
 
-  async initDataset(pairs: Pairings, params: OptimizationParameters) {
-    const { train, test } = trainTestSplit(pairs, params.testSplitFraction);
-    const shouldAugment = params.generateSyntheticNegatives;
-    const testAugmented = shouldAugment ? augmentNegatives(test) : test;
-    const trainAugmented = shouldAugment ? augmentNegatives(train) : train;
-
+  async initDatasets({ train, test }: { train: Pairings; test: Pairings }) {
     await tf_ready();
-    this.trainDataset = pairingToDataset(trainAugmented, this.embeddingCache!);
-    this.testDataset = pairingToDataset(testAugmented, this.embeddingCache!);
+    this.trainDataset = pairingToDataset(train, this.embeddingCache);
+    this.testDataset = pairingToDataset(test, this.embeddingCache);
 
     sendMessageToHost({
       type: "initialPerformance",
@@ -93,13 +89,16 @@ class Trainer {
           "Your browser doesn't support worker WebGL, try Chrome. It will be slow otherwise!",
       });
     }
+    if (!this.trainDataset) {
+      throw new Error("Datasets not initialized");
+    }
     const matrix = makeMatrix(
-      this.trainDataset!.embeddingSize,
+      this.trainDataset.embeddingSize,
       parameters.targetEmbeddingSize
     );
 
     for await (const epoch of trainMatrix(
-      this.trainDataset!,
+      this.trainDataset,
       parameters,
       matrix
     )) {
@@ -130,15 +129,21 @@ addEventListener("message", async (e: MessageEvent<MessageToTrainer>) => {
     switch (e.data.type) {
       case "initializeLocalDataset":
         await trainer.embedLocalPairings(
-          e.data.allPairings,
+          e.data.testSet.concat(e.data.trainSet),
           e.data.apiKey,
           e.data.model
         );
-        await trainer.initDataset(e.data.allPairings, e.data.parameters);
+        await trainer.initDatasets({
+          train: e.data.trainSet,
+          test: e.data.testSet,
+        });
         break;
       case "initializeExampleDataset":
         await trainer.fetchPrecomputedEmbeddings(e.data.cacheUrl);
-        await trainer.initDataset(e.data.allPairings, e.data.parameters);
+        await trainer.initDatasets({
+          train: e.data.trainSet,
+          test: e.data.testSet,
+        });
         break;
       case "train":
         await trainer.train(e.data.parameters);

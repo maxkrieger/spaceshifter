@@ -1,25 +1,9 @@
-import {
-  apiKeyAtom,
-  currentDatasetAtom,
-  modelsAtom,
-  projectPhaseAtom,
-  trainingWorkerAtom,
-} from "@/lib/atoms";
-import { db } from "@/lib/db";
-import { useLiveQuery } from "dexie-react-hooks";
-import { useAtomValue, useSetAtom } from "jotai";
-import { useCallback, useState } from "react";
+import { currentDatasetAtom, modelsAtom } from "@/lib/atoms";
+import { useAtomValue } from "jotai";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import TrainingWorkerClient from "@/lib/TrainingWorkerClient";
-import {
-  PerformanceGroup,
-  ProjectPhase,
-  OptimizationParameters,
-  Pairings,
-} from "@/types";
 import { Progress } from "../ui/progress";
 import useParameters from "@/hooks/useParameters";
 import { cardStyles as cardStyles } from "@/lib/const";
@@ -31,100 +15,15 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Loader2Icon } from "lucide-react";
-import { countLabels } from "@/lib/utils";
+import usePretraining from "@/hooks/usePretraining";
 
-type EmbeddingStatus =
-  | { type: "embeddingProgress"; progress: number }
-  | { type: "fetching" }
-  | { type: "idle" };
-
-export default function PretrainingSetup({
-  setPerformance,
-}: {
-  setPerformance: (performance: PerformanceGroup) => void;
-}) {
+export default function PretrainingSetup() {
+  const { initializeDataset, status, datasetCounts } = usePretraining();
+  const [parameters, setParameter] = useParameters();
   const currentDataset = useAtomValue(currentDatasetAtom);
-  const setWorkerClient = useSetAtom(trainingWorkerAtom);
-  const setPhase = useSetAtom(projectPhaseAtom);
-  const apiKey = useAtomValue(apiKeyAtom);
-  const [parameters, setParameters] = useParameters();
-  const pairs = useLiveQuery(async () => {
-    if (currentDataset.type === "local") {
-      const pairs = await db.pair
-        .where("dataset")
-        .equals(currentDataset.id)
-        .toArray();
-      return pairs as Pairings;
-    } else if (currentDataset.type === "example") {
-      return currentDataset.pairings;
-    }
-  }, [currentDataset]);
-  const setTrainingParam = useCallback(
-    (key: keyof OptimizationParameters, value: boolean | number) => {
-      setParameters({ ...parameters, [key]: value });
-    },
-    [parameters, setParameters]
-  );
-  const [embeddingStatus, setEmbeddingStatus] = useState<EmbeddingStatus>({
-    type: "idle",
-  });
   const embeddingModels = useAtomValue(modelsAtom);
-  const [selectedEmbeddingModel, setSelectedEmbeddingModel] = useState(0);
-  const embedAndSplit = useCallback(() => {
-    if (pairs) {
-      const workerClient = new TrainingWorkerClient();
-      setWorkerClient(workerClient);
-      workerClient.addListener((message) => {
-        if (message.type === "embeddingProgress") {
-          setEmbeddingStatus({
-            type: "embeddingProgress",
-            progress: message.progress,
-          });
-        } else if (message.type === "initialPerformance") {
-          setPerformance(message.performance);
-          setEmbeddingStatus({ type: "idle" });
-          setPhase(ProjectPhase.Embedded);
-        } else if (message.type === "fetchingStatus") {
-          setEmbeddingStatus({
-            type: "fetching",
-          });
-        }
-      });
-      if (currentDataset.type === "local") {
-        const model =
-          embeddingModels.state === "hasData"
-            ? embeddingModels.data[selectedEmbeddingModel]
-            : undefined;
-        workerClient.sendMessage({
-          type: "initializeLocalDataset",
-          allPairings: pairs,
-          parameters,
-          apiKey: apiKey!,
-          model,
-        });
-        setEmbeddingStatus({ type: "embeddingProgress", progress: 0 });
-      } else if (currentDataset.type === "example") {
-        workerClient.sendMessage({
-          type: "initializeExampleDataset",
-          allPairings: currentDataset.pairings,
-          parameters,
-          cacheUrl: currentDataset.embeddingsURL,
-        });
-      }
-    }
-  }, [
-    parameters,
-    setWorkerClient,
-    apiKey,
-    pairs,
-    setPerformance,
-    setPhase,
-    currentDataset,
-    embeddingModels,
-    selectedEmbeddingModel,
-  ]);
 
-  if (embeddingStatus.type === "fetching") {
+  if (status.type === "fetching") {
     return (
       <div className={cardStyles}>
         <h1 className="text-2xl">Pretraining</h1>
@@ -137,24 +36,24 @@ export default function PretrainingSetup({
       </div>
     );
   }
-  if (embeddingStatus.type === "embeddingProgress") {
+  if (status.type === "embeddingProgress") {
     return (
       <div className={cardStyles}>
         <h1 className="text-2xl">Pretraining</h1>
         <div className="p-2">
           <p className="py-2 text-slate-300">
-            embedding & caching ({Math.round(embeddingStatus.progress * 100)}
+            embedding & caching ({Math.round(status.progress * 100)}
             %)...
           </p>
-          <Progress value={embeddingStatus.progress * 100} />
+          <Progress value={status.progress * 100} />
         </div>
       </div>
     );
   }
-  if (!pairs) {
+  if (!datasetCounts) {
     return <div>loading...</div>;
   }
-  const { positives, negatives } = countLabels(pairs);
+  const enoughData = datasetCounts.positives + datasetCounts.negatives > 1;
   return (
     <div className={cardStyles}>
       <h1 className="text-2xl">Pretraining</h1>
@@ -168,29 +67,32 @@ export default function PretrainingSetup({
         .
       </p>
       <p className="text-slate-300 text-l my-2">
-        There are <span className="text-white">{positives}</span> positive
-        examples and <span className="text-white">{negatives}</span> negative
+        There are <span className="text-white">{datasetCounts.positives}</span>{" "}
+        positive examples and{" "}
+        <span className="text-white">{datasetCounts.negatives}</span> negative
         examples.{" "}
-        {pairs.length <= 1 && (
+        {!enoughData && (
           <span className="text-red-300 font-bold">
             You need at least 2 examples to train.
           </span>
         )}
-        {pairs.length > 1 && negatives < positives
+        {enoughData && datasetCounts.negatives < datasetCounts.positives
           ? "More negative examples can be generated."
           : ""}
       </p>
       <div className="grid grid-cols-[250px,1fr] gap-3 p-3 items-center">
-        {positives - negatives > 0 && (
+        {datasetCounts.positives - datasetCounts.negatives > 0 && (
           <>
             <Label htmlFor="augment" className="md:text-right sm:text-left">
-              Generate {Math.max(positives - negatives, 0)} negative examples
+              Generate{" "}
+              {Math.max(datasetCounts.positives - datasetCounts.negatives, 0)}{" "}
+              negative examples
             </Label>
             <Switch
               id="augment"
               checked={parameters.generateSyntheticNegatives}
               onCheckedChange={(b) =>
-                setTrainingParam("generateSyntheticNegatives", b)
+                setParameter("generateSyntheticNegatives", b)
               }
             />
           </>
@@ -207,40 +109,40 @@ export default function PretrainingSetup({
           step={0.1}
           value={parameters.testSplitFraction}
           onChange={(e) =>
-            setTrainingParam("testSplitFraction", Number(e.target.value))
+            setParameter("testSplitFraction", Number(e.target.value))
           }
         />
-        {currentDataset.type === "local" && (
-          <>
-            <Label htmlFor="model" className="md:text-right sm:text-left">
-              Embedding model
-            </Label>
-            <Select
-              value={selectedEmbeddingModel.toString()}
-              onValueChange={(v) => setSelectedEmbeddingModel(parseInt(v, 10))}
-            >
-              <SelectTrigger className="md:w-[250px] sm:w-[200px]" id="model">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {embeddingModels.state === "hasData" &&
-                  embeddingModels.data.map((model, i) => (
-                    <SelectItem key={i} value={i.toString()}>
+        {currentDataset.type === "local" &&
+          embeddingModels.state === "hasData" && (
+            <>
+              <Label htmlFor="model" className="md:text-right sm:text-left">
+                Embedding model
+              </Label>
+              <Select
+                value={parameters.embeddingModel}
+                onValueChange={(v) => setParameter("embeddingModel", v)}
+              >
+                <SelectTrigger className="md:w-[250px] sm:w-[200px]" id="model">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {embeddingModels.data.map((model, i) => (
+                    <SelectItem key={i} value={model}>
                       {model}
                     </SelectItem>
                   ))}
-              </SelectContent>
-            </Select>
-          </>
-        )}
+                </SelectContent>
+              </Select>
+            </>
+          )}
       </div>
       <div className="w-full px-3">
         <Button
           className="w-full"
-          onClick={embedAndSplit}
-          disabled={pairs.length <= 1}
+          onClick={initializeDataset}
+          disabled={!enoughData}
         >
-          {pairs.length <= 1 ? "Not enough examples" : "Prepare Data"}
+          {!enoughData ? "Not enough examples" : "Prepare Data"}
         </Button>
       </div>
     </div>

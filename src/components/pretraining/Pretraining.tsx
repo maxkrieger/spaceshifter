@@ -1,6 +1,6 @@
 import { ProjectPhase } from "@/types";
 import PretrainingSetup from "./PretrainingSetup";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtomValue } from "jotai";
 import { pretrainingPerformanceAtom, projectPhaseAtom } from "@/lib/atoms";
 import Histogram from "../Histogram";
 import { Button } from "../ui/button";
@@ -11,9 +11,7 @@ import useDownloadEmbeddings from "@/hooks/useDownloadEmbeddings";
 
 export default function Pretraining() {
   const currentPhase = useAtomValue(projectPhaseAtom);
-  const [initialPerformance, setInitialPerformance] = useAtom(
-    pretrainingPerformanceAtom
-  );
+  const initialPerformance = useAtomValue(pretrainingPerformanceAtom);
   const downloadEmbeddings = useDownloadEmbeddings();
   if (currentPhase < ProjectPhase.DataPresent) {
     return (
@@ -23,7 +21,7 @@ export default function Pretraining() {
     );
   }
   if (currentPhase < ProjectPhase.Embedded) {
-    return <PretrainingSetup setPerformance={setInitialPerformance} />;
+    return <PretrainingSetup />;
   }
   if (!initialPerformance) {
     return <div>loading...</div>;

@@ -1,4 +1,5 @@
 import { Tensor1D, Tensor2D, data, TensorContainer } from "@tensorflow/tfjs";
+import { defaultEmbeddingModel } from "./lib/const";
 
 export type EmbeddingCacheData = { [key: string]: number[] };
 
@@ -37,6 +38,7 @@ export interface OptimizationParameters {
   optimizer: OptimizerType;
   generateSyntheticNegatives: boolean;
   testSplitFraction: number;
+  embeddingModel: string;
 }
 
 export const defaultOptimizationParameters: OptimizationParameters = {
@@ -48,6 +50,7 @@ export const defaultOptimizationParameters: OptimizationParameters = {
   optimizer: "adamax",
   generateSyntheticNegatives: true,
   testSplitFraction: 0.5,
+  embeddingModel: defaultEmbeddingModel,
 };
 
 export type AccuracyAndSE = {
@@ -63,20 +66,21 @@ export type PerformanceGroup = {
   trainAccuracyAndSE: AccuracyAndSE;
 };
 
+type DatasetInitializer = {
+  parameters: OptimizationParameters;
+  trainSet: Pairings;
+  testSet: Pairings;
+};
 export type MessageToTrainer =
-  | {
+  | ({
       type: "initializeLocalDataset";
-      allPairings: Pairings;
-      parameters: OptimizationParameters;
       apiKey: string;
       model?: string;
-    }
-  | {
+    } & DatasetInitializer)
+  | ({
       type: "initializeExampleDataset";
-      allPairings: Pairings;
-      parameters: OptimizationParameters;
       cacheUrl: string;
-    }
+    } & DatasetInitializer)
   | {
       type: "train";
       parameters: OptimizationParameters;

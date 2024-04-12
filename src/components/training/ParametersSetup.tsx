@@ -1,5 +1,5 @@
 import useParameters from "@/hooks/useParameters";
-import { OptimizationParameters, OptimizerType } from "@/types";
+import { OptimizerType } from "@/types";
 import { useCallback } from "react";
 import { Label } from "../ui/label";
 import {
@@ -38,28 +38,20 @@ export default function ParametersSetup({
 }: {
   children: React.ReactNode;
 }) {
-  const [parameters, setParameters] = useParameters();
+  const [parameters, setParameter] = useParameters();
   const changeOptimizer = useCallback(
     (value: OptimizerType) => {
-      const params = { ...parameters };
       //   Both optimizers have dramatically different learning rates
       if (value === "adamax") {
-        params.learningRate = 0.01;
-        params.batchSize = 10;
+        setParameter("learningRate", 0.01);
       } else {
-        params.learningRate = 10;
-        params.batchSize = 10;
+        setParameter("learningRate", 10);
       }
-      setParameters({ ...params, optimizer: value });
+      setParameter("optimizer", value);
     },
-    [setParameters, parameters]
+    [setParameter]
   );
-  const changeValue = useCallback(
-    (value: number, key: keyof OptimizationParameters) => {
-      setParameters({ ...parameters, [key]: value });
-    },
-    [parameters, setParameters]
-  );
+
   return (
     <div>
       <p className="text-slate-200">
@@ -77,7 +69,7 @@ export default function ParametersSetup({
             step={1}
             value={parameters.targetEmbeddingSize}
             onChange={(e) =>
-              changeValue(Number(e.target.value), "targetEmbeddingSize")
+              setParameter("targetEmbeddingSize", Number(e.target.value))
             }
             id="targetEmbeddingSize"
           />
@@ -108,7 +100,7 @@ export default function ParametersSetup({
             type="text"
             value={parameters.learningRate}
             onChange={(e) =>
-              changeValue(Number(e.target.value), "learningRate")
+              setParameter("learningRate", Number(e.target.value))
             }
             id="learningRate"
           />
@@ -122,7 +114,7 @@ export default function ParametersSetup({
           <Input
             type="text"
             value={parameters.batchSize}
-            onChange={(e) => changeValue(Number(e.target.value), "batchSize")}
+            onChange={(e) => setParameter("batchSize", Number(e.target.value))}
             id="batchSize"
           />
         </ParameterField>
@@ -135,7 +127,7 @@ export default function ParametersSetup({
           <Input
             type="text"
             value={parameters.epochs}
-            onChange={(e) => changeValue(Number(e.target.value), "epochs")}
+            onChange={(e) => setParameter("epochs", Number(e.target.value))}
             id="epochs"
           />
         </ParameterField>
@@ -152,7 +144,7 @@ export default function ParametersSetup({
             step={0.05}
             value={parameters.dropoutFraction}
             onChange={(e) =>
-              changeValue(Number(e.target.value), "dropoutFraction")
+              setParameter("dropoutFraction", Number(e.target.value))
             }
             id="dropoutFraction"
           />
