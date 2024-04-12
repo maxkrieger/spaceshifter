@@ -97,7 +97,6 @@ class Trainer {
         throw new Error("Embedding cache not initialized");
       }
     } catch (e) {
-      console.log("foo", e);
       sendMessageToHost({ type: "error", message: (e as Error).toString() });
     }
   }
@@ -180,7 +179,6 @@ addEventListener("message", async (e: MessageEvent<MessageToTrainer>) => {
         throw new Error("Unknown message type " + e.data);
     }
   } catch (e) {
-    console.log("bar", e);
     sendMessageToHost({ type: "error", message: (e as Error).toString() });
   }
 });

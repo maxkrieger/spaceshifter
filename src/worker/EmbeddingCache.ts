@@ -56,7 +56,6 @@ export default class EmbeddingCache {
       for (let i = 0; i < chunked.length; i++) {
         const chunk = chunked[i];
         log.info(`Fetching ${chunk.length} embeddings chunk`);
-        console.log("ch", chunk);
         const res = await backOff(() =>
           fetch("https://api.openai.com/v1/embeddings", {
             method: "POST",
