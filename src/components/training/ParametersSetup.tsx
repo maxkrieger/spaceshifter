@@ -33,11 +33,7 @@ function ParameterField({
   );
 }
 
-export default function ParametersSetup({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function ParametersSetup() {
   const [parameters, setParameter] = useParameters();
   const changeOptimizer = useCallback(
     (value: OptimizerType) => {
@@ -156,7 +152,6 @@ export default function ParametersSetup({
           />
         </ParameterField>
       </div>
-      {children}
     </div>
   );
 }

@@ -64,40 +64,36 @@ export default function Pretraining() {
         </TooltipWrapper>
       </div>
       <div>
-        <div className="py-3">
-          <p className="text-slate-300 text-l">
-            The test set has{" "}
-            <span className="text-white">
-              {trainer.pretrainingPerformance.testCosinePairings.length}
-            </span>{" "}
-            pairs and the train set has{" "}
-            <span className="text-white">
-              {trainer.pretrainingPerformance.trainCosinePairings.length}
-            </span>{" "}
-            pairs.
-          </p>
-          <p className="text-slate-300 text-l">
-            Before training, the test set performance is{" "}
-            <span className="text-white">
-              {trainer.pretrainingPerformance.testAccuracyAndSE.message}
-            </span>{" "}
-            and the train set performance is{" "}
-            <span className="text-white">
-              {trainer.pretrainingPerformance.trainAccuracyAndSE.message}
-            </span>
-            .
-          </p>
-          <p className="text-slate-300 text-l">
-            Ideally, a red peak will be on the left and a blue peak will be on
-            the right, non-overlapping.
-          </p>
-        </div>
-        <div>
-          <Histogram
-            trainPairings={trainer.pretrainingPerformance.trainCosinePairings}
-            testPairings={trainer.pretrainingPerformance.testCosinePairings}
-          />
-        </div>
+        <p className="text-slate-300 text-l">
+          The test set has{" "}
+          <span className="text-white">
+            {trainer.pretrainingPerformance.testCosinePairings.length}
+          </span>{" "}
+          pairs and the train set has{" "}
+          <span className="text-white">
+            {trainer.pretrainingPerformance.trainCosinePairings.length}
+          </span>{" "}
+          pairs.
+        </p>
+        <p className="text-slate-300 text-l">
+          Before training, the test set performance is{" "}
+          <span className="text-white">
+            {trainer.pretrainingPerformance.testAccuracyAndSE.message}
+          </span>{" "}
+          and the train set performance is{" "}
+          <span className="text-white">
+            {trainer.pretrainingPerformance.trainAccuracyAndSE.message}
+          </span>
+          .
+        </p>
+        <p className="text-slate-300 text-l">
+          Ideally, a red peak will be on the left and a blue peak will be on the
+          right, non-overlapping.
+        </p>
+        <Histogram
+          trainPairings={trainer.pretrainingPerformance.trainCosinePairings}
+          testPairings={trainer.pretrainingPerformance.testCosinePairings}
+        />
       </div>
     </div>
   );
