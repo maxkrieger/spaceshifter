@@ -167,25 +167,28 @@ export default function useTrainer(): TrainerAPI {
 
   if (trainingState.type === "uninitialized") {
     return {
-      type: "uninitialized",
-      initializeLocal: onInitializeLocal,
-      initializeExample: onInitializeExample,
+      ...trainingState,
+      actions: {
+        initializeLocal: onInitializeLocal,
+        initializeExample: onInitializeExample,
+      },
     };
   }
   if (
     trainingState.type === "fetchingEmbeddings" ||
     trainingState.type === "embeddingProgress"
   ) {
-    return { ...trainingState, reset: onReset };
+    return { ...trainingState, actions: { reset: onReset } };
   }
 
   if (trainingState.type === "pretrained") {
     return {
-      type: "pretrained",
-      train: onTrain,
-      pretrainingPerformance: trainingState.pretrainingPerformance,
-      downloadEmbeddings: onDownloadEmbeddings,
-      reset: onReset,
+      ...trainingState,
+      actions: {
+        train: onTrain,
+        downloadEmbeddings: onDownloadEmbeddings,
+        reset: onReset,
+      },
     };
   }
 
@@ -195,16 +198,20 @@ export default function useTrainer(): TrainerAPI {
   ) {
     return {
       ...trainingState,
-      downloadEmbeddings: onDownloadEmbeddings,
-      reset: onReset,
+      actions: {
+        downloadEmbeddings: onDownloadEmbeddings,
+        reset: onReset,
+      },
     };
   }
 
   // Done training state
   return {
     ...trainingState,
-    downloadEmbeddings: onDownloadEmbeddings,
-    train: onTrain,
-    reset: onReset,
+    actions: {
+      downloadEmbeddings: onDownloadEmbeddings,
+      train: onTrain,
+      reset: onReset,
+    },
   };
 }

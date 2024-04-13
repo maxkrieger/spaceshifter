@@ -66,33 +66,49 @@ type TrainerState =
   | DoneTrainingState;
 
 type EmbeddingsDownloadable = {
-  /**
-   * Retrieves the embeddings cache for download
-   */
-  downloadEmbeddings: () => void;
+  actions: {
+    /**
+     * Retrieves the embeddings cache for download
+     */
+    downloadEmbeddings: () => void;
+  };
 };
 
 type Trainable = {
-  /**
-   * Begins a training run
-   */
-  train: (parameters: OptimizationParameters) => void;
+  actions: {
+    /**
+     * Begins a training run
+     */
+    train: (parameters: OptimizationParameters) => void;
+  };
 };
 
 type Resettable = {
-  /**
-   * Resets the trainer state and terminates the training loop
-   */
-  reset: () => void;
+  actions: {
+    /**
+     * Resets the trainer state and terminates the training loop
+     */
+    reset: () => void;
+  };
+};
+
+type Initializable = {
+  actions: {
+    /**
+     * Initializes the trainer with a local dataset
+     */
+    initializeLocal: (options: LocalDatasetInitializer) => void;
+    /**
+     * Initializes the trainer with an example dataset
+     */
+    initializeExample: (initializer: ExampleDatasetInitializer) => void;
+  };
 };
 
 /**
  * Trainer worker does not exist. Accepts a local or example dataset to transition to get embeddings
  */
-export type Uninitialized = UninitializedState & {
-  initializeLocal: (options: LocalDatasetInitializer) => void;
-  initializeExample: (initializer: ExampleDatasetInitializer) => void;
-};
+export type Uninitialized = UninitializedState & Initializable;
 
 /**
  * Fetching precomputed embeddings for an example

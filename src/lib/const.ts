@@ -3,4 +3,5 @@ export const cardStyles =
 
 export const datasetPanelStyles =
   "border border-slate-500 bg-slate-900 rounded-md p-4 m-2 flex-1 min-w-[300px]";
+
 export const defaultEmbeddingModel = "text-embedding-ada-002";

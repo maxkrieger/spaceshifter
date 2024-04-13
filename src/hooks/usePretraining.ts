@@ -33,13 +33,13 @@ export default function usePretraining(): {
     }
 
     if (currentDataset.type === "local") {
-      trainer.initializeLocal({
+      trainer.actions.initializeLocal({
         pairings,
         parameters,
         apiKey: apiKey || "",
       });
     } else if (currentDataset.type === "example") {
-      trainer.initializeExample({
+      trainer.actions.initializeExample({
         pairings,
         parameters,
         cacheUrl: currentDataset.embeddingsURL,

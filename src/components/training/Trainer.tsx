@@ -88,7 +88,7 @@ export default function Trainer() {
         <ParametersSetup>
           <div className="flex flex-row p-3">
             <Button
-              onClick={() => trainer.train(parameters)}
+              onClick={() => trainer.actions.train(parameters)}
               className="w-full"
             >
               Train
@@ -115,7 +115,7 @@ export default function Trainer() {
         <RenderGraphics state={trainer} />
         <div className="flex flex-row justify-end">
           {trainer.type === "training" ? (
-            <Button variant={"destructive"} onClick={trainer.reset}>
+            <Button variant={"destructive"} onClick={trainer.actions.reset}>
               Stop
             </Button>
           ) : null}

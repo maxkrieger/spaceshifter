@@ -56,7 +56,7 @@ export default function Pretraining() {
         <TooltipWrapper tooltip="Download all embeddings" asChild>
           <Button
             variant={"ghost"}
-            onClick={trainer.downloadEmbeddings}
+            onClick={trainer.actions.downloadEmbeddings}
             aria-label="Download all embeddings"
           >
             <Download size={14} />

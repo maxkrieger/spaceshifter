@@ -8,7 +8,7 @@ export default function useResetTrainer() {
   const trainer = useTrainer();
   return useCallback(() => {
     if (trainer.type !== "uninitialized") {
-      trainer.reset();
+      trainer.actions.reset();
     }
   }, [trainer]);
 }
