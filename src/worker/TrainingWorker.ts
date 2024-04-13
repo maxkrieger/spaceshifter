@@ -28,7 +28,57 @@ class Trainer {
   trainDataset?: TensorDataset;
   testDataset?: TensorDataset;
   embeddingCache: EmbeddingCache = new EmbeddingCache();
-  constructor() {}
+
+  constructor() {
+    this.listenForMessages();
+  }
+
+  /**
+   * Listens for messages from the host
+   */
+  listenForMessages() {
+    addEventListener("message", async (e: MessageEvent<MessageToTrainer>) => {
+      try {
+        switch (e.data.type) {
+          case "initializeLocalDataset":
+            await this.embedLocalPairings(
+              e.data.pairings,
+              e.data.apiKey,
+              e.data.parameters.embeddingModel
+            );
+            await this.initDatasets({
+              pairings: e.data.pairings,
+              parameters: e.data.parameters,
+            });
+            break;
+          case "initializeExampleDataset":
+            await this.fetchPrecomputedEmbeddings(e.data.cacheUrl);
+            await this.initDatasets({
+              pairings: e.data.pairings,
+              parameters: e.data.parameters,
+            });
+            break;
+          case "train":
+            await this.train(e.data.parameters);
+            break;
+          case "getEmbeddingCache":
+            sendMessageToHost({
+              type: "dumpEmbeddingCache",
+              cache: this.getEmbeddingCache(),
+            });
+            break;
+          default:
+            throw new Error("Unknown message type " + e.data);
+        }
+      } catch (e) {
+        sendMessageToHost({ type: "error", message: (e as Error).toString() });
+      }
+    });
+  }
+
+  /**
+   * Computes the performance of the datasets, optionally with a bias matrix
+   */
   async getPerformance(mat?: Tensor2D): Promise<PerformanceGroup> {
     if (!this.trainDataset || !this.testDataset) {
       throw new Error("Datasets not initialized");
@@ -51,6 +101,9 @@ class Trainer {
     };
   }
 
+  /**
+   * Splits + augments pairings and loads them into memory as tensorflow datasets
+   */
   async initDatasets({
     pairings,
     parameters,
@@ -77,10 +130,16 @@ class Trainer {
     });
   }
 
+  /**
+   * Embeds local pairings and stores them in the cache
+   */
   async embedLocalPairings(pairs: Pairings, apiKey: string, model?: string) {
     await this.embeddingCache!.bulkEmbed(pairs, apiKey, model);
   }
 
+  /**
+   * Loads precomputed embeddings from a URL and stores them in the cache
+   */
   async fetchPrecomputedEmbeddings(url: string) {
     try {
       sendMessageToHost({ type: "fetchingStatus", status: "fetching" });
@@ -101,6 +160,9 @@ class Trainer {
     }
   }
 
+  /**
+   * Trains the model given an existing dataset loaded in
+   */
   async train(parameters: OptimizationParameters) {
     if (getBackend() !== "webgl") {
       sendMessageToHost({
@@ -138,47 +200,15 @@ class Trainer {
     matrix.dispose();
   }
 
+  /**
+   * Gets all embeddings by text
+   */
   getEmbeddingCache() {
     return this.embeddingCache.getCache();
   }
 }
 
-const trainer = new Trainer();
-
-addEventListener("message", async (e: MessageEvent<MessageToTrainer>) => {
-  try {
-    switch (e.data.type) {
-      case "initializeLocalDataset":
-        await trainer.embedLocalPairings(
-          e.data.pairings,
-          e.data.apiKey,
-          e.data.parameters.embeddingModel
-        );
-        await trainer.initDatasets({
-          pairings: e.data.pairings,
-          parameters: e.data.parameters,
-        });
-        break;
-      case "initializeExampleDataset":
-        await trainer.fetchPrecomputedEmbeddings(e.data.cacheUrl);
-        await trainer.initDatasets({
-          pairings: e.data.pairings,
-          parameters: e.data.parameters,
-        });
-        break;
-      case "train":
-        await trainer.train(e.data.parameters);
-        break;
-      case "getEmbeddingCache":
-        sendMessageToHost({
-          type: "dumpEmbeddingCache",
-          cache: trainer.getEmbeddingCache(),
-        });
-        break;
-      default:
-        throw new Error("Unknown message type " + e.data);
-    }
-  } catch (e) {
-    sendMessageToHost({ type: "error", message: (e as Error).toString() });
-  }
-});
+/**
+ * Initializing the worker
+ */
+new Trainer();
