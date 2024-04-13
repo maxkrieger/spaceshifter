@@ -37,16 +37,25 @@ test("Augmenting negatives with 4 positives, 1 negative", () => {
     augmented,
     ({ label }) => label === -1
   );
-  expect(positives.length).toBe(negatives.length);
+  expect(positives.length, "Positives/negatives should have equal length").toBe(
+    negatives.length
+  );
   for (const { text_1, text_2 } of positives) {
-    expect(negatives).not.toContainEqual({ text_1, text_2, label: -1 });
-    expect(negatives).not.toContainEqual({
+    expect(
+      negatives,
+      "Negatives should not contain any positive pairings"
+    ).not.toContainEqual({ text_1, text_2, label: -1 });
+    expect(
+      negatives,
+      "Negatives should not contain any positive pairings (commutatively)"
+    ).not.toContainEqual({
       text_1: text_2,
       text_2: text_1,
       label: -1,
     });
   }
 });
+
 test("Augmenting negatives with 1 positive should produce 0 negatives", () => {
   const augmented = augmentNegatives(testPairings.slice(0, 1));
 
