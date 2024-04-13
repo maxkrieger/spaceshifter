@@ -107,7 +107,7 @@ export default function PretrainingSetup() {
             </>
           )}
       </div>
-      <div className="w-full px-3">
+      <div className="w-full my-2">
         <Button
           className="w-full"
           onClick={initializeDataset}

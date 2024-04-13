@@ -86,7 +86,7 @@ export default function Trainer() {
       <h1 className="text-2xl mb-3">Training</h1>
       {(trainer.type === "doneTraining" || trainer.type === "pretrained") && (
         <ParametersSetup>
-          <div className="flex flex-row p-3">
+          <div className="flex flex-row my-2">
             <Button
               onClick={() => trainer.actions.train(parameters)}
               className="w-full"
