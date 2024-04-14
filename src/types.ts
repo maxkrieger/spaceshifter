@@ -169,17 +169,22 @@ export type MessageFromTrainer =
   | { type: "error"; message: string }
   | { type: "dumpEmbeddingCache"; cache: EmbeddingCacheData };
 
+export type ExampleDatasetLocator = {
+  type: "example";
+  embeddingsURL: string;
+  datasetURL: string;
+  name: string;
+};
+
+export type LocalDatasetLocator = {
+  type: "local";
+  id: number;
+};
+
 /**
  * A pointer to a local or example dataset
  */
-export type DatasetLocator =
-  | { type: "local"; id: number }
-  | {
-      type: "example";
-      embeddingsURL: string;
-      datasetURL: string;
-      name: string;
-    };
+export type DatasetLocator = LocalDatasetLocator | ExampleDatasetLocator;
 
 /**
  * A pointer to the current dataset.

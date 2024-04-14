@@ -6,7 +6,11 @@ function matMul(tensor: Tensor2D, mat?: Tensor2D) {
   return mat ? tensor.matMul(mat) : tensor;
 }
 
-// Returns a tensor with cosine similarity row and label row
+/**
+ * Gets the cosine distances for each pair in the dataset.
+ * Zips with the groundtruth label for easy comparison/labeling
+ * @param mat (optional) matrix to multiply by each embedding before computing
+ */
 export default async function computeCosinePairings(
   dataset: TensorDataset,
   mat?: Tensor2D
