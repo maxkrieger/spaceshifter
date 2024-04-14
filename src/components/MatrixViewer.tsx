@@ -73,9 +73,10 @@ export default function MatrixViewer() {
                 </span>
               </span>
               <span className="block">
-                <span className="text-yellow-300">M</span>{" "}
+                <span className="text-yellow-300">v</span>{" "}
                 <span className="text-purple-300">@</span>{" "}
-                <span className="text-yellow-300">v</span>
+                <span className="text-yellow-300">M</span>{" "}
+                <span className="text-gray-300"># v is spaceshifted by M</span>
               </span>
             </div>
           </div>

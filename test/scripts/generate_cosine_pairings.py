@@ -2,11 +2,7 @@
 import numpy as np
 import json
 import argparse
-
-
-# from https://github.com/openai/openai-python/blob/release-v0.28.1/openai/embeddings_utils.py
-def cosine_similarity(a, b):
-    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+from cookbooklib import generate_cosine_distances
 
 
 parser = argparse.ArgumentParser(description="Generate cosine distances for pairings")
@@ -31,16 +27,9 @@ args = parser.parse_args()
 similarities = []
 
 with open(args.pairings) as pairings_file, open(args.embeddings) as embeddings_file:
-    pairings = json.load(pairings_file)
-    embeddings = json.load(embeddings_file)
-    for pairing in pairings:
-        text_1 = pairing["text_1"]
-        text_2 = pairing["text_2"]
-        label = pairing["label"]
-        embedding_1 = embeddings[text_1]
-        embedding_2 = embeddings[text_2]
-        similarity = cosine_similarity(embedding_1, embedding_2)
-        similarities.append([similarity, label])
+    similarities = generate_cosine_distances(
+        json.load(embeddings_file), json.load(pairings_file)
+    )
 
 with open(args.output, "w") as output_file:
     json.dump(similarities, output_file)

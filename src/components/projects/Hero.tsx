@@ -36,12 +36,12 @@ export default function Hero() {
         </span>
         <span className="block ml-2">
           <span className="text-blue-300">cosine_similarity</span>(
-          <span className="text-yellow-300">M</span>{" "}
+          <span className="text-yellow-300">u</span>{" "}
           <span className="text-purple-300">@</span>{" "}
-          <span className="text-yellow-300">u</span>,{" "}
-          <span className="text-yellow-300">M</span>{" "}
+          <span className="text-yellow-300">M</span>,{" "}
+          <span className="text-yellow-300">v</span>{" "}
           <span className="text-purple-300">@</span>{" "}
-          <span className="text-yellow-300">v</span>){" "}
+          <span className="text-yellow-300">M</span>){" "}
           <span className="text-gray-300"># closer together!</span>
         </span>
         <span className="block">)</span>
