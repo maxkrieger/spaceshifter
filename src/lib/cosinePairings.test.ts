@@ -9,6 +9,7 @@ const cityFactsDataset = exampleDatasets.cityFacts;
 
 test(
   "computeCosinePairings should produce groundtruth cosine values within 5 decimal places",
+  { timeout: 15000 },
   async () => {
     const cityFactsPairingsResult = await fetch(cityFactsDataset.datasetURL);
     const cityFactsPairings = await cityFactsPairingsResult.json();
@@ -27,6 +28,5 @@ test(
         `cosinePairings[${i}] is within 5 decimal places of groundtruth`
       ).toBeCloseTo(citiesCosinePairingsGroundtruth[i][0], 5);
     }
-  },
-  { timeout: 15000 }
+  }
 );
