@@ -181,13 +181,17 @@ export default function useTrainer(): TrainerAPI {
     return { ...trainingState, actions: { reset: onReset } };
   }
 
+  const trainingActions = {
+    downloadEmbeddings: onDownloadEmbeddings,
+    reset: onReset,
+  };
+
   if (trainingState.type === "pretrained") {
     return {
       ...trainingState,
       actions: {
+        ...trainingActions,
         train: onTrain,
-        downloadEmbeddings: onDownloadEmbeddings,
-        reset: onReset,
       },
     };
   }
@@ -198,10 +202,7 @@ export default function useTrainer(): TrainerAPI {
   ) {
     return {
       ...trainingState,
-      actions: {
-        downloadEmbeddings: onDownloadEmbeddings,
-        reset: onReset,
-      },
+      actions: trainingActions,
     };
   }
 
@@ -209,9 +210,8 @@ export default function useTrainer(): TrainerAPI {
   return {
     ...trainingState,
     actions: {
-      downloadEmbeddings: onDownloadEmbeddings,
+      ...trainingActions,
       train: onTrain,
-      reset: onReset,
     },
   };
 }
